@@ -9215,3 +9215,5 @@ models/dicetoss_small/F/F_12142023_191841_42.png
 models/dicetoss_small/F/F_12142023_192029_152.png
 models/dicetoss_small/F/F_12182023_105736_25.png
 models/dicetoss_small/F/F_12182023_113551_243.png
+__pychache__/
+models/pytorchmodel_weights.pth
