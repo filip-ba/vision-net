@@ -1,6 +1,5 @@
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QProgressBar, 
                            QLabel, QPushButton)
-from utils.model_trainer import ModelTrainer
 
 class TrainingDialog(QDialog):
     def __init__(self, model, parent=None):

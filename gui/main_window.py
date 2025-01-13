@@ -11,33 +11,23 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.signals = AppSignals()
         self._create_ui()
-        # Connects
-
         
     def _create_ui(self):
         project_dir = os.path.dirname(os.path.dirname(__file__))
         icon_path = os.path.join(project_dir, "icon.ico")
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(50, 50, 1000, 800)
-        # Create main widget and layout
+        self.setGeometry(50, 50, 1000, 804)
         main_widget = QWidget(self)
         self.setCentralWidget(main_widget)
         main_layout = QVBoxLayout(main_widget)
-        # Status bar 
-        self.statusBar = self.statusBar()
-        self.status_label = QLabel("Ready")
-        self.statusBar.addPermanentWidget(self.status_label)
-
-        # Tab Widget for different Neural Network Frameworks
         self.tab_widget = QTabWidget(self)
-        # PyTorch Tab
+        # PyTorch and Keras Tab
         pytorch_tab = PytorchTab()
         keras_tab = KerasTab()
         self.tab_widget.addTab(pytorch_tab, "PyTorch")
         self.tab_widget.addTab(keras_tab, "Keras")
         main_layout.addWidget(self.tab_widget)
-  
         # MenuBar
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu("File")
@@ -53,7 +43,6 @@ class MainWindow(QMainWindow):
         self.quit_action = QAction("Quit", self)
         file_menu.addAction(self.quit_action)  
         self.quit_action.triggered.connect(self.close)
-
 
 
 class AppSignals(QObject):
