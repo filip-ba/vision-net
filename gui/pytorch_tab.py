@@ -1,12 +1,13 @@
 from PyQt6.QtWidgets import ( 
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, QSlider, QDoubleSpinBox, 
-    QSpinBox, QSizePolicy, QFileDialog,QScrollArea, QFrame, QStatusBar )
+    QSpinBox, QSizePolicy, QFileDialog, QScrollArea, QFrame, QStatusBar, QGridLayout )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QImageReader, QFont
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import os
+from gui.progress_dialog import ProgressDialog
 from models.pytorch_model import DiceTossModel
 import numpy as np
 
@@ -167,11 +168,47 @@ class ImageClassificationWidget(QWidget):
             self.image_display.setText("No image loaded")
 
 
+class MetricsWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+        layout.setContentsMargins(0, 0, 0, 0)
+        metrics_grid = QGridLayout()
+        metrics_grid.setSpacing(10)
+        self.accuracy_label = QLabel("Accuracy: -")
+        self.precision_label = QLabel("Precision: -")
+        self.recall_label = QLabel("Recall: -")
+        metric_style = """
+            QLabel {
+                font-size: 12px;
+                padding: 8px;
+                background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+            }
+        """
+        for label in [self.accuracy_label, self.precision_label, self.recall_label]:
+            label.setStyleSheet(metric_style)
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        metrics_grid.addWidget(self.accuracy_label, 0, 0)
+        metrics_grid.addWidget(self.precision_label, 0, 1)
+        metrics_grid.addWidget(self.recall_label, 0, 2)
+        layout.addLayout(metrics_grid)
+
+    def update_metrics(self, metrics):
+        """Updates the displayed metrics"""
+        self.accuracy_label.setText(f"Accuracy: {metrics['accuracy']:.2%}")
+        self.precision_label.setText(f"Precision: {metrics['precision']:.2%}")
+        self.recall_label.setText(f"Recall: {metrics['recall']:.2%}")
+
+
 class PytorchTab(QWidget):
     def __init__(self):
         super().__init__()
         self._create_ui()
         self.current_image_path = None
+        # Connect signals
         self._setup_connections() 
         # Model Initialization 
         self.model = DiceTossModel()
@@ -183,11 +220,17 @@ class PytorchTab(QWidget):
         self.image_widget.load_image_btn.clicked.connect(self.load_image)
         self.image_widget.classify_btn.clicked.connect(self.classify_image)
         self.load_model_btn.clicked.connect(self.load_model)
+        self.save_model_btn.clicked.connect(self.save_model)
         self.train_model_btn.clicked.connect(self.train_model)
         self.test_model_btn.clicked.connect(self.test_model)
 
+    def update_metrics_display(self, metrics):
+        """Metoda pro aktualizaci zobrazení metrik"""
+        self.accuracy_label.setText(f"Accuracy: {metrics['accuracy']:.2%}")
+        self.precision_label.setText(f"Precision: {metrics['precision']:.2%}")
+        self.recall_label.setText(f"Recall: {metrics['recall']:.2%}")
+
     def load_image(self):
-        """Method for loading an image"""
         supported_formats = [f"*.{fmt.data().decode()}" for fmt in QImageReader.supportedImageFormats()]
         filter_string = "Image Files ({})".format(" ".join(supported_formats))
         
@@ -197,7 +240,6 @@ class PytorchTab(QWidget):
             "",
             filter_string
         )
-        
         if file_path:
             pixmap = QPixmap(file_path)
             if not pixmap.isNull():
@@ -211,7 +253,6 @@ class PytorchTab(QWidget):
                 self.status_bar.showMessage("Failed to load image", 3000)
 
     def update_model_status(self, status, color="red"):
-        """Aktualizuje status modelu v UI"""
         self.model_status.setText(status)
         self.model_status.setStyleSheet(f"""
             QLabel {{
@@ -222,24 +263,19 @@ class PytorchTab(QWidget):
         """)
 
     def classify_image(self):
-        """Klasifikuje načtený obrázek"""
         if not self.current_image_path:
             self.status_bar.showMessage("No image loaded", 3000)
-            return
-            
+            return 
         if not self.model_loaded:
             self.status_bar.showMessage("No model loaded", 3000)
-            return
-            
+            return 
         try:
             result = self.model.predict_image(self.current_image_path)
             predicted_class = result['class']
             probabilities = result['probabilities']
-            
-            # Aktualizace UI
+            # UI aktualization
             self.image_widget.result_label.setText(f"Classification: {predicted_class}")
-            
-            # Vykreslení pravděpodobností
+            # Plotting probabilities
             self.plot_widget2.figure.clear()
             ax = self.plot_widget2.figure.add_subplot(111)
             ax.bar(self.model.classes, probabilities)
@@ -248,119 +284,113 @@ class PytorchTab(QWidget):
             plt.setp(ax.get_xticklabels(), rotation=45)
             self.plot_widget2.figure.tight_layout()
             self.plot_widget2.canvas.draw()
-            
             self.status_bar.showMessage("Classification complete", 3000)
-            
         except Exception as e:
             self.status_bar.showMessage(f"Classification error: {str(e)}", 5000)
 
     def load_model(self):
-        """Načte existující model"""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Load Model",
             "",
             "PyTorch Model (*.pth)"
         )
-        
         if file_path:
             try:
                 self.model.initialize_model()
                 self.model.load_model(file_path)
                 self.model_loaded = True
                 self.update_model_status("Model loaded successfully", "green")
-                self.test_model_btn.setEnabled(True)
                 self.status_bar.showMessage("Model loaded successfully", 3000)
             except Exception as e:
                 self.status_bar.showMessage(f"Error loading model: {str(e)}", 5000)
 
+    def save_model(self):
+        if not self.model_loaded:
+            self.status_bar.showMessage("No model to save", 3000)
+            return
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Model",
+            "",
+            "PyTorch Model (*.pth)"
+        )
+        if file_path:
+            try:
+                self.model.save_model(file_path)
+                self.status_bar.showMessage("Model saved successfully", 3000)
+            except Exception as e:
+                self.status_bar.showMessage(f"Error saving model: {str(e)}", 5000)
+
     def train_model(self):
-        """Trénuje model"""
-        # Získání parametrů z UI
         epochs = self.epochs_widget.spinbox.value()
         learning_rate = self.learning_rate_widget.spinbox.value()
         momentum = self.momentum_widget.spinbox.value()
-        
         try:
-            # Inicializace modelu
+            # Model Inicialization
             self.model.initialize_model()
-            
-            # Načtení dat
+            # Loads the data
             train_size, val_size, test_size = self.model.load_data("./models/dicetoss_small")
-            self.status_bar.showMessage(f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test", 3000)
-            
-            # Trénování s callback funkcí pro aktualizaci grafů
-            def update_progress(progress, current_loss):
-                self.status_bar.showMessage(f"Training progress: {progress*100:.1f}% (loss: {current_loss:.4f})")
-            
-            train_loss_history, val_loss_history = self.model.train(
-                epochs, learning_rate, momentum, update_progress
+            self.status_bar.showMessage(
+                f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test",
+                3000
             )
-            
-            # Vykreslení grafů
-            self.plot_widget1.plot(
-                range(1, epochs + 1),
-                train_loss_history,
-                "Training Loss"
-            )
-            self.plot_widget2.plot(
-                range(1, epochs + 1),
-                val_loss_history,
-                "Validation Loss"
-            )
-            
-            self.model_loaded = True
-            self.test_model_btn.setEnabled(True)
-            self.update_model_status("Model trained successfully", "green")
-            self.status_bar.showMessage("Training completed", 3000)
-            
+            dialog = ProgressDialog(self, "Training")
+            result = dialog.start_training(self.model, epochs, learning_rate, momentum)     
+            if result is not None:
+                train_loss_history, val_loss_history = result
+                self.plot_widget1.plot(
+                    range(1, epochs + 1),
+                    train_loss_history,
+                    "Training Loss"
+                )
+                self.plot_widget2.plot(
+                    range(1, epochs + 1),
+                    val_loss_history,
+                    "Validation Loss"
+                )
+                self.model_loaded = True
+                self.test_model_btn.setEnabled(True)
+                self.update_model_status("Model trained successfully", "green")
+                self.status_bar.showMessage("Training completed", 3000)
+            else:
+                self.status_bar.showMessage(
+                    f"Training error: {getattr(dialog, 'error_message', 'Unknown error')}",
+                    5000
+                )       
         except Exception as e:
             self.status_bar.showMessage(f"Training error: {str(e)}", 5000)
 
     def test_model(self):
-        """Testuje model"""
         if not self.model_loaded:
             self.status_bar.showMessage("No model loaded", 3000)
             return
-            
         try:
-            metrics = self.model.test()
-            
-            # Výpis metrik
-            accuracy = metrics['accuracy']
-            precision = metrics['precision']
-            recall = metrics['recall']
-            conf_mat = metrics['confusion_matrix']
-            
-            # Vykreslení confusion matrix
-            self.plot_widget1.figure.clear()
-            ax = self.plot_widget1.figure.add_subplot(111)
-            im = ax.imshow(conf_mat, cmap='Blues')
-            
-            # Přidání popisků
-            classes = self.model.classes
-            ax.set_xticks(np.arange(len(classes)))
-            ax.set_yticks(np.arange(len(classes)))
-            ax.set_xticklabels(classes)
-            ax.set_yticklabels(classes)
-            
-            # Rotace popisků
-            plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
-            
-            # Přidání hodnot do buněk
-            for i in range(len(classes)):
-                for j in range(len(classes)):
-                    ax.text(j, i, conf_mat[i, j], ha="center", va="center")
-            
-            self.plot_widget1.figure.tight_layout()
-            self.plot_widget1.canvas.draw()
-            
-            # Zobrazení metrik
-            self.status_bar.showMessage(
-                f"Test results - Accuracy: {accuracy:.2f}, Precision: {precision:.2f}, Recall: {recall:.2f}",
-                5000
-            )
-            
+            dialog = ProgressDialog(self, "Testing")
+            metrics = dialog.start_testing(self.model)
+            if metrics is not None:
+                self.metrics_widget.update_metrics(metrics)
+                conf_mat = metrics['confusion_matrix']
+                self.plot_widget1.figure.clear()
+                ax = self.plot_widget1.figure.add_subplot(111)
+                im = ax.imshow(conf_mat, cmap='Blues')
+                classes = self.model.classes
+                ax.set_xticks(np.arange(len(classes)))
+                ax.set_yticks(np.arange(len(classes)))
+                ax.set_xticklabels(classes)
+                ax.set_yticklabels(classes)
+                plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")    
+                for i in range(len(classes)):
+                    for j in range(len(classes)):
+                        ax.text(j, i, conf_mat[i, j], ha="center", va="center")
+                self.plot_widget1.figure.tight_layout()
+                self.plot_widget1.canvas.draw()
+                self.status_bar.showMessage("Testing completed", 3000)
+            else:
+                self.status_bar.showMessage(
+                    f"Testing error: {getattr(dialog, 'error_message', 'Unknown error')}",
+                    5000
+                ) 
         except Exception as e:
             self.status_bar.showMessage(f"Testing error: {str(e)}", 5000)
 
@@ -399,9 +429,10 @@ class PytorchTab(QWidget):
         # Model buttons
         buttons_layout = QHBoxLayout()
         self.load_model_btn = QPushButton("Load Model")
+        self.save_model_btn = QPushButton("Save Model")
         self.train_model_btn = QPushButton("Train Model")
         self.test_model_btn = QPushButton("Test Model")
-        for btn in [self.load_model_btn, self.train_model_btn, self.test_model_btn]:
+        for btn in [self.load_model_btn, self.save_model_btn, self.train_model_btn, self.test_model_btn]:
             btn.setStyleSheet("""
                 QPushButton {
                     padding: 8px;
@@ -445,8 +476,14 @@ class PytorchTab(QWidget):
         image_layout = QVBoxLayout()
         image_layout.addWidget(self.image_widget)
         image_group.setLayout(image_layout)
+        # Metrics Group Box
+        self.metrics_widget = MetricsWidget()
+        metrics_group = QGroupBox("Model Metrics")
+        metrics_layout = QVBoxLayout()
+        metrics_layout.addWidget(self.metrics_widget)
+        metrics_group.setLayout(metrics_layout)
         # Add all components to left panel
-        for widget in [model_group, params_group, image_group]:
+        for widget in [model_group, params_group, image_group, metrics_group]:
             widget.setStyleSheet("""
                 QGroupBox {
                     font-weight: bold;
@@ -469,18 +506,12 @@ class PytorchTab(QWidget):
         right_panel = QWidget()
         right_layout = QVBoxLayout(right_panel)
         right_layout.setSpacing(10)
-        right_layout.setContentsMargins(15, 30, 10, 10) 
+        right_layout.setContentsMargins(15, 30, 10, 10)
         # Create plot widgets with titles
         self.plot_widget1 = PlotWidget("Training Loss")
         self.plot_widget2 = PlotWidget("Validation Accuracy")
         for plot in [self.plot_widget1, self.plot_widget2]:
             plot.setMinimumHeight(300)
             right_layout.addWidget(plot)
-        # Example plots
-        x = range(10)
-        y1 = [i**2 for i in x]
-        y2 = [i**3 for i in x]
-        self.plot_widget1.plot(x, y1)
-        self.plot_widget2.plot(x, y2)
         right_layout.addStretch()
         return right_panel
