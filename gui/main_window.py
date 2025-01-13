@@ -9,7 +9,6 @@ from gui.keras_tab import KerasTab
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.signals = AppSignals()
         self._create_ui()
         
     def _create_ui(self):
@@ -17,7 +16,7 @@ class MainWindow(QMainWindow):
         icon_path = os.path.join(project_dir, "icon.ico")
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(50, 50, 1000, 804)
+        self.setGeometry(50, 50, 1200, 804)
         main_widget = QWidget(self)
         self.setCentralWidget(main_widget)
         main_layout = QVBoxLayout(main_widget)
@@ -43,7 +42,3 @@ class MainWindow(QMainWindow):
         self.quit_action = QAction("Quit", self)
         file_menu.addAction(self.quit_action)  
         self.quit_action.triggered.connect(self.close)
-
-
-class AppSignals(QObject):
-    pass

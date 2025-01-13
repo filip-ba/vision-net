@@ -3,9 +3,12 @@ from PyQt6.QtWidgets import (
     QSpinBox, QSizePolicy, QFileDialog,QScrollArea, QFrame, QStatusBar )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QImageReader, QFont
+from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import os
+from models.pytorch_model import DiceTossModel
+import numpy as np
 
 
 class PlotWidget(QWidget):
@@ -169,7 +172,12 @@ class PytorchTab(QWidget):
         super().__init__()
         self._create_ui()
         self.current_image_path = None
-        self._setup_connections()  
+        self._setup_connections() 
+        # Model Initialization 
+        self.model = DiceTossModel()
+        self.model_loaded = False
+        # UI update
+        self.update_model_status("No model loaded") 
 
     def _setup_connections(self):
         self.image_widget.load_image_btn.clicked.connect(self.load_image)
@@ -202,29 +210,159 @@ class PytorchTab(QWidget):
                 self.current_image_path = None
                 self.status_bar.showMessage("Failed to load image", 3000)
 
+    def update_model_status(self, status, color="red"):
+        """Aktualizuje status modelu v UI"""
+        self.model_status.setText(status)
+        self.model_status.setStyleSheet(f"""
+            QLabel {{
+                font-weight: bold;
+                color: {color};
+                padding: 5px;
+            }}
+        """)
+
     def classify_image(self):
-        """Method for image classification"""
-        if self.current_image_path:
-            # Zde přidejte vlastní logiku klasifikace
-            self.image_widget.result_label.setText("Classification: Example Class")
-            self.status_bar.showMessage("Classification complete", 3000)
-        else:
+        """Klasifikuje načtený obrázek"""
+        if not self.current_image_path:
             self.status_bar.showMessage("No image loaded", 3000)
+            return
+            
+        if not self.model_loaded:
+            self.status_bar.showMessage("No model loaded", 3000)
+            return
+            
+        try:
+            result = self.model.predict_image(self.current_image_path)
+            predicted_class = result['class']
+            probabilities = result['probabilities']
+            
+            # Aktualizace UI
+            self.image_widget.result_label.setText(f"Classification: {predicted_class}")
+            
+            # Vykreslení pravděpodobností
+            self.plot_widget2.figure.clear()
+            ax = self.plot_widget2.figure.add_subplot(111)
+            ax.bar(self.model.classes, probabilities)
+            ax.set_ylabel('Probability')
+            ax.set_title('Class Probabilities')
+            plt.setp(ax.get_xticklabels(), rotation=45)
+            self.plot_widget2.figure.tight_layout()
+            self.plot_widget2.canvas.draw()
+            
+            self.status_bar.showMessage("Classification complete", 3000)
+            
+        except Exception as e:
+            self.status_bar.showMessage(f"Classification error: {str(e)}", 5000)
 
     def load_model(self):
-        """Method for loading the model"""
-        self.status_bar.showMessage("Loading model...", 3000)
-        # Zde přidejte vlastní logiku načtení modelu
+        """Načte existující model"""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Load Model",
+            "",
+            "PyTorch Model (*.pth)"
+        )
+        
+        if file_path:
+            try:
+                self.model.initialize_model()
+                self.model.load_model(file_path)
+                self.model_loaded = True
+                self.update_model_status("Model loaded successfully", "green")
+                self.test_model_btn.setEnabled(True)
+                self.status_bar.showMessage("Model loaded successfully", 3000)
+            except Exception as e:
+                self.status_bar.showMessage(f"Error loading model: {str(e)}", 5000)
 
     def train_model(self):
-        """Method for model training"""
-        self.status_bar.showMessage("Training model...", 3000)
-        # Zde přidejte vlastní logiku trénování modelu
+        """Trénuje model"""
+        # Získání parametrů z UI
+        epochs = self.epochs_widget.spinbox.value()
+        learning_rate = self.learning_rate_widget.spinbox.value()
+        momentum = self.momentum_widget.spinbox.value()
+        
+        try:
+            # Inicializace modelu
+            self.model.initialize_model()
+            
+            # Načtení dat
+            train_size, val_size, test_size = self.model.load_data("./models/dicetoss_small")
+            self.status_bar.showMessage(f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test", 3000)
+            
+            # Trénování s callback funkcí pro aktualizaci grafů
+            def update_progress(progress, current_loss):
+                self.status_bar.showMessage(f"Training progress: {progress*100:.1f}% (loss: {current_loss:.4f})")
+            
+            train_loss_history, val_loss_history = self.model.train(
+                epochs, learning_rate, momentum, update_progress
+            )
+            
+            # Vykreslení grafů
+            self.plot_widget1.plot(
+                range(1, epochs + 1),
+                train_loss_history,
+                "Training Loss"
+            )
+            self.plot_widget2.plot(
+                range(1, epochs + 1),
+                val_loss_history,
+                "Validation Loss"
+            )
+            
+            self.model_loaded = True
+            self.test_model_btn.setEnabled(True)
+            self.update_model_status("Model trained successfully", "green")
+            self.status_bar.showMessage("Training completed", 3000)
+            
+        except Exception as e:
+            self.status_bar.showMessage(f"Training error: {str(e)}", 5000)
 
     def test_model(self):
-        """Method for model testing"""
-        self.status_bar.showMessage("Testing model...", 3000)
-        # Zde přidejte vlastní logiku testování modelu
+        """Testuje model"""
+        if not self.model_loaded:
+            self.status_bar.showMessage("No model loaded", 3000)
+            return
+            
+        try:
+            metrics = self.model.test()
+            
+            # Výpis metrik
+            accuracy = metrics['accuracy']
+            precision = metrics['precision']
+            recall = metrics['recall']
+            conf_mat = metrics['confusion_matrix']
+            
+            # Vykreslení confusion matrix
+            self.plot_widget1.figure.clear()
+            ax = self.plot_widget1.figure.add_subplot(111)
+            im = ax.imshow(conf_mat, cmap='Blues')
+            
+            # Přidání popisků
+            classes = self.model.classes
+            ax.set_xticks(np.arange(len(classes)))
+            ax.set_yticks(np.arange(len(classes)))
+            ax.set_xticklabels(classes)
+            ax.set_yticklabels(classes)
+            
+            # Rotace popisků
+            plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+            
+            # Přidání hodnot do buněk
+            for i in range(len(classes)):
+                for j in range(len(classes)):
+                    ax.text(j, i, conf_mat[i, j], ha="center", va="center")
+            
+            self.plot_widget1.figure.tight_layout()
+            self.plot_widget1.canvas.draw()
+            
+            # Zobrazení metrik
+            self.status_bar.showMessage(
+                f"Test results - Accuracy: {accuracy:.2f}, Precision: {precision:.2f}, Recall: {recall:.2f}",
+                5000
+            )
+            
+        except Exception as e:
+            self.status_bar.showMessage(f"Testing error: {str(e)}", 5000)
 
     def _create_ui(self):
         # Main layout with scroll area
