@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader, random_split
 import numpy as np
 import torchvision
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
+from PIL import Image
 
 
 class DiceTossModel:
@@ -144,10 +145,13 @@ class DiceTossModel:
         """Predicts class for one image"""
         if self.net is None:
             raise ValueError("Model is not initialized")
-        # Load and transform an image
-        image = torchvision.io.read_image(image_path).float()
-        image = self.test_transform(image).unsqueeze(0).to(self.device)
-        # Prediction
+        try:
+            with Image.open(image_path) as img:
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                image = self.test_transform(img).unsqueeze(0).to(self.device)
+        except Exception as e:
+            raise Exception(f"Error loading image: {str(e)}")
         self.net.eval()
         with torch.no_grad():
             outputs = self.net(image)
