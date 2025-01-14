@@ -448,6 +448,8 @@ class PytorchTab(QWidget):
                 # Plotting empty confusion matrix
                 self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
                 self.model_loaded = True
+                self.save_model_btn.setEnabled(True)
+                self.test_model_btn.setEnabled(True)
                 self.update_model_status("Model trained successfully", "green")
                 self.status_bar.showMessage("Training completed", 8000)
             else:
@@ -516,12 +518,12 @@ class PytorchTab(QWidget):
         # Model buttons
         buttons_layout = QHBoxLayout()
         self.load_model_btn = QPushButton("Load Model")
+        self.train_model_btn = QPushButton("Train Model")
         self.save_model_btn = QPushButton("Save Model")
         self.save_model_btn.setEnabled(False)
-        self.train_model_btn = QPushButton("Train Model")
         self.test_model_btn = QPushButton("Test Model")
         self.test_model_btn.setEnabled(False)
-        for btn in [self.load_model_btn, self.save_model_btn, self.train_model_btn, self.test_model_btn]:
+        for btn in [self.load_model_btn, self.train_model_btn, self.save_model_btn, self.test_model_btn]:
             btn.setStyleSheet("""
                 QPushButton {
                     padding: 8px;
