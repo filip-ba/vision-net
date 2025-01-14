@@ -57,19 +57,42 @@ class TestingThread(QThread):
 
 
 class ProgressDialog(QDialog):
-    def __init__(self, parent=None, operation_type="Training"):
+    def __init__(self, parent=None, operation_type="Training", epochs=None, 
+                 learning_rate=None, momentum=None):
         super().__init__(parent)
         self.operation_type = operation_type
         self.start_time = None
         self.thread = None
+        self.epochs = epochs
+        self.learning_rate = learning_rate
+        self.momentum = momentum
         self.setup_ui()
         
     def setup_ui(self):
         """UI component initialization"""
         self.setWindowTitle(f"Model {self.operation_type}")
-        self.setFixedSize(400, 150)
+        self.setFixedSize(400, 200)  
         self.setModal(True)
         layout = QVBoxLayout()
+        # Add training parameters if available
+        if self.operation_type == "Training" and all(param is not None for param in 
+            [self.epochs, self.learning_rate, self.momentum]):
+            params_label = QLabel(
+                f"Training Parameters:\n"
+                f"Epochs: {self.epochs}\n"
+                f"Learning Rate: {self.learning_rate}\n"
+                f"Momentum: {self.momentum}"
+            )
+            params_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            params_label.setStyleSheet("""
+                QLabel {
+                    background-color: #f8f9fa;
+                    padding: 10px;
+                    border-radius: 5px;
+                    border: 1px solid #dee2e6;
+                }
+            """)
+            layout.addWidget(params_label)
         # Status label
         self.status_label = QLabel(f"{self.operation_type} in progress...")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -87,7 +110,6 @@ class ProgressDialog(QDialog):
         self.cancel_button = QPushButton("Cancel")
         self.cancel_button.clicked.connect(self.cancel)
         layout.addWidget(self.cancel_button)
-        # Set layout 
         self.setLayout(layout)
 
     def start_training(self, model, epochs, learning_rate, momentum):

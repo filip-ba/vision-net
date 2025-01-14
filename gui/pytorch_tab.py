@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import ( 
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, QSlider, QDoubleSpinBox, 
-    QSpinBox, QSizePolicy, QFileDialog, QScrollArea, QFrame, QStatusBar, QGridLayout )
+    QSpinBox, QSizePolicy, QFileDialog, QScrollArea, QFrame, QStatusBar, QGridLayout, QMessageBox )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QImageReader, QFont
 from matplotlib import pyplot as plt
@@ -183,9 +183,6 @@ class ImageClassificationWidget(QWidget):
         """Initialize empty probability plot"""
         self.figure.clear()
         ax = self.figure.add_subplot(111)
-        ax.set_title('Class Probabilities')
-        ax.set_xlabel('Class')
-        ax.set_ylabel('Probability')
         ax.set_title('Class Probabilities', fontsize=10)
         ax.set_xlabel('Class', fontsize=8)
         ax.set_ylabel('Probability', fontsize=8)
@@ -205,9 +202,6 @@ class ImageClassificationWidget(QWidget):
             ax.text(bar.get_x() + bar.get_width()/2., height,
                    f'{height:.0%}',
                    ha='center', va='bottom')
-        ax.set_title('Class Probabilities')
-        ax.set_xlabel('Class')
-        ax.set_ylabel('Probability')
         ax.set_title('Class Probabilities', fontsize=10)
         ax.set_xlabel('Class', fontsize=8)
         ax.set_ylabel('Probability', fontsize=8)
@@ -276,6 +270,11 @@ class MetricsWidget(QWidget):
         self.precision_label.setText(f"Precision: {metrics['precision']:.2%}")
         self.recall_label.setText(f"Recall: {metrics['recall']:.2%}")
 
+    def reset_metrics(self):
+        """Resets all metrics to their initial state"""
+        self.accuracy_label.setText("Accuracy: -")
+        self.precision_label.setText("Precision: -")
+        self.recall_label.setText("Recall: -")
 
 class PytorchTab(QWidget):
     def __init__(self):
@@ -299,6 +298,7 @@ class PytorchTab(QWidget):
         self.save_model_btn.clicked.connect(self.save_model)
         self.train_model_btn.clicked.connect(self.train_model)
         self.test_model_btn.clicked.connect(self.test_model)
+        self.clear_model_btn.clicked.connect(self.clear_model)
 
     def update_metrics_display(self, metrics):
         """Method to update the metrics"""
@@ -306,10 +306,79 @@ class PytorchTab(QWidget):
         self.precision_label.setText(f"Precision: {metrics['precision']:.2%}")
         self.recall_label.setText(f"Recall: {metrics['recall']:.2%}")
 
+    def _update_ui_from_model_data(self):
+        """Updates UI elements with model data"""
+        if self.model.training_params['epochs'] is not None:
+            # Update parameter widgets
+            self.epochs_widget.spinbox.setValue(self.model.training_params['epochs'])
+            self.learning_rate_widget.spinbox.setValue(self.model.training_params['learning_rate'])
+            self.momentum_widget.spinbox.setValue(self.model.training_params['momentum'])   
+        if self.model.metrics['accuracy'] is not None:
+            # Update metrics display
+            self.metrics_widget.update_metrics(self.model.metrics)
+        if self.model.history['train_loss'] is not None:
+            # Update loss history plot
+            self.plot_widget1.plot_loss_history(
+                self.plot_widget1,
+                len(self.model.history['train_loss']),
+                self.model.history['train_loss'],
+                self.model.history['val_loss']
+            ) 
+        if self.model.metrics['confusion_matrix'] is not None:
+            # Update confusion matrix plot
+            self.plot_widget2.plot_confusion_matrix(
+                self.plot_widget2,
+                self.model.metrics['confusion_matrix'],
+                self.model.classes
+            )
+
+    def clear_model(self):
+        """Clears the current model and resets UI elements while preserving dataset"""   
+        # Show confirmation dialog
+        reply = QMessageBox.question(
+            self,
+            'Clear Model',
+            'Are you sure you want to clear the model? This will reset all charts, metrics and parameters.',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            dataset_loaded = self.model.is_data_loaded()
+            trainloader = self.model.trainloader
+            valloader = self.model.valloader
+            testloader = self.model.testloader
+            # Reset model
+            self.model = DiceTossModel()
+            self.model.initialize_model()
+            # Restore dataset if it was loaded
+            if dataset_loaded:
+                self.model.dataset_loaded = dataset_loaded
+                self.model.trainloader = trainloader
+                self.model.valloader = valloader
+                self.model.testloader = testloader
+            self.model_loaded = False
+            # Reset UI elements
+            self.update_model_status("No model loaded", "red")
+            # Reset parameters to defaults
+            self.epochs_widget.spinbox.setValue(10)
+            self.learning_rate_widget.spinbox.setValue(0.001)
+            self.momentum_widget.spinbox.setValue(0.9)
+            # Reset metrics
+            self.metrics_widget.reset_metrics()
+            # Reset plots
+            self.plot_widget1.plot_loss_history(self.plot_widget1)
+            self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
+            # Reset image classification
+            self.image_widget.result_label.setText("Classification: None")
+            self.image_widget.init_plot()
+            # Disable buttons
+            self.save_model_btn.setEnabled(False)
+            self.test_model_btn.setEnabled(False)
+            self.status_bar.showMessage("Model cleared successfully", 8000)
+
     def load_image(self):
         supported_formats = [f"*.{fmt.data().decode()}" for fmt in QImageReader.supportedImageFormats()]
         filter_string = "Image Files ({})".format(" ".join(supported_formats))
-        
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Select Image",
@@ -373,6 +442,9 @@ class PytorchTab(QWidget):
             default_model_path = "./models/default_model.pth" 
             if os.path.exists(default_model_path):
                 try:
+                    metadata = self.model.load_model(default_model_path)
+                    # Update UI with loaded data
+                    self._update_ui_from_model_data()
                     self.model.load_model(default_model_path)
                     self.model_loaded = True
                     self.update_model_status("Model loaded successfully", "green")
@@ -387,7 +459,7 @@ class PytorchTab(QWidget):
                 self.update_model_status("No model loaded", "red")
         except Exception as e:
             dataset_message += f"Error initializing model: {str(e)}"
-            self.update_model_status("Error initializing model", "red")       
+            self.update_model_status("Error initializing model", "red")     
         # Show status message
         self.status_bar.showMessage(dataset_message, 10000)
 
@@ -401,12 +473,19 @@ class PytorchTab(QWidget):
         if file_path:
             try:
                 self.model.initialize_model()
-                self.model.load_model(file_path)
+                # Load model and get metadata
+                metadata = self.model.load_model(file_path)
+                # Update UI with loaded data
+                self._update_ui_from_model_data()
+                
                 self.model_loaded = True
-                self.update_model_status("Model loaded successfully", "green")
-                self.status_bar.showMessage("Model loaded successfully", 8000)
                 self.save_model_btn.setEnabled(True)
                 self.test_model_btn.setEnabled(True)
+                self.update_model_status("Model loaded successfully", "green")
+                self.status_bar.showMessage(
+                    f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})",
+                    8000
+                )
             except Exception as e:
                 self.status_bar.showMessage(f"Error loading model: {str(e)}", 8000)
 
@@ -434,15 +513,27 @@ class PytorchTab(QWidget):
         try:
             # Model Initialization
             self.model.initialize_model()
-            # No need to load data here as it's already loaded
-            dialog = ProgressDialog(self, "Training")
-            result = dialog.start_training(self.model, epochs, learning_rate, momentum)            
+            # Reset metrics display
+            self.metrics_widget.reset_metrics()
+            # Reset confusion matrix plot
+            self.plot_widget2.plot_confusion_matrix(self.plot_widget2)   
+            dialog = ProgressDialog(
+                self, 
+                "Training",
+                epochs=epochs,
+                learning_rate=learning_rate,
+                momentum=momentum
+            )
+            result = dialog.start_training(self.model, epochs, learning_rate, momentum)     
             if result is not None:
                 train_loss_history, val_loss_history = result
                 # Plotting loss history
-                self.plot_widget1.plot_loss_history(self.plot_widget1, epochs, train_loss_history, val_loss_history)
-                # Plotting empty confusion matrix
-                self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
+                self.plot_widget1.plot_loss_history(
+                    self.plot_widget1, 
+                    epochs, 
+                    train_loss_history, 
+                    val_loss_history
+                )
                 self.model_loaded = True
                 self.save_model_btn.setEnabled(True)
                 self.test_model_btn.setEnabled(True)
@@ -519,6 +610,7 @@ class PytorchTab(QWidget):
         self.save_model_btn.setEnabled(False)
         self.test_model_btn = QPushButton("Test Model")
         self.test_model_btn.setEnabled(False)
+        # Add buttons to layout
         for btn in [self.load_model_btn, self.train_model_btn, self.save_model_btn, self.test_model_btn]:
             btn.setStyleSheet("""
                 QPushButton {
@@ -536,6 +628,9 @@ class PytorchTab(QWidget):
                 }
             """)
             buttons_layout.addWidget(btn)
+        model_layout.addLayout(buttons_layout)
+        # Status layout with Clear button
+        status_layout = QHBoxLayout()
         self.model_status = QLabel("No model loaded")
         self.model_status.setStyleSheet("""
             QLabel {
@@ -544,8 +639,29 @@ class PytorchTab(QWidget):
                 padding: 5px;
             }
         """)
-        model_layout.addLayout(buttons_layout)
-        model_layout.addWidget(self.model_status)
+        status_layout.addWidget(self.model_status)
+        # Clear Model button with distinct style
+        self.clear_model_btn = QPushButton("Clear Model")
+        self.clear_model_btn.setFixedWidth(107)  # Make button smaller
+        self.clear_model_btn.setStyleSheet("""
+            QPushButton {
+                padding: 5px;
+                background-color: #f8f9fa;
+                border: 1px solid #6c757d;
+                border-radius: 4px;
+                color: #3d4145;
+                font-size: 11px;
+            }
+            QPushButton:hover {
+                background-color: #e9ecef;
+            }
+            QPushButton:pressed {
+                background-color: #dee2e6;
+            }
+        """)
+        status_layout.addWidget(self.clear_model_btn)
+        model_layout.addLayout(status_layout)
+        
         model_group.setLayout(model_layout)
         # Parameters
         params_group = QGroupBox("Parameters")

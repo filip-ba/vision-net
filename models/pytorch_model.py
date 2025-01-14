@@ -31,6 +31,31 @@ class DiceTossModel:
         self.valloader = None
         self.testloader = None
         self.dataset_loaded = False
+        # Saving attributes
+        self.training_params = {
+            'epochs': None,
+            'learning_rate': None,
+            'momentum': None
+        }
+        self.metrics = {
+            'accuracy': None,
+            'precision': None,
+            'recall': None,
+            'confusion_matrix': None
+        }
+        self.history = {
+            'train_loss': None,
+            'val_loss': None
+        }
+
+    def reset_metrics(self):
+        """Resets all metrics to their default state"""
+        self.metrics = {
+            'accuracy': None,
+            'precision': None,
+            'recall': None,
+            'confusion_matrix': None
+        }
 
     def is_data_loaded(self):
         """Check if dataset is loaded"""
@@ -84,7 +109,15 @@ class DiceTossModel:
         if self.net is None:
             raise ValueError("Model is not initialized")
         if not self.dataset_loaded:
-            raise ValueError("Dataset not loaded. Call load_data first.")       
+            raise ValueError("Dataset not loaded. Call load_data first.")   
+        # Reset metrics before training
+        self.reset_metrics()
+        # Store training parameters
+        self.training_params = {
+            'epochs': epochs,
+            'learning_rate': learning_rate,
+            'momentum': momentum
+        }    
         self.optimizer = optim.SGD(self.net.parameters(), lr=learning_rate, momentum=momentum)
         train_loss_history = []
         val_loss_history = []
@@ -115,6 +148,11 @@ class DiceTossModel:
                     val_loss += loss.item()
             train_loss_history.append(train_loss / len(self.trainloader))
             val_loss_history.append(val_loss / len(self.valloader))
+        # Store history at the end of training
+        self.history = {
+            'train_loss': train_loss_history,
+            'val_loss': val_loss_history
+        }
         return train_loss_history, val_loss_history
 
     def test(self):
@@ -138,23 +176,46 @@ class DiceTossModel:
             y_true, y_pred, average='macro', zero_division=0
         )  
         accuracy = (np.array(y_pred) == np.array(y_true)).mean()
-        return {
+        metrics = {
             'accuracy': accuracy,
             'precision': precision,
             'recall': recall,
             'confusion_matrix': conf_mat
         }
+        self.metrics = metrics
+        return metrics
 
     def save_model(self, path):
+        """Saves model state along with training parameters, metrics and history"""
         if self.net is None:
             raise ValueError("Model is not initialized")
-        torch.save(self.net.state_dict(), path)
+        save_dict = {
+            'model_state': self.net.state_dict(),
+            'training_params': self.training_params,
+            'metrics': self.metrics,
+            'history': self.history,
+            'classes': self.classes  # Save classes in case they change in future versions
+        }
+        torch.save(save_dict, path)
 
     def load_model(self, path):
+        """Loads model state along with training parameters, metrics and history"""
         if self.net is None:
-            self.initialize_model()
-        self.net.load_state_dict(torch.load(path))
+            self.initialize_model()    
+        save_dict = torch.load(path)
+        # Load model state
+        self.net.load_state_dict(save_dict['model_state'])
         self.net.eval()
+        # Load metadata
+        self.training_params = save_dict['training_params']
+        self.metrics = save_dict['metrics']
+        self.history = save_dict['history']
+        self.classes = save_dict['classes']
+        return {
+            'training_params': self.training_params,
+            'metrics': self.metrics,
+            'history': self.history
+        }
 
     def predict_image(self, image_path):
         """Predicts class for one image"""
