@@ -289,6 +289,8 @@ class PytorchTab(QWidget):
         self.model_loaded = False
         # UI update
         self.update_model_status("No model loaded") 
+        # Try to load the default model on startup
+        self._try_load_default_model()
 
     def _setup_connections(self):
         self.image_widget.load_image_btn.clicked.connect(self.load_image)
@@ -320,11 +322,11 @@ class PytorchTab(QWidget):
                 self.current_image_path = file_path
                 self.image_widget.update_image(pixmap)
                 self.image_widget.result_label.setText("Classification: None")
-                self.status_bar.showMessage(f"Loaded image: {os.path.basename(file_path)}", 6000)
+                self.status_bar.showMessage(f"Loaded image: {os.path.basename(file_path)}", 8000)
             else:
                 self.image_widget.image_display.setText("Failed to load image")
                 self.current_image_path = None
-                self.status_bar.showMessage("Failed to load image", 10000)
+                self.status_bar.showMessage("Failed to load image", 8000)
 
     def update_model_status(self, status, color="red"):
         self.model_status.setText(status)
@@ -338,10 +340,10 @@ class PytorchTab(QWidget):
 
     def classify_image(self):
         if not self.current_image_path:
-            self.status_bar.showMessage("No image loaded", 3000)
+            self.status_bar.showMessage("No image loaded", 8000)
             return 
         if not self.model_loaded:
-            self.status_bar.showMessage("No model loaded", 3000)
+            self.status_bar.showMessage("No model loaded", 8000)
             return 
         try:
             result = self.model.predict_image(self.current_image_path)
@@ -352,9 +354,40 @@ class PytorchTab(QWidget):
             self.image_widget.result_label.setText(f"Classification: {predicted_class}")
             self.image_widget.update_plot(self.model.classes, probabilities)
             
-            self.status_bar.showMessage("Classification complete", 3000)
+            self.status_bar.showMessage("Classification complete", 8000)
         except Exception as e:
-            self.status_bar.showMessage(f"Classification error: {str(e)}", 5000)
+            self.status_bar.showMessage(f"Classification error: {str(e)}", 8000)
+
+    def _try_load_default_model(self):
+        """Attempts to load the default model on startup"""
+        try:
+            # Initialize the model first
+            self.model.initialize_model()
+            # Define the default model path - adjust this path as needed
+            default_model_path = "./models/default_model.pth"
+            
+            if os.path.exists(default_model_path):
+                try:
+                    # Load the model
+                    self.model.load_model(default_model_path)
+                    # Load the dataset for potential testing/training
+                    self.model.load_data("./models/dicetoss_small")
+                    self.model_loaded = True
+                    self.update_model_status("Model loaded successfully", "green")
+                    self.status_bar.showMessage("Default model loaded successfully", 8000)
+                    self.save_model_btn.setEnabled(True)
+                    self.test_model_btn.setEnabled(True)
+                    # Enable testing button since model is loaded
+                    self.test_model_btn.setEnabled(True)
+                except Exception as e:
+                    self.status_bar.showMessage(f"Error loading default model: {str(e)}", 8000)
+                    self.update_model_status("Error loading default model", "red")
+            else:
+                self.status_bar.showMessage("No default model found", 8000)
+                self.update_model_status("No model loaded", "red")
+        except Exception as e:
+            self.status_bar.showMessage(f"Error initializing model: {str(e)}", 8000)
+            self.update_model_status("Error initializing model", "red")
 
     def load_model(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -370,13 +403,15 @@ class PytorchTab(QWidget):
                 self.model.load_data("./models/dicetoss_small")
                 self.model_loaded = True
                 self.update_model_status("Model loaded successfully", "green")
-                self.status_bar.showMessage("Model loaded successfully", 7000)
+                self.status_bar.showMessage("Model loaded successfully", 8000)
+                self.save_model_btn.setEnabled(True)
+                self.test_model_btn.setEnabled(True)
             except Exception as e:
-                self.status_bar.showMessage(f"Error loading model: {str(e)}", 10000)
+                self.status_bar.showMessage(f"Error loading model: {str(e)}", 8000)
 
     def save_model(self):
         if not self.model_loaded:
-            self.status_bar.showMessage("No model to save", 6000)
+            self.status_bar.showMessage("No model to save", 8000)
             return
         file_path, _ = QFileDialog.getSaveFileName(
             self,
@@ -387,9 +422,9 @@ class PytorchTab(QWidget):
         if file_path:
             try:
                 self.model.save_model(file_path)
-                self.status_bar.showMessage("Model saved successfully", 6000)
+                self.status_bar.showMessage("Model saved successfully", 8000)
             except Exception as e:
-                self.status_bar.showMessage(f"Error saving model: {str(e)}", 10000)
+                self.status_bar.showMessage(f"Error saving model: {str(e)}", 8000)
 
     def train_model(self):
         epochs = self.epochs_widget.spinbox.value()
@@ -402,7 +437,7 @@ class PytorchTab(QWidget):
             train_size, val_size, test_size = self.model.load_data("./models/dicetoss_small")
             self.status_bar.showMessage(
                 f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test",
-                6000
+                8000
             )
             dialog = ProgressDialog(self, "Training")
             result = dialog.start_training(self.model, epochs, learning_rate, momentum)     
@@ -414,18 +449,18 @@ class PytorchTab(QWidget):
                 self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
                 self.model_loaded = True
                 self.update_model_status("Model trained successfully", "green")
-                self.status_bar.showMessage("Training completed", 6000)
+                self.status_bar.showMessage("Training completed", 8000)
             else:
                 self.status_bar.showMessage(
                     f"Training error: {getattr(dialog, 'error_message', 'Unknown error')}",
-                    10000
+                    8000
                 )       
         except Exception as e:
-            self.status_bar.showMessage(f"Training error: {str(e)}", 10000)
+            self.status_bar.showMessage(f"Training error: {str(e)}", 8000)
 
     def test_model(self):
         if not self.model_loaded:
-            self.status_bar.showMessage("No model loaded", 6000)
+            self.status_bar.showMessage("No model loaded", 8000)
             return
         try:
             dialog = ProgressDialog(self, "Testing")
@@ -437,14 +472,14 @@ class PytorchTab(QWidget):
                 classes = self.model.classes
                 self.plot_widget2.plot_confusion_matrix(self.plot_widget2, conf_mat, classes)
                 # Status update
-                self.status_bar.showMessage("Testing completed", 6000)
+                self.status_bar.showMessage("Testing completed", 8000)
             else:
                 self.status_bar.showMessage(
                     f"Testing error: {getattr(dialog, 'error_message', 'Unknown error')}",
-                    10000
+                    8000
                 ) 
         except Exception as e:
-            self.status_bar.showMessage(f"Testing error: {str(e)}", 10000)
+            self.status_bar.showMessage(f"Testing error: {str(e)}", 8000)
 
     def _create_ui(self):
         # Main layout with scroll area
@@ -482,8 +517,10 @@ class PytorchTab(QWidget):
         buttons_layout = QHBoxLayout()
         self.load_model_btn = QPushButton("Load Model")
         self.save_model_btn = QPushButton("Save Model")
+        self.save_model_btn.setEnabled(False)
         self.train_model_btn = QPushButton("Train Model")
         self.test_model_btn = QPushButton("Test Model")
+        self.test_model_btn.setEnabled(False)
         for btn in [self.load_model_btn, self.save_model_btn, self.train_model_btn, self.test_model_btn]:
             btn.setStyleSheet("""
                 QPushButton {
