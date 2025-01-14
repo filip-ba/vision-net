@@ -137,20 +137,7 @@ class ImageClassificationWidget(QWidget):
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(10)
-        # Image display area
-        self.image_display = QLabel()
-        self.image_display.setFixedSize(300, 300)
-        self.image_display.setStyleSheet("""
-            QLabel {
-                border: 2px solid #ccc;
-                border-radius: 5px;
-                background-color: #f8f9fa;
-            }
-        """)
-        self.image_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        # Load placeholder image
-        self._load_placeholder()
-        # Controls area
+        # Controls area with buttons
         controls_layout = QVBoxLayout()
         self.load_image_btn = QPushButton("Load Image")
         self.load_image_btn.setStyleSheet("padding: 8px;")
@@ -166,37 +153,93 @@ class ImageClassificationWidget(QWidget):
                 border-radius: 5px;
             }
         """)
+        # Small image preview
+        self.image_display = QLabel()
+        self.image_display.setFixedSize(120, 120)
+        self.image_title = QLabel("Image Preview")
+        self.image_display.setStyleSheet("""
+            QLabel {
+                border: 2px solid #ccc;
+                border-radius: 5px;
+                background-color: #f8f9fa;
+            }
+        """)
+        self.image_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
         controls_layout.addWidget(self.load_image_btn)
         controls_layout.addWidget(self.classify_btn)
+        controls_layout.addWidget(self.image_display, alignment=Qt.AlignmentFlag.AlignHCenter)
         controls_layout.addWidget(self.result_label)
-        controls_layout.addStretch()
-        # Add to main layout
-        layout.addWidget(self.image_display)
+        # Classification plot
+        self.figure = Figure(figsize=(4, 3))
+        self.canvas = FigureCanvas(self.figure)
+        self.canvas.setFixedSize(300, 300) 
+        self.init_plot()
+        layout.addWidget(self.canvas)
         layout.addLayout(controls_layout)
+        # Load placeholder image
+        self._load_placeholder()
+
+    def init_plot(self):
+        """Initialize empty probability plot"""
+        self.figure.clear()
+        ax = self.figure.add_subplot(111)
+        ax.set_title('Class Probabilities')
+        ax.set_xlabel('Class')
+        ax.set_ylabel('Probability')
+        ax.set_title('Class Probabilities', fontsize=10)
+        ax.set_xlabel('Class', fontsize=8)
+        ax.set_ylabel('Probability', fontsize=8)
+        ax.tick_params(axis='both', labelsize=8)
+        ax.set_ylim(0, 1)
+        self.figure.tight_layout()
+        self.canvas.draw()
+
+    def update_plot(self, classes, probabilities):
+        """Update probability plot with new data"""
+        self.figure.clear()
+        ax = self.figure.add_subplot(111)
+        bars = ax.bar(classes, probabilities)
+        # Add value labels on top of each bar
+        for bar in bars:
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height,
+                   f'{height:.0%}',
+                   ha='center', va='bottom')
+        ax.set_title('Class Probabilities')
+        ax.set_xlabel('Class')
+        ax.set_ylabel('Probability')
+        ax.set_title('Class Probabilities', fontsize=10)
+        ax.set_xlabel('Class', fontsize=8)
+        ax.set_ylabel('Probability', fontsize=8)
+        ax.tick_params(axis='both', labelsize=8)
+        ax.set_ylim(0, 1.2)  # Make room for percentage labels
+        plt.setp(ax.get_xticklabels(), rotation=45)
+        self.figure.tight_layout()
+        self.canvas.draw()
 
     def _load_placeholder(self):
         placeholder_path = os.path.join(os.path.dirname(__file__), "..", "placeholder_img.jpg")
         if os.path.exists(placeholder_path):
             pixmap = QPixmap(placeholder_path)
             self.image_display.setPixmap(pixmap.scaled(
-                300, 300,
+                120, 120,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation
             ))
         else:
-            self.image_display.setText("No image loaded")
+            self.image_display.setText("No image")
 
     def update_image(self, pixmap):
         """Method for updating the displayed image"""
         if pixmap:
             scaled_pixmap = pixmap.scaled(
-                300, 300,
+                120, 120,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation
             )
             self.image_display.setPixmap(scaled_pixmap)
         else:
-            self.image_display.setText("No image loaded")
+            self.image_display.setText("No image")
 
 
 class MetricsWidget(QWidget):
@@ -295,29 +338,23 @@ class PytorchTab(QWidget):
 
     def classify_image(self):
         if not self.current_image_path:
-            self.status_bar.showMessage("No image loaded", 6000)
+            self.status_bar.showMessage("No image loaded", 3000)
             return 
         if not self.model_loaded:
-            self.status_bar.showMessage("No model loaded", 6000)
+            self.status_bar.showMessage("No model loaded", 3000)
             return 
         try:
             result = self.model.predict_image(self.current_image_path)
             predicted_class = result['class']
             probabilities = result['probabilities']
-            # UI aktualization
+            
+            # Update UI
             self.image_widget.result_label.setText(f"Classification: {predicted_class}")
-            # Plotting probabilities
-            self.plot_widget2.figure.clear()
-            ax = self.plot_widget2.figure.add_subplot(111)
-            ax.bar(self.model.classes, probabilities)
-            ax.set_ylabel('Probability')
-            ax.set_title('Class Probabilities')
-            plt.setp(ax.get_xticklabels(), rotation=45)
-            self.plot_widget2.figure.tight_layout()
-            self.plot_widget2.canvas.draw()
-            self.status_bar.showMessage("Classification complete", 6000)
+            self.image_widget.update_plot(self.model.classes, probabilities)
+            
+            self.status_bar.showMessage("Classification complete", 3000)
         except Exception as e:
-            self.status_bar.showMessage(f"Classification error: {str(e)}", 10000)
+            self.status_bar.showMessage(f"Classification error: {str(e)}", 5000)
 
     def load_model(self):
         file_path, _ = QFileDialog.getOpenFileName(
