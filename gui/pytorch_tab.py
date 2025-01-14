@@ -308,29 +308,36 @@ class PytorchTab(QWidget):
 
     def _update_ui_from_model_data(self):
         """Updates UI elements with model data"""
+        # Update parameter widgets if training params exist
         if self.model.training_params['epochs'] is not None:
-            # Update parameter widgets
             self.epochs_widget.spinbox.setValue(self.model.training_params['epochs'])
             self.learning_rate_widget.spinbox.setValue(self.model.training_params['learning_rate'])
-            self.momentum_widget.spinbox.setValue(self.model.training_params['momentum'])   
+            self.momentum_widget.spinbox.setValue(self.model.training_params['momentum'])    
+        # Update metrics display if metrics exist
         if self.model.metrics['accuracy'] is not None:
-            # Update metrics display
             self.metrics_widget.update_metrics(self.model.metrics)
-        if self.model.history['train_loss'] is not None:
-            # Update loss history plot
+        else:
+            self.metrics_widget.reset_metrics()
+        # Update loss history plot if history exists
+        if (self.model.history['train_loss'] is not None and 
+            self.model.history['val_loss'] is not None):
             self.plot_widget1.plot_loss_history(
                 self.plot_widget1,
                 len(self.model.history['train_loss']),
                 self.model.history['train_loss'],
                 self.model.history['val_loss']
-            ) 
+            )
+        else:
+            self.plot_widget1.plot_loss_history(self.plot_widget1)
+        # Update confusion matrix plot if confusion matrix exists
         if self.model.metrics['confusion_matrix'] is not None:
-            # Update confusion matrix plot
             self.plot_widget2.plot_confusion_matrix(
                 self.plot_widget2,
                 self.model.metrics['confusion_matrix'],
                 self.model.classes
             )
+        else:
+            self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
 
     def clear_model(self):
         """Clears the current model and resets UI elements while preserving dataset"""   
@@ -475,17 +482,22 @@ class PytorchTab(QWidget):
                 self.model.initialize_model()
                 # Load model and get metadata
                 metadata = self.model.load_model(file_path)
-                # Update UI with loaded data
-                self._update_ui_from_model_data()
-                
+                # Reset all metrics and plots first
+                self.metrics_widget.reset_metrics()
+                self.plot_widget1.plot_loss_history(self.plot_widget1)
+                self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
+                # Update UI with loaded data only if the data exists
+                if metadata['training_params']['epochs'] is not None:
+                    self._update_ui_from_model_data()
                 self.model_loaded = True
                 self.save_model_btn.setEnabled(True)
                 self.test_model_btn.setEnabled(True)
                 self.update_model_status("Model loaded successfully", "green")
-                self.status_bar.showMessage(
-                    f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})",
-                    8000
-                )
+                # Customize status message based on whether metrics exist
+                if (metadata['metrics']['accuracy'] is not None):
+                    self.status_bar.showMessage(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
+                else:
+                    self.status_bar.showMessage("Model loaded successfully (untested model)", 8000)
             except Exception as e:
                 self.status_bar.showMessage(f"Error loading model: {str(e)}", 8000)
 
