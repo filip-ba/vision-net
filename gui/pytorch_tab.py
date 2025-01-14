@@ -42,14 +42,45 @@ class PlotWidget(QWidget):
         self.canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         frame_layout.addWidget(self.canvas)
 
-    def plot(self, x, y, title=None):
-        self.figure.clear()
-        ax = self.figure.add_subplot(111)
-        ax.plot(x, y)
-        if title:
-            self.title_label.setText(title)
+    def plot_confusion_matrix(self, plot_widget, conf_mat = None, classes = None):
+        plot_widget.figure.clear()
+        plot_widget.figure.subplots_adjust(left=0.25, right=0.85, bottom=0.25, top=0.85)
+        plot_widget.figure.tight_layout()
+        ax = plot_widget.figure.add_subplot(111)
+        ax.set_xlabel('Predicted', labelpad=10)
+        ax.set_ylabel('True', labelpad=10)
+        # Empty confusion matrix
+        if conf_mat is None or classes is None:
+            ax.set_title('(Will be populated after testing)', pad=10)
+        else:   # Populated confusion matrix
+            im = ax.imshow(conf_mat, cmap='Blues', aspect='auto')
+            cbar = plot_widget.figure.colorbar(im)
+            cbar.ax.tick_params(labelsize=8)
+            ax.set_xticks(np.arange(len(classes)))
+            ax.set_yticks(np.arange(len(classes)))
+            ax.set_xticklabels(classes)
+            ax.set_yticklabels(classes)
+            plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+            for i in range(len(classes)):
+                for j in range(len(classes)):
+                    ax.text(j, i, conf_mat[i, j], 
+                        ha="center", va="center",
+                        color="white" if conf_mat[i, j] > conf_mat.max() / 2 else "black")         
+        plot_widget.canvas.draw()
+
+    def plot_loss_history(self, plot_widget, epochs = None, train_loss_history = None, val_loss_history = None):
+        plot_widget.figure.clear()
+        plot_widget.figure.subplots_adjust(left=0.25, right=0.85, bottom=0.25, top=0.85)
+        plot_widget.figure.tight_layout()
+        ax = plot_widget.figure.add_subplot(111)
+        ax.set_xlabel('Epochs', labelpad=10)
+        ax.set_ylabel('Loss', labelpad=10)
         ax.grid(True)
-        self.canvas.draw()
+        if epochs is not None or train_loss_history is not None or val_loss_history is not None:
+            ax.plot(range(1, epochs + 1), train_loss_history, label='Training Loss')
+            ax.plot(range(1, epochs + 1), val_loss_history, label='Validation Loss')
+            ax.legend()       
+        plot_widget.canvas.draw()
 
 
 class ParameterWidget(QWidget):
@@ -225,7 +256,7 @@ class PytorchTab(QWidget):
         self.test_model_btn.clicked.connect(self.test_model)
 
     def update_metrics_display(self, metrics):
-        """Metoda pro aktualizaci zobrazení metrik"""
+        """Method to update the metrics"""
         self.accuracy_label.setText(f"Accuracy: {metrics['accuracy']:.2%}")
         self.precision_label.setText(f"Precision: {metrics['precision']:.2%}")
         self.recall_label.setText(f"Recall: {metrics['recall']:.2%}")
@@ -246,11 +277,11 @@ class PytorchTab(QWidget):
                 self.current_image_path = file_path
                 self.image_widget.update_image(pixmap)
                 self.image_widget.result_label.setText("Classification: None")
-                self.status_bar.showMessage(f"Loaded image: {os.path.basename(file_path)}", 3000)
+                self.status_bar.showMessage(f"Loaded image: {os.path.basename(file_path)}", 6000)
             else:
                 self.image_widget.image_display.setText("Failed to load image")
                 self.current_image_path = None
-                self.status_bar.showMessage("Failed to load image", 3000)
+                self.status_bar.showMessage("Failed to load image", 10000)
 
     def update_model_status(self, status, color="red"):
         self.model_status.setText(status)
@@ -264,10 +295,10 @@ class PytorchTab(QWidget):
 
     def classify_image(self):
         if not self.current_image_path:
-            self.status_bar.showMessage("No image loaded", 3000)
+            self.status_bar.showMessage("No image loaded", 6000)
             return 
         if not self.model_loaded:
-            self.status_bar.showMessage("No model loaded", 3000)
+            self.status_bar.showMessage("No model loaded", 6000)
             return 
         try:
             result = self.model.predict_image(self.current_image_path)
@@ -284,9 +315,9 @@ class PytorchTab(QWidget):
             plt.setp(ax.get_xticklabels(), rotation=45)
             self.plot_widget2.figure.tight_layout()
             self.plot_widget2.canvas.draw()
-            self.status_bar.showMessage("Classification complete", 3000)
+            self.status_bar.showMessage("Classification complete", 6000)
         except Exception as e:
-            self.status_bar.showMessage(f"Classification error: {str(e)}", 5000)
+            self.status_bar.showMessage(f"Classification error: {str(e)}", 10000)
 
     def load_model(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -299,15 +330,16 @@ class PytorchTab(QWidget):
             try:
                 self.model.initialize_model()
                 self.model.load_model(file_path)
+                self.model.load_data("./models/dicetoss_small")
                 self.model_loaded = True
                 self.update_model_status("Model loaded successfully", "green")
-                self.status_bar.showMessage("Model loaded successfully", 3000)
+                self.status_bar.showMessage("Model loaded successfully", 7000)
             except Exception as e:
-                self.status_bar.showMessage(f"Error loading model: {str(e)}", 5000)
+                self.status_bar.showMessage(f"Error loading model: {str(e)}", 10000)
 
     def save_model(self):
         if not self.model_loaded:
-            self.status_bar.showMessage("No model to save", 3000)
+            self.status_bar.showMessage("No model to save", 6000)
             return
         file_path, _ = QFileDialog.getSaveFileName(
             self,
@@ -318,81 +350,64 @@ class PytorchTab(QWidget):
         if file_path:
             try:
                 self.model.save_model(file_path)
-                self.status_bar.showMessage("Model saved successfully", 3000)
+                self.status_bar.showMessage("Model saved successfully", 6000)
             except Exception as e:
-                self.status_bar.showMessage(f"Error saving model: {str(e)}", 5000)
+                self.status_bar.showMessage(f"Error saving model: {str(e)}", 10000)
 
     def train_model(self):
         epochs = self.epochs_widget.spinbox.value()
         learning_rate = self.learning_rate_widget.spinbox.value()
         momentum = self.momentum_widget.spinbox.value()
         try:
-            # Model Inicialization
+            # Model Initialization
             self.model.initialize_model()
-            # Loads the data
+            # Load the data
             train_size, val_size, test_size = self.model.load_data("./models/dicetoss_small")
             self.status_bar.showMessage(
                 f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test",
-                3000
+                6000
             )
             dialog = ProgressDialog(self, "Training")
             result = dialog.start_training(self.model, epochs, learning_rate, momentum)     
             if result is not None:
                 train_loss_history, val_loss_history = result
-                self.plot_widget1.plot(
-                    range(1, epochs + 1),
-                    train_loss_history,
-                    "Training Loss"
-                )
-                self.plot_widget2.plot(
-                    range(1, epochs + 1),
-                    val_loss_history,
-                    "Validation Loss"
-                )
+                # Plotting loss history
+                self.plot_widget1.plot_loss_history(self.plot_widget1, epochs, train_loss_history, val_loss_history)
+                # Plotting empty confusion matrix
+                self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
                 self.model_loaded = True
-                self.test_model_btn.setEnabled(True)
                 self.update_model_status("Model trained successfully", "green")
-                self.status_bar.showMessage("Training completed", 3000)
+                self.status_bar.showMessage("Training completed", 6000)
             else:
                 self.status_bar.showMessage(
                     f"Training error: {getattr(dialog, 'error_message', 'Unknown error')}",
-                    5000
+                    10000
                 )       
         except Exception as e:
-            self.status_bar.showMessage(f"Training error: {str(e)}", 5000)
+            self.status_bar.showMessage(f"Training error: {str(e)}", 10000)
 
     def test_model(self):
         if not self.model_loaded:
-            self.status_bar.showMessage("No model loaded", 3000)
+            self.status_bar.showMessage("No model loaded", 6000)
             return
         try:
             dialog = ProgressDialog(self, "Testing")
             metrics = dialog.start_testing(self.model)
             if metrics is not None:
                 self.metrics_widget.update_metrics(metrics)
+                # Confusion matrix 
                 conf_mat = metrics['confusion_matrix']
-                self.plot_widget1.figure.clear()
-                ax = self.plot_widget1.figure.add_subplot(111)
-                im = ax.imshow(conf_mat, cmap='Blues')
                 classes = self.model.classes
-                ax.set_xticks(np.arange(len(classes)))
-                ax.set_yticks(np.arange(len(classes)))
-                ax.set_xticklabels(classes)
-                ax.set_yticklabels(classes)
-                plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")    
-                for i in range(len(classes)):
-                    for j in range(len(classes)):
-                        ax.text(j, i, conf_mat[i, j], ha="center", va="center")
-                self.plot_widget1.figure.tight_layout()
-                self.plot_widget1.canvas.draw()
-                self.status_bar.showMessage("Testing completed", 3000)
+                self.plot_widget2.plot_confusion_matrix(self.plot_widget2, conf_mat, classes)
+                # Status update
+                self.status_bar.showMessage("Testing completed", 6000)
             else:
                 self.status_bar.showMessage(
                     f"Testing error: {getattr(dialog, 'error_message', 'Unknown error')}",
-                    5000
+                    10000
                 ) 
         except Exception as e:
-            self.status_bar.showMessage(f"Testing error: {str(e)}", 5000)
+            self.status_bar.showMessage(f"Testing error: {str(e)}", 10000)
 
     def _create_ui(self):
         # Main layout with scroll area
@@ -505,13 +520,16 @@ class PytorchTab(QWidget):
     def _create_right_panel(self):
         right_panel = QWidget()
         right_layout = QVBoxLayout(right_panel)
-        right_layout.setSpacing(10)
+        right_layout.setSpacing(20)  # Increased spacing between plots
         right_layout.setContentsMargins(15, 30, 10, 10)
-        # Create plot widgets with titles
-        self.plot_widget1 = PlotWidget("Training Loss")
-        self.plot_widget2 = PlotWidget("Validation Accuracy")
-        for plot in [self.plot_widget1, self.plot_widget2]:
-            plot.setMinimumHeight(300)
-            right_layout.addWidget(plot)
+        # Plot widgets
+        self.plot_widget1 = PlotWidget("Loss History") 
+        self.plot_widget2 = PlotWidget("Confusion Matrix")  
+        # Initialize empty Confusion Matrix
+        self.plot_widget1.plot_loss_history(self.plot_widget1)
+        self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
+        # Add to layout
+        right_layout.addWidget(self.plot_widget1)
+        right_layout.addWidget(self.plot_widget2)
         right_layout.addStretch()
         return right_panel
