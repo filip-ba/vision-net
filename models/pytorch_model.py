@@ -5,7 +5,6 @@ import torch.nn.functional as F
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, random_split
 import numpy as np
-import torchvision
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 from PIL import Image
 
@@ -27,21 +26,33 @@ class DiceTossModel:
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
+        # Dataset attributes
+        self.trainloader = None
+        self.valloader = None
+        self.testloader = None
+        self.dataset_loaded = False
+
+    def is_data_loaded(self):
+        """Check if dataset is loaded"""
+        return self.dataset_loaded
 
     def load_data(self, data_dir):
-        """Loads and prepares dataset"""
-        full_dataset = datasets.ImageFolder(root=data_dir, transform=self.transform)
-        train_size = int(0.7 * len(full_dataset))
-        val_size = int(0.15 * len(full_dataset))
-        test_size = len(full_dataset) - train_size - val_size
-        
-        train_dataset, val_dataset, test_dataset = random_split(
-            full_dataset, [train_size, val_size, test_size]
-        )  
-        self.trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-        self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=True)
-        self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
-        return len(train_dataset), len(val_dataset), len(test_dataset)
+        """Loads and prepares dataset if not already loaded"""
+        if not self.dataset_loaded:
+            full_dataset = datasets.ImageFolder(root=data_dir, transform=self.transform)
+            train_size = int(0.7 * len(full_dataset))
+            val_size = int(0.15 * len(full_dataset))
+            test_size = len(full_dataset) - train_size - val_size
+            
+            train_dataset, val_dataset, test_dataset = random_split(
+                full_dataset, [train_size, val_size, test_size]
+            )  
+            self.trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+            self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=True)
+            self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+            self.dataset_loaded = True
+            return len(train_dataset), len(val_dataset), len(test_dataset)
+        return len(self.trainloader.dataset), len(self.valloader.dataset), len(self.testloader.dataset)
 
     def initialize_model(self):
         """Initializes the model"""
@@ -63,7 +74,7 @@ class DiceTossModel:
                 x = F.relu(self.fc2(x))
                 x = self.fc3(x)
                 return x
-
+            
         self.net = Net().to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = None  # To be set during training
@@ -72,6 +83,8 @@ class DiceTossModel:
         """Trains the model and returns the loss history"""
         if self.net is None:
             raise ValueError("Model is not initialized")
+        if not self.dataset_loaded:
+            raise ValueError("Dataset not loaded. Call load_data first.")       
         self.optimizer = optim.SGD(self.net.parameters(), lr=learning_rate, momentum=momentum)
         train_loss_history = []
         val_loss_history = []
@@ -108,6 +121,8 @@ class DiceTossModel:
         """Tests the model and returns metrics"""
         if self.net is None:
             raise ValueError("Model is not initialized")
+        if not self.dataset_loaded:
+            raise ValueError("Dataset not loaded. Call load_data first.")
         self.net.eval()
         y_pred = []
         y_true = []

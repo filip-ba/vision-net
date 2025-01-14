@@ -282,15 +282,15 @@ class PytorchTab(QWidget):
         super().__init__()
         self._create_ui()
         self.current_image_path = None
-        # Connect signals
-        self._setup_connections() 
         # Model Initialization 
         self.model = DiceTossModel()
         self.model_loaded = False
-        # UI update
+        # Update model status
         self.update_model_status("No model loaded") 
-        # Try to load the default model on startup
-        self._try_load_default_model()
+        # Try to load the dataset and default model on startup
+        self._try_load_dataset_and_default_model()
+        # Connect signals
+        self._setup_connections()    
 
     def _setup_connections(self):
         self.image_widget.load_image_btn.clicked.connect(self.load_image)
@@ -358,36 +358,38 @@ class PytorchTab(QWidget):
         except Exception as e:
             self.status_bar.showMessage(f"Classification error: {str(e)}", 8000)
 
-    def _try_load_default_model(self):
-        """Attempts to load the default model on startup"""
+    def _try_load_dataset_and_default_model(self):
+        """Attempts to load the dataset and the default model on startup"""
+        dataset_message = ""
+        # Attempt to load dataset
         try:
-            # Initialize the model first
+            train_size, val_size, test_size = self.model.load_data("./models/dicetoss_small")
+            dataset_message = f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test. "
+        except Exception as e:
+            dataset_message = f"Error loading dataset: {str(e)}. "
+        # Attempt to load default model
+        try:
             self.model.initialize_model()
-            # Define the default model path - adjust this path as needed
-            default_model_path = "./models/default_model.pth"
-            
+            default_model_path = "./models/default_model.pth" 
             if os.path.exists(default_model_path):
                 try:
-                    # Load the model
                     self.model.load_model(default_model_path)
-                    # Load the dataset for potential testing/training
-                    self.model.load_data("./models/dicetoss_small")
                     self.model_loaded = True
                     self.update_model_status("Model loaded successfully", "green")
-                    self.status_bar.showMessage("Default model loaded successfully", 8000)
+                    dataset_message += "Default model loaded successfully."
                     self.save_model_btn.setEnabled(True)
                     self.test_model_btn.setEnabled(True)
-                    # Enable testing button since model is loaded
-                    self.test_model_btn.setEnabled(True)
                 except Exception as e:
-                    self.status_bar.showMessage(f"Error loading default model: {str(e)}", 8000)
+                    dataset_message += f"Error loading default model: {str(e)}"
                     self.update_model_status("Error loading default model", "red")
             else:
-                self.status_bar.showMessage("No default model found", 8000)
+                dataset_message += "No default model found."
                 self.update_model_status("No model loaded", "red")
         except Exception as e:
-            self.status_bar.showMessage(f"Error initializing model: {str(e)}", 8000)
-            self.update_model_status("Error initializing model", "red")
+            dataset_message += f"Error initializing model: {str(e)}"
+            self.update_model_status("Error initializing model", "red")       
+        # Show status message
+        self.status_bar.showMessage(dataset_message, 10000)
 
     def load_model(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -400,7 +402,6 @@ class PytorchTab(QWidget):
             try:
                 self.model.initialize_model()
                 self.model.load_model(file_path)
-                self.model.load_data("./models/dicetoss_small")
                 self.model_loaded = True
                 self.update_model_status("Model loaded successfully", "green")
                 self.status_bar.showMessage("Model loaded successfully", 8000)
@@ -433,14 +434,9 @@ class PytorchTab(QWidget):
         try:
             # Model Initialization
             self.model.initialize_model()
-            # Load the data
-            train_size, val_size, test_size = self.model.load_data("./models/dicetoss_small")
-            self.status_bar.showMessage(
-                f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test",
-                8000
-            )
+            # No need to load data here as it's already loaded
             dialog = ProgressDialog(self, "Training")
-            result = dialog.start_training(self.model, epochs, learning_rate, momentum)     
+            result = dialog.start_training(self.model, epochs, learning_rate, momentum)            
             if result is not None:
                 train_loss_history, val_loss_history = result
                 # Plotting loss history
@@ -481,7 +477,7 @@ class PytorchTab(QWidget):
                     8000
                 ) 
         except Exception as e:
-            self.status_bar.showMessage(f"Testing error: {str(e)}", 8000)
+            self.status_bar.showMessage(f"Testing error: {str(e)}", 8000)    
 
     def _create_ui(self):
         # Main layout with scroll area
