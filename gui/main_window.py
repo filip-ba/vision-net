@@ -16,7 +16,7 @@ class MainWindow(QMainWindow):
         icon_path = os.path.join(project_dir, "icon.ico")
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(50, 50, 1200, 900)
+        self.setGeometry(50, 50, 1200, 910)
         main_widget = QWidget(self)
         self.setCentralWidget(main_widget)
         main_layout = QVBoxLayout(main_widget)

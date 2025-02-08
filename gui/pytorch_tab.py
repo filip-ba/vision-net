@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import ( 
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, QSlider, QDoubleSpinBox, 
-    QSpinBox, QSizePolicy, QFileDialog, QScrollArea, QFrame, QStatusBar, QGridLayout, QMessageBox )
+    QSpinBox, QFileDialog, QScrollArea, QFrame, QStatusBar, QGridLayout, QMessageBox, QSpacerItem, QSizePolicy )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QImageReader, QFont
 from matplotlib import pyplot as plt
@@ -99,7 +99,7 @@ class ParameterWidget(QWidget):
             self.spinbox.setDecimals(decimals)
         self.spinbox.setRange(min_val, max_val)
         self.spinbox.setValue(default_val)
-        self.spinbox.setFixedWidth(80)
+        self.spinbox.setFixedWidth(100)
         layout.addWidget(self.spinbox)
         # Slider setup
         self.slider = QSlider(Qt.Orientation.Horizontal)
@@ -141,14 +141,18 @@ class ImageClassificationWidget(QWidget):
         controls_layout = QVBoxLayout()
         self.load_image_btn = QPushButton("Load Image")
         self.load_image_btn.setStyleSheet("padding: 8px;")
+        self.load_image_btn.setFixedWidth(120)
         self.classify_btn = QPushButton("Classify Image")
+        self.classify_btn.setFixedWidth(120)
         self.classify_btn.setStyleSheet("padding: 8px;")
-        self.result_label = QLabel("Classification: None")
+        self.result_label = QLabel("Classification:\nNone")
+        self.result_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.result_label.setFixedWidth(120)
         self.result_label.setStyleSheet("""
             QLabel {
                 font-weight: bold;
                 color: #2c3e50;
-                padding: 10px;
+                padding: 1px;
                 background-color: #ecf0f1;
                 border-radius: 5px;
             }
@@ -212,7 +216,7 @@ class ImageClassificationWidget(QWidget):
         self.canvas.draw()
 
     def _load_placeholder(self):
-        placeholder_path = os.path.join(os.path.dirname(__file__), "..", "placeholder_img.jpg")
+        placeholder_path = os.path.join(os.path.dirname(__file__), "..", "placeholder_img.png")
         if os.path.exists(placeholder_path):
             pixmap = QPixmap(placeholder_path)
             self.image_display.setPixmap(pixmap.scaled(
@@ -249,7 +253,7 @@ class MetricsWidget(QWidget):
         self.recall_label = QLabel("Recall: -")
         metric_style = """
             QLabel {
-                font-size: 12px;
+                font-size: 14px;
                 padding: 8px;
                 background-color: #f8f9fa;
                 border: 1px solid #dee2e6;
@@ -376,7 +380,7 @@ class PytorchTab(QWidget):
             self.plot_widget1.plot_loss_history(self.plot_widget1)
             self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
             # Reset image classification
-            self.image_widget.result_label.setText("Classification: None")
+            self.image_widget.result_label.setText("Classification:\nNone")
             self.image_widget.init_plot()
             # Disable buttons
             self.save_model_btn.setEnabled(False)
@@ -397,7 +401,7 @@ class PytorchTab(QWidget):
             if not pixmap.isNull():
                 self.current_image_path = file_path
                 self.image_widget.update_image(pixmap)
-                self.image_widget.result_label.setText("Classification: None")
+                self.image_widget.result_label.setText("Classification:\nNone")
                 self.status_bar.showMessage(f"Loaded image: {os.path.basename(file_path)}", 8000)
             else:
                 self.image_widget.image_display.setText("Failed to load image")
@@ -427,7 +431,7 @@ class PytorchTab(QWidget):
             probabilities = result['probabilities']
             
             # Update UI
-            self.image_widget.result_label.setText(f"Classification: {predicted_class}")
+            self.image_widget.result_label.setText(f"Classification:\n{predicted_class}")
             self.image_widget.update_plot(self.model.classes, probabilities)
             
             self.status_bar.showMessage("Classification complete", 8000)
@@ -616,16 +620,17 @@ class PytorchTab(QWidget):
         model_layout = QVBoxLayout()
         # Model buttons
         buttons_layout = QHBoxLayout()
-        self.load_model_btn = QPushButton("Load Model")
-        self.train_model_btn = QPushButton("Train Model")
-        self.save_model_btn = QPushButton("Save Model")
+        self.load_model_btn = QPushButton("Load")
+        self.train_model_btn = QPushButton("Train")
+        self.save_model_btn = QPushButton("Save")
         self.save_model_btn.setEnabled(False)
-        self.test_model_btn = QPushButton("Test Model")
+        self.test_model_btn = QPushButton("Test")
         self.test_model_btn.setEnabled(False)
         # Add buttons to layout
         for btn in [self.load_model_btn, self.train_model_btn, self.save_model_btn, self.test_model_btn]:
             btn.setStyleSheet("""
                 QPushButton {
+                    font-size: 14px;
                     padding: 8px;
                     background-color: #f8f9fa;
                     border: 1px solid #dee2e6;
@@ -654,15 +659,15 @@ class PytorchTab(QWidget):
         status_layout.addWidget(self.model_status)
         # Clear Model button with distinct style
         self.clear_model_btn = QPushButton("Clear Model")
-        self.clear_model_btn.setFixedWidth(107)  # Make button smaller
+        self.clear_model_btn.setFixedWidth(107)  
         self.clear_model_btn.setStyleSheet("""
             QPushButton {
-                padding: 5px;
+                font-size: 13px;
+                padding: 4px;
                 background-color: #f8f9fa;
                 border: 1px solid #6c757d;
                 border-radius: 4px;
                 color: #3d4145;
-                font-size: 11px;
             }
             QPushButton:hover {
                 background-color: #e9ecef;
@@ -673,7 +678,7 @@ class PytorchTab(QWidget):
         """)
         status_layout.addWidget(self.clear_model_btn)
         model_layout.addLayout(status_layout)
-        
+        model_layout.setContentsMargins(10,10,10,10)
         model_group.setLayout(model_layout)
         # Parameters
         params_group = QGroupBox("Parameters")
@@ -685,11 +690,13 @@ class PytorchTab(QWidget):
         for widget in [self.epochs_widget, self.learning_rate_widget, self.momentum_widget]:
             params_layout.addWidget(widget)
         params_group.setLayout(params_layout)
+        params_layout.setContentsMargins(10,10,10,10)
         # Image Classification
         self.image_widget = ImageClassificationWidget()
         image_group = QGroupBox("Image Classification")
         image_layout = QVBoxLayout()
         image_layout.addWidget(self.image_widget)
+        image_layout.setContentsMargins(10,10,10,10)
         image_group.setLayout(image_layout)
         # Metrics Group Box
         self.metrics_widget = MetricsWidget()
@@ -697,6 +704,7 @@ class PytorchTab(QWidget):
         metrics_layout = QVBoxLayout()
         metrics_layout.addWidget(self.metrics_widget)
         metrics_group.setLayout(metrics_layout)
+        metrics_layout.setContentsMargins(10,10,10,10)
         # Add all components to left panel
         for widget in [model_group, params_group, image_group, metrics_group]:
             widget.setStyleSheet("""
