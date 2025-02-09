@@ -2,11 +2,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+#from torch.serialization import safe_globals, add_safe_globals
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, random_split
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 from PIL import Image
+
+#add_safe_globals([np.core.multiarray.scalar])
 
 
 class DiceTossModel:
@@ -202,7 +205,8 @@ class DiceTossModel:
         """Loads model state along with training parameters, metrics and history"""
         if self.net is None:
             self.initialize_model()    
-        save_dict = torch.load(path)
+        save_dict = torch.load(path, weights_only=False)
+        #save_dict = torch.load(path, weights_only=False, safe_load=True)
         # Load model state
         self.net.load_state_dict(save_dict['model_state'])
         self.net.eval()

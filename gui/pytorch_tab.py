@@ -464,6 +464,7 @@ class PytorchTab(QWidget):
                     self.test_model_btn.setEnabled(True)
                 except Exception as e:
                     dataset_message += f"Error loading default model: {str(e)}"
+                    print(dataset_message)
                     self.update_model_status("Error loading default model", "red")
             else:
                 dataset_message += "No default model found."
