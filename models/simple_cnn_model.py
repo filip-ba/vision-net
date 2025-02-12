@@ -9,7 +9,7 @@ from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 from PIL import Image
 
 
-class SimpleCNNModel:
+class SimpleCnnModel:
     def __init__(self):
         self.classes = ("A", "B", "C", "D", "E", "F")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

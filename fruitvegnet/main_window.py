@@ -1,8 +1,7 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QTabWidget
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTabWidget
 from PyQt6.QtGui import QAction, QIcon
-from PyQt6.QtCore import pyqtSignal, QObject
 import os
-from gui.main_widget import PytorchTab
+from fruitvegnet.main_widget import MainWidget
 
 
 class MainWindow(QMainWindow):
@@ -21,7 +20,7 @@ class MainWindow(QMainWindow):
         main_layout = QVBoxLayout(main_widget)
         self.tab_widget = QTabWidget(self)
         # PyTorch and Keras Tab
-        pytorch_tab = PytorchTab()
+        pytorch_tab = MainWidget()
         self.tab_widget.addTab(pytorch_tab, "PyTorch")
         main_layout.addWidget(self.tab_widget)
         # MenuBar
