@@ -2,17 +2,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-#from torch.serialization import safe_globals, add_safe_globals
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, random_split
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 from PIL import Image
 
-#add_safe_globals([np.core.multiarray.scalar])
 
-
-class DiceTossModel:
+class SimpleCNNModel:
     def __init__(self):
         self.classes = ("A", "B", "C", "D", "E", "F")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

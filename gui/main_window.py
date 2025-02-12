@@ -2,8 +2,7 @@ from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QTabWidge
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtCore import pyqtSignal, QObject
 import os
-from gui.pytorch_tab import PytorchTab
-from gui.keras_tab import KerasTab
+from gui.main_widget import PytorchTab
 
 
 class MainWindow(QMainWindow):
@@ -23,9 +22,7 @@ class MainWindow(QMainWindow):
         self.tab_widget = QTabWidget(self)
         # PyTorch and Keras Tab
         pytorch_tab = PytorchTab()
-        keras_tab = KerasTab()
         self.tab_widget.addTab(pytorch_tab, "PyTorch")
-        self.tab_widget.addTab(keras_tab, "Keras")
         main_layout.addWidget(self.tab_widget)
         # MenuBar
         menu_bar = self.menuBar()

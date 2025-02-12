@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import ( 
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, QSlider, QDoubleSpinBox, 
-    QSpinBox, QFileDialog, QScrollArea, QFrame, QStatusBar, QGridLayout, QMessageBox, QSpacerItem, QSizePolicy )
+    QSpinBox, QFileDialog, QScrollArea, QFrame, QStatusBar, QGridLayout, QMessageBox, QSizePolicy )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QImageReader, QFont
 from matplotlib import pyplot as plt
@@ -8,7 +8,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import os
 from gui.progress_dialog import ProgressDialog
-from models.pytorch_model import DiceTossModel
+from models.simple_cnn_model import SimpleCNNModel
 import numpy as np
 
 
@@ -286,7 +286,7 @@ class PytorchTab(QWidget):
         self._create_ui()
         self.current_image_path = None
         # Model Initialization 
-        self.model = DiceTossModel()
+        self.model = SimpleCNNModel()
         self.model_loaded = False
         # Update model status
         self.update_model_status("No model loaded") 
@@ -359,7 +359,7 @@ class PytorchTab(QWidget):
             valloader = self.model.valloader
             testloader = self.model.testloader
             # Reset model
-            self.model = DiceTossModel()
+            self.model = SimpleCNNModel()
             self.model.initialize_model()
             # Restore dataset if it was loaded
             if dataset_loaded:
