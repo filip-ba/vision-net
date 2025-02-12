@@ -1,213 +1,15 @@
 from PyQt6.QtWidgets import ( 
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, QSlider, QDoubleSpinBox, 
-    QSpinBox, QFileDialog, QScrollArea, QStatusBar, QGridLayout, QMessageBox )
-from PyQt6.QtCore import Qt
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, 
+    QFileDialog, QScrollArea, QStatusBar, QMessageBox )
 from PyQt6.QtGui import QPixmap, QImageReader
-from matplotlib import pyplot as plt
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import os
 from fruitvegnet.progress_dialog import ProgressDialog
 from models.simple_cnn_model import SimpleCnnModel
 from fruitvegnet.plot_widget import PlotWidget
+from fruitvegnet.parameter_widget import ParameterWidget
+from fruitvegnet.image_classification_widget import ImageClassificationWidget
+from fruitvegnet.metrics_widget import MetricsWidget
 
-
-class ParameterWidget(QWidget):
-    def __init__(self, label, min_val, max_val, default_val, decimals=0, parent=None):
-        super().__init__(parent)
-        layout = QHBoxLayout()
-        self.setLayout(layout)
-        param_label = QLabel(label)
-        param_label.setMinimumWidth(100)
-        layout.addWidget(param_label)
-        # SpinBox setup
-        if decimals == 0:
-            self.spinbox = QSpinBox()
-        else:
-            self.spinbox = QDoubleSpinBox()
-            self.spinbox.setDecimals(decimals)
-        self.spinbox.setRange(min_val, max_val)
-        self.spinbox.setValue(default_val)
-        self.spinbox.setFixedWidth(100)
-        layout.addWidget(self.spinbox)
-        # Slider setup
-        self.slider = QSlider(Qt.Orientation.Horizontal)
-        if decimals > 0:
-            self.slider.setRange(0, int(max_val * (10 ** decimals)))
-            self.slider.setValue(int(default_val * (10 ** decimals)))
-        else:
-            self.slider.setRange(int(min_val), int(max_val))
-            self.slider.setValue(int(default_val))
-        layout.addWidget(self.slider)
-        # Connect signals
-        self._setup_connections()
-
-    def _setup_connections(self):
-        self.slider.valueChanged.connect(self._slider_changed)
-        self.spinbox.valueChanged.connect(self._spinbox_changed)
-    
-    def _slider_changed(self, value):
-        if isinstance(self.spinbox, QDoubleSpinBox):
-            self.spinbox.setValue(value / (10 ** self.spinbox.decimals()))
-        else:
-            self.spinbox.setValue(value)
-    
-    def _spinbox_changed(self, value):
-        if isinstance(self.spinbox, QDoubleSpinBox):
-            self.slider.setValue(int(value * (10 ** self.spinbox.decimals())))
-        else:
-            self.slider.setValue(int(value))
-
-
-class ImageClassificationWidget(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        layout = QHBoxLayout()
-        self.setLayout(layout)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(10)
-        # Controls area with buttons
-        controls_layout = QVBoxLayout()
-        self.load_image_btn = QPushButton("Load Image")
-        self.load_image_btn.setStyleSheet("padding: 8px;")
-        self.load_image_btn.setFixedWidth(120)
-        self.classify_btn = QPushButton("Classify Image")
-        self.classify_btn.setFixedWidth(120)
-        self.classify_btn.setStyleSheet("padding: 8px;")
-        self.result_label = QLabel("Classification:\nNone")
-        self.result_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.result_label.setFixedWidth(120)
-        self.result_label.setStyleSheet("""
-            QLabel {
-                font-weight: bold;
-                color: #2c3e50;
-                padding: 1px;
-                background-color: #ecf0f1;
-                border-radius: 5px;
-            }
-        """)
-        # Small image preview
-        self.image_display = QLabel()
-        self.image_display.setFixedSize(120, 120)
-        self.image_title = QLabel("Image Preview")
-        self.image_display.setStyleSheet("""
-            QLabel {
-                border: 2px solid #ccc;
-                border-radius: 5px;
-                background-color: #f8f9fa;
-            }
-        """)
-        self.image_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        controls_layout.addWidget(self.load_image_btn)
-        controls_layout.addWidget(self.classify_btn)
-        controls_layout.addWidget(self.image_display, alignment=Qt.AlignmentFlag.AlignHCenter)
-        controls_layout.addWidget(self.result_label)
-        # Classification plot
-        self.figure = Figure(figsize=(4, 3))
-        self.canvas = FigureCanvas(self.figure)
-        self.canvas.setFixedSize(300, 300) 
-        self.init_plot()
-        layout.addWidget(self.canvas)
-        layout.addLayout(controls_layout)
-        # Load placeholder image
-        self._load_placeholder()
-
-    def init_plot(self):
-        """Initialize empty probability plot"""
-        self.figure.clear()
-        ax = self.figure.add_subplot(111)
-        ax.set_title('Class Probabilities', fontsize=10)
-        ax.set_xlabel('Class', fontsize=8)
-        ax.set_ylabel('Probability', fontsize=8)
-        ax.tick_params(axis='both', labelsize=8)
-        ax.set_ylim(0, 1)
-        self.figure.tight_layout()
-        self.canvas.draw()
-
-    def update_plot(self, classes, probabilities):
-        """Update probability plot with new data"""
-        self.figure.clear()
-        ax = self.figure.add_subplot(111)
-        bars = ax.bar(classes, probabilities)
-        # Add value labels on top of each bar
-        for bar in bars:
-            height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height,
-                   f'{height:.0%}',
-                   ha='center', va='bottom')
-        ax.set_title('Class Probabilities', fontsize=10)
-        ax.set_xlabel('Class', fontsize=8)
-        ax.set_ylabel('Probability', fontsize=8)
-        ax.tick_params(axis='both', labelsize=8)
-        ax.set_ylim(0, 1.2)  # Make room for percentage labels
-        plt.setp(ax.get_xticklabels(), rotation=45)
-        self.figure.tight_layout()
-        self.canvas.draw()
-
-    def _load_placeholder(self):
-        placeholder_path = os.path.join(os.path.dirname(__file__), "..", "placeholder_img.png")
-        if os.path.exists(placeholder_path):
-            pixmap = QPixmap(placeholder_path)
-            self.image_display.setPixmap(pixmap.scaled(
-                120, 120,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation
-            ))
-        else:
-            self.image_display.setText("No image")
-
-    def update_image(self, pixmap):
-        """Method for updating the displayed image"""
-        if pixmap:
-            scaled_pixmap = pixmap.scaled(
-                120, 120,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation
-            )
-            self.image_display.setPixmap(scaled_pixmap)
-        else:
-            self.image_display.setText("No image")
-
-
-class MetricsWidget(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        layout = QVBoxLayout()
-        self.setLayout(layout)
-        layout.setContentsMargins(0, 0, 0, 0)
-        metrics_grid = QGridLayout()
-        metrics_grid.setSpacing(10)
-        self.accuracy_label = QLabel("Accuracy: -")
-        self.precision_label = QLabel("Precision: -")
-        self.recall_label = QLabel("Recall: -")
-        metric_style = """
-            QLabel {
-                font-size: 14px;
-                padding: 8px;
-                background-color: #f8f9fa;
-                border: 1px solid #dee2e6;
-                border-radius: 4px;
-            }
-        """
-        for label in [self.accuracy_label, self.precision_label, self.recall_label]:
-            label.setStyleSheet(metric_style)
-            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        metrics_grid.addWidget(self.accuracy_label, 0, 0)
-        metrics_grid.addWidget(self.precision_label, 0, 1)
-        metrics_grid.addWidget(self.recall_label, 0, 2)
-        layout.addLayout(metrics_grid)
-
-    def update_metrics(self, metrics):
-        """Updates the displayed metrics"""
-        self.accuracy_label.setText(f"Accuracy: {metrics['accuracy']:.2%}")
-        self.precision_label.setText(f"Precision: {metrics['precision']:.2%}")
-        self.recall_label.setText(f"Recall: {metrics['recall']:.2%}")
-
-    def reset_metrics(self):
-        """Resets all metrics to their initial state"""
-        self.accuracy_label.setText("Accuracy: -")
-        self.precision_label.setText("Precision: -")
-        self.recall_label.setText("Recall: -")
 
 class MainWidget(QWidget):
     def __init__(self):
@@ -372,7 +174,7 @@ class MainWidget(QWidget):
         dataset_message = ""
         # Attempt to load dataset
         try:
-            train_size, val_size, test_size = self.model.load_data("./models/dicetoss_small")
+            train_size, val_size, test_size = self.model.load_data("./dataset/dicetoss_small")
             dataset_message = f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test. "
         except Exception as e:
             dataset_message = f"Error loading dataset: {str(e)}. "
