@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         self.tab_widget = QTabWidget(self)
         # PyTorch and Keras Tab
         pytorch_tab = MainWidget()
-        self.tab_widget.addTab(pytorch_tab, "PyTorch")
+        self.tab_widget.addTab(pytorch_tab, "Simple CNN Model")
         main_layout.addWidget(self.tab_widget)
         # MenuBar
         menu_bar = self.menuBar()
