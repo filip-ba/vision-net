@@ -11,7 +11,7 @@ from PIL import Image
 
 class SimpleCnnModel:
     def __init__(self):
-        self.classes = ("A", "B", "C", "D", "E", "F")
+        self.classes = None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.net = None
         self.transform = transforms.Compose([
@@ -65,6 +65,7 @@ class SimpleCnnModel:
         """Loads and prepares dataset if not already loaded"""
         if not self.dataset_loaded:
             full_dataset = datasets.ImageFolder(root=data_dir, transform=self.transform)
+            self.classes = full_dataset.classes
             train_size = int(0.7 * len(full_dataset))
             val_size = int(0.15 * len(full_dataset))
             test_size = len(full_dataset) - train_size - val_size
