@@ -194,7 +194,6 @@ class SimpleCnnModel:
             'training_params': self.training_params,
             'metrics': self.metrics,
             'history': self.history,
-            'classes': self.classes  # Save classes in case they change in future versions
         }
         torch.save(save_dict, path)
 
@@ -211,7 +210,6 @@ class SimpleCnnModel:
         self.training_params = save_dict['training_params']
         self.metrics = save_dict['metrics']
         self.history = save_dict['history']
-        self.classes = save_dict['classes']
         return {
             'training_params': self.training_params,
             'metrics': self.metrics,
