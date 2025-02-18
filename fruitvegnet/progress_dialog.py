@@ -71,7 +71,7 @@ class ProgressDialog(QDialog):
     def setup_ui(self):
         """UI component initialization"""
         self.setWindowTitle(f"Model {self.operation_type}")
-        self.setFixedSize(400, 200)  
+        self.setFixedSize(400, 300)  
         self.setModal(True)
         layout = QVBoxLayout()
         # Add training parameters if available
