@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
+
 class PlotWidget(QWidget):
     def __init__(self, title, parent=None):
         super().__init__(parent)
@@ -28,7 +29,7 @@ class PlotWidget(QWidget):
         main_layout.addWidget(frame)
         # Title label
         self.title_label = QLabel(title)
-        self.title_label.setFont(QFont('Arial', 10, QFont.Weight.Bold))
+        self.title_label.setFont(QFont('Arial', 11, QFont.Weight.Bold))
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         frame_layout.addWidget(self.title_label)
         # Figure
@@ -39,11 +40,11 @@ class PlotWidget(QWidget):
 
     def plot_confusion_matrix(self, plot_widget, conf_mat = None, classes = None):
         plot_widget.figure.clear()
-        plot_widget.figure.subplots_adjust(left=0.25, right=0.85, bottom=0.25, top=0.85)
+        plot_widget.figure.subplots_adjust(left=0.25, right=0.85, bottom=0.35, top=0.85)
         plot_widget.figure.tight_layout()
         ax = plot_widget.figure.add_subplot(111)
-        ax.set_xlabel('Predicted', labelpad=10)
-        ax.set_ylabel('True', labelpad=10)
+        ax.set_xlabel('Predicted', labelpad=15)
+        ax.set_ylabel('True', labelpad=15)
         # Empty confusion matrix
         if conf_mat is None or classes is None:
             ax.set_title('(Will be populated after testing)', pad=10)
@@ -66,11 +67,11 @@ class PlotWidget(QWidget):
     def plot_loss_history(self, plot_widget, epochs=None, train_loss_history=None, val_loss_history=None):
         plot_widget.figure.clear()
         ax = plot_widget.figure.add_subplot(111)
+        plot_widget.figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)
         ax.clear()
         ax.set_xlabel('Epochs')
         ax.set_ylabel('Loss')
         ax.grid(True)
-
         if train_loss_history is not None and val_loss_history is not None:
             x = list(range(1, len(train_loss_history) + 1)) if epochs is None else list(range(1, epochs + 1))
             # In case of single epoch, plot points instead of lines
@@ -82,7 +83,6 @@ class PlotWidget(QWidget):
                 ax.plot(x, train_loss_history, 'b-', label='Training Loss')
                 ax.plot(x, val_loss_history, 'r-', label='Validation Loss')
             ax.legend()
-            ax.set_title('Loss History', pad=10)
         else:
             ax.set_title('(Will be populated after training)', pad=10)
         plot_widget.canvas.draw()
