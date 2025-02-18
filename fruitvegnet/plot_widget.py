@@ -63,16 +63,26 @@ class PlotWidget(QWidget):
                         color="white" if conf_mat[i, j] > conf_mat.max() / 2 else "black")         
         plot_widget.canvas.draw()
 
-    def plot_loss_history(self, plot_widget, epochs = None, train_loss_history = None, val_loss_history = None):
+    def plot_loss_history(self, plot_widget, epochs=None, train_loss_history=None, val_loss_history=None):
         plot_widget.figure.clear()
-        plot_widget.figure.subplots_adjust(left=0.25, right=0.85, bottom=0.25, top=0.85)
-        plot_widget.figure.tight_layout()
         ax = plot_widget.figure.add_subplot(111)
-        ax.set_xlabel('Epochs', labelpad=10)
-        ax.set_ylabel('Loss', labelpad=10)
+        ax.clear()
+        ax.set_xlabel('Epochs')
+        ax.set_ylabel('Loss')
         ax.grid(True)
-        if epochs is not None or train_loss_history is not None or val_loss_history is not None:
-            ax.plot(range(1, epochs + 1), train_loss_history, label='Training Loss')
-            ax.plot(range(1, epochs + 1), val_loss_history, label='Validation Loss')
-            ax.legend()       
+
+        if train_loss_history is not None and val_loss_history is not None:
+            x = list(range(1, len(train_loss_history) + 1)) if epochs is None else list(range(1, epochs + 1))
+            # In case of single epoch, plot points instead of lines
+            if len(train_loss_history) == 1:
+                ax.plot(x, train_loss_history, 'bo-', label='Training Loss', markersize=8)  
+                ax.plot(x, val_loss_history, 'ro-', label='Validation Loss', markersize=8)  
+                ax.set_xticks([1]) 
+            else:
+                ax.plot(x, train_loss_history, 'b-', label='Training Loss')
+                ax.plot(x, val_loss_history, 'r-', label='Validation Loss')
+            ax.legend()
+            ax.set_title('Loss History', pad=10)
+        else:
+            ax.set_title('(Will be populated after training)', pad=10)
         plot_widget.canvas.draw()
