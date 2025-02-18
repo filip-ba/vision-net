@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torchvision import datasets, transforms
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 from PIL import Image
@@ -63,22 +63,15 @@ class SimpleCnnModel:
 
     def load_data(self, data_dir):
         """Loads and prepares dataset if not already loaded"""
-        if not self.dataset_loaded:
-            full_dataset = datasets.ImageFolder(root=data_dir, transform=self.transform)
-            self.classes = full_dataset.classes
-            train_size = int(0.7 * len(full_dataset))
-            val_size = int(0.15 * len(full_dataset))
-            test_size = len(full_dataset) - train_size - val_size
-            
-            train_dataset, val_dataset, test_dataset = random_split(
-                full_dataset, [train_size, val_size, test_size]
-            )  
-            self.trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-            self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=True)
-            self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
-            self.dataset_loaded = True
-            return len(train_dataset), len(val_dataset), len(test_dataset)
-        return len(self.trainloader.dataset), len(self.valloader.dataset), len(self.testloader.dataset)
+        train_dataset = datasets.ImageFolder(root=f"{data_dir}/train", transform=self.transform)
+        val_dataset = datasets.ImageFolder(root=f"{data_dir}/valid", transform=self.transform)
+        test_dataset = datasets.ImageFolder(root=f"{data_dir}/test", transform=self.test_transform) 
+        self.trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+        self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=False) 
+        self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+        self.classes = train_dataset.classes
+        self.dataset_loaded = True
+        return len(train_dataset), len(val_dataset), len(test_dataset)
 
     def initialize_model(self):
         """Initializes the model"""
@@ -90,7 +83,7 @@ class SimpleCnnModel:
                 self.conv2 = nn.Conv2d(6, 16, 5)
                 self.fc1 = nn.Linear(16 * 5 * 5, 120)
                 self.fc2 = nn.Linear(120, 84)
-                self.fc3 = nn.Linear(84, 6)
+                self.fc3 = nn.Linear(84, 5)
 
             def forward(self, x):
                 x = self.pool(F.relu(self.conv1(x)))

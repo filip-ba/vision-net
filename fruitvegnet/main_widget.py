@@ -183,7 +183,7 @@ class MainWidget(QWidget):
         # Attempt to load default model
         try:
             self.model.initialize_model()
-            default_model_path = "./models/default_resnet_model.pth" 
+            default_model_path = "./models/default_simple_cnn_model.pth" 
             if os.path.exists(default_model_path):
                 try:
                     metadata = self.model.load_model(default_model_path)

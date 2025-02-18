@@ -1,77 +1,130 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import models, transforms, datasets
-from torch.utils.data import DataLoader, random_split
+import torch.nn.functional as F
+from torchvision import models, datasets, transforms
+from torch.utils.data import DataLoader
+from PIL import Image
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
-from PIL import Image
+
 
 class ResNetModel:
     def __init__(self):
         self.classes = None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.net = None
+        # ResNet requires different normalization values than your simple CNN
         self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize(256),
+            transforms.CenterCrop(224),  # ResNet expects 224x224 images
             transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(10),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
         self.test_transform = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
+        # Dataset attributes
         self.trainloader = None
         self.valloader = None
         self.testloader = None
         self.dataset_loaded = False
-        self.training_params = {'epochs': None, 'learning_rate': None, 'momentum': None}
-        self.metrics = {'accuracy': None, 'precision': None, 'recall': None, 'confusion_matrix': None}
-        self.history = {'train_loss': None, 'val_loss': None}
+        # Saving attributes
+        self.training_params = {
+            'epochs': None,
+            'learning_rate': None,
+            'momentum': None
+        }
+        self.metrics = {
+            'accuracy': None,
+            'precision': None,
+            'recall': None,
+            'confusion_matrix': None
+        }
+        self.history = {
+            'train_loss': None,
+            'val_loss': None
+        }
 
     def reset_metrics(self):
-        self.metrics = {'accuracy': None, 'precision': None, 'recall': None, 'confusion_matrix': None}
+        """Resets all metrics to their default state"""
+        self.metrics = {
+            'accuracy': None,
+            'precision': None,
+            'recall': None,
+            'confusion_matrix': None
+        }
 
     def is_data_loaded(self):
+        """Check if dataset is loaded"""
         return self.dataset_loaded
 
     def load_data(self, data_dir):
-        if not self.dataset_loaded:
-            full_dataset = datasets.ImageFolder(root=data_dir, transform=self.transform)
-            self.classes = full_dataset.classes
-            train_size = int(0.7 * len(full_dataset))
-            val_size = int(0.15 * len(full_dataset))
-            test_size = len(full_dataset) - train_size - val_size
-            train_dataset, val_dataset, test_dataset = random_split(full_dataset, [train_size, val_size, test_size])
-            self.trainloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-            self.valloader = DataLoader(val_dataset, batch_size=32, shuffle=True)
-            self.testloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
-            self.dataset_loaded = True
-            return len(train_dataset), len(val_dataset), len(test_dataset)
-        return len(self.trainloader.dataset), len(self.valloader.dataset), len(self.testloader.dataset)
+        """Loads and prepares dataset if not already loaded"""
+        train_dataset = datasets.ImageFolder(root=f"{data_dir}/train", transform=self.transform)
+        val_dataset = datasets.ImageFolder(root=f"{data_dir}/valid", transform=self.transform)
+        test_dataset = datasets.ImageFolder(root=f"{data_dir}/test", transform=self.test_transform) 
+        self.trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+        self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=False) 
+        self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+        self.classes = train_dataset.classes
+        self.dataset_loaded = True
+        return len(train_dataset), len(val_dataset), len(test_dataset)
 
     def initialize_model(self):
-        if self.classes is None:
-            raise ValueError("Load dataset before initializing the model.")
-        self.net = models.resnet18(pretrained=True)
-        num_ftrs = self.net.fc.in_features
-        self.net.fc = nn.Linear(num_ftrs, len(self.classes))
+        """Initializes the ResNet model with transfer learning"""
+        # Load pretrained ResNet18
+        self.net = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+        
+        # Freeze all layers
+        for param in self.net.parameters():
+            param.requires_grad = False
+            
+        # Replace the final fully connected layer
+        num_features = self.net.fc.in_features
+        self.net.fc = nn.Linear(num_features, 6)  # 6 classes for your dataset
+        
+        # Move to device
         self.net = self.net.to(self.device)
+        
+        # Loss function
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = None
+        self.optimizer = None  # To be set during training
 
-    def train(self, epochs, lr, momentum, progress_callback=None):
-        if not self.net or not self.dataset_loaded:
-            raise ValueError("Model or dataset is not initialized.")
-        self.optimizer = optim.SGD(self.net.parameters(), lr=lr, momentum=momentum)
-        self.training_params = {'epochs': epochs, 'learning_rate': lr, 'momentum': momentum}
-        train_loss, val_loss = [], []
+    def train(self, epochs, learning_rate, momentum, progress_callback=None):
+        """Trains the model and returns the loss history"""
+        if self.net is None:
+            raise ValueError("Model is not initialized")
+        if not self.dataset_loaded:
+            raise ValueError("Dataset not loaded. Call load_data first.")
+            
+        # Reset metrics before training
+        self.reset_metrics()
+        
+        # Store training parameters
+        self.training_params = {
+            'epochs': epochs,
+            'learning_rate': learning_rate,
+            'momentum': momentum
+        }
+        
+        # Only optimize the final layer parameters
+        self.optimizer = optim.SGD(self.net.fc.parameters(), lr=learning_rate, momentum=momentum)
+        
+        train_loss_history = []
+        val_loss_history = []
+        
         for epoch in range(epochs):
+            train_loss = 0.0
+            val_loss = 0.0
+            
+            # Training
             self.net.train()
-            epoch_loss = 0.0
             for i, (inputs, labels) in enumerate(self.trainloader):
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
                 self.optimizer.zero_grad()
@@ -79,69 +132,120 @@ class ResNetModel:
                 loss = self.criterion(outputs, labels)
                 loss.backward()
                 self.optimizer.step()
-                epoch_loss += loss.item()
+                train_loss += loss.item()
+                
                 if progress_callback:
                     progress = (epoch * len(self.trainloader) + i) / (epochs * len(self.trainloader))
-                    progress_callback(progress, epoch_loss/(i+1))
-            train_loss.append(epoch_loss/len(self.trainloader))
-            # Validace
+                    progress_callback(progress, train_loss / (i + 1))
+                    
+            # Validation
             self.net.eval()
-            val_loss_epoch = 0.0
             with torch.no_grad():
                 for inputs, labels in self.valloader:
                     inputs, labels = inputs.to(self.device), labels.to(self.device)
                     outputs = self.net(inputs)
-                    val_loss_epoch += self.criterion(outputs, labels).item()
-            val_loss.append(val_loss_epoch/len(self.valloader))
-        self.history = {'train_loss': train_loss, 'val_loss': val_loss}
-        return train_loss, val_loss
+                    loss = self.criterion(outputs, labels)
+                    val_loss += loss.item()
+                    
+            train_loss_history.append(train_loss / len(self.trainloader))
+            val_loss_history.append(val_loss / len(self.valloader))
+            
+        # Store history
+        self.history = {
+            'train_loss': train_loss_history,
+            'val_loss': val_loss_history
+        }
+        
+        return train_loss_history, val_loss_history
 
     def test(self):
-        y_true, y_pred = [], []
+        """Tests the model and returns metrics"""
+        if self.net is None:
+            raise ValueError("Model is not initialized")
+        if not self.dataset_loaded:
+            raise ValueError("Dataset not loaded. Call load_data first.")
+            
         self.net.eval()
+        y_pred = []
+        y_true = []
+        
         with torch.no_grad():
-            for inputs, labels in self.testloader:
-                inputs, labels = inputs.to(self.device), labels.to(self.device)
-                outputs = self.net(inputs)
+            for images, labels in self.testloader:
+                images, labels = images.to(self.device), labels.to(self.device)
+                outputs = self.net(images)
                 _, predicted = torch.max(outputs, 1)
-                y_true.extend(labels.cpu().numpy())
                 y_pred.extend(predicted.cpu().numpy())
-        cm = confusion_matrix(y_true, y_pred)
-        precision, recall, _, _ = precision_recall_fscore_support(y_true, y_pred, average='macro', zero_division=0)
-        self.metrics = {
-            'accuracy': np.mean(np.array(y_true) == np.array(y_pred)),
+                y_true.extend(labels.cpu().numpy())
+                
+        conf_mat = confusion_matrix(y_true, y_pred)
+        precision, recall, _, _ = precision_recall_fscore_support(
+            y_true, y_pred, average='macro', zero_division=0
+        )
+        accuracy = (np.array(y_pred) == np.array(y_true)).mean()
+        
+        metrics = {
+            'accuracy': accuracy,
             'precision': precision,
             'recall': recall,
-            'confusion_matrix': cm
+            'confusion_matrix': conf_mat
         }
-        return self.metrics
+        self.metrics = metrics
+        return metrics
+
+    def predict_image(self, image_path):
+        """Predicts class for one image"""
+        if self.net is None:
+            raise ValueError("Model is not initialized")
+            
+        try:
+            with Image.open(image_path) as img:
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                image = self.test_transform(img).unsqueeze(0).to(self.device)
+        except Exception as e:
+            raise Exception(f"Error loading image: {str(e)}")
+            
+        self.net.eval()
+        with torch.no_grad():
+            outputs = self.net(image)
+            _, predicted = torch.max(outputs, 1)
+            probabilities = F.softmax(outputs, dim=1)
+            
+        return {
+            'class': self.classes[predicted.item()],
+            'probabilities': probabilities[0].cpu().numpy()
+        }
 
     def save_model(self, path):
-        torch.save({
+        """Saves model state along with training parameters, metrics and history"""
+        if self.net is None:
+            raise ValueError("Model is not initialized")
+            
+        save_dict = {
             'model_state': self.net.state_dict(),
             'training_params': self.training_params,
             'metrics': self.metrics,
             'history': self.history,
-            'classes': self.classes
-        }, path)
+        }
+        torch.save(save_dict, path)
 
     def load_model(self, path):
-        checkpoint = torch.load(path, map_location=self.device)
-        self.classes = checkpoint['classes']
-        if not self.net:
-            self.initialize_model()
-        self.net.load_state_dict(checkpoint['model_state'])
-        self.training_params = checkpoint['training_params']
-        self.metrics = checkpoint['metrics']
-        self.history = checkpoint['history']
-
-    def predict_image(self, image_path):
-        with Image.open(image_path) as img:
-            img = img.convert('RGB')
-            img = self.test_transform(img).unsqueeze(0).to(self.device)
+        """Loads model state along with training parameters, metrics and history"""
+        if self.net is None:
+            self.initialize_model()     
+        save_dict = torch.load(path, weights_only=False)
+        
+        # Load model state
+        self.net.load_state_dict(save_dict['model_state'])
         self.net.eval()
-        with torch.no_grad():
-            outputs = self.net(img)
-            probs = torch.nn.functional.softmax(outputs, dim=1)[0]
-            _, pred = torch.max(outputs, 1)
-        return {'class': self.classes[pred.item()], 'probabilities': probs.cpu().numpy()}
+        
+        # Load metadata
+        self.training_params = save_dict['training_params']
+        self.metrics = save_dict['metrics']
+        self.history = save_dict['history']
+        
+        return {
+            'training_params': self.training_params,
+            'metrics': self.metrics,
+            'history': self.history
+        }
