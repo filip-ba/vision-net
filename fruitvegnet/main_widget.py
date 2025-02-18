@@ -89,6 +89,7 @@ class MainWidget(QWidget):
             trainloader = self.model.trainloader
             valloader = self.model.valloader
             testloader = self.model.testloader
+            old_classes = self.model.classes 
             # Reset model
             self.model = SimpleCnnModel()
             self.model.initialize_model()
@@ -98,6 +99,7 @@ class MainWidget(QWidget):
                 self.model.trainloader = trainloader
                 self.model.valloader = valloader
                 self.model.testloader = testloader
+                self.model.classes = old_classes
             self.model_loaded = False
             # Reset UI elements
             self.update_model_status("No model loaded", "red")
@@ -174,14 +176,14 @@ class MainWidget(QWidget):
         dataset_message = ""
         # Attempt to load dataset
         try:
-            train_size, val_size, test_size = self.model.load_data("./dataset/dicetoss_small")
+            train_size, val_size, test_size = self.model.load_data("./dataset/fruit_dataset")
             dataset_message = f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test. "
         except Exception as e:
             dataset_message = f"Error loading dataset: {str(e)}. "
         # Attempt to load default model
         try:
             self.model.initialize_model()
-            default_model_path = "./models/default_model.pth" 
+            default_model_path = "./models/default_resnet_model.pth" 
             if os.path.exists(default_model_path):
                 try:
                     metadata = self.model.load_model(default_model_path)
@@ -416,7 +418,7 @@ class MainWidget(QWidget):
         params_group = QGroupBox("Parameters")
         params_layout = QVBoxLayout()
         # Create parameter widgets
-        self.epochs_widget = ParameterWidget("Epochs:", 1, 1000, 10)
+        self.epochs_widget = ParameterWidget("Epochs:", 1, 100, 10)
         self.learning_rate_widget = ParameterWidget("Learning Rate:", 0.000001, 1.0, 0.001, 6)
         self.momentum_widget = ParameterWidget("Momentum:", 0.0, 1.0, 0.9, 6)
         for widget in [self.epochs_widget, self.learning_rate_widget, self.momentum_widget]:
