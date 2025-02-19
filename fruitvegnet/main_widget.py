@@ -5,6 +5,7 @@ from PyQt6.QtGui import QPixmap, QImageReader
 import os
 import torch
 from fruitvegnet.progress_dialog import ProgressDialog
+from models.efficientnet_model import EfficientNetModel
 from models.simple_cnn_model import SimpleCnnModel
 from fruitvegnet.plot_widget import PlotWidget
 from fruitvegnet.parameter_widget import ParameterWidget
@@ -190,6 +191,8 @@ class MainWidget(QWidget):
             default_model_path = "./models/simple_cnn_default_model.pth"
         elif self.model_class == ResNetModel:
             default_model_path = "./models/resnet_default_model.pth"
+        elif self.model_class == EfficientNetModel:
+            default_model_path = "./models/efficientnet_default_model.pth"
         elif self.model_class == VGG16Model:
             default_model_path = "./models/vgg16_default_model.pth"
         else:
