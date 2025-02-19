@@ -4,6 +4,8 @@ import os
 from fruitvegnet.main_widget import MainWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
+from models.vgg16_model import VGG16Model
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -24,8 +26,10 @@ class MainWindow(QMainWindow):
         # Create tabs with different models
         self.simple_cnn_tab = MainWidget(model_class=SimpleCnnModel)
         self.resnet_tab = MainWidget(model_class=ResNetModel)
+        self.vgg16_tab = MainWidget(model_class=VGG16Model)
         self.tab_widget.addTab(self.simple_cnn_tab, "Simple CNN Model")
         self.tab_widget.addTab(self.resnet_tab, "ResNet Model")
+        self.tab_widget.addTab(self.vgg16_tab, "VGG16 Model")
         main_layout.addWidget(self.tab_widget)
         # MenuBar
         menu_bar = self.menuBar()

@@ -11,6 +11,7 @@ from fruitvegnet.parameter_widget import ParameterWidget
 from fruitvegnet.image_classification_widget import ImageClassificationWidget
 from fruitvegnet.metrics_widget import MetricsWidget
 from models.resnet_model import ResNetModel
+from models.vgg16_model import VGG16Model
 
 
 class MainWidget(QWidget):
@@ -186,9 +187,11 @@ class MainWidget(QWidget):
 
         # Determine the correct default model path based on model class
         if self.model_class == SimpleCnnModel:
-            default_model_path = "./models/default_simple_cnn_model.pth"
+            default_model_path = "./models/simple_cnn_default_model.pth"
         elif self.model_class == ResNetModel:
-            default_model_path = "./models/default_resnet_model.pth"
+            default_model_path = "./models/resnet_default_model.pth"
+        elif self.model_class == VGG16Model:
+            default_model_path = "./models/vgg16_default_model.pth"
         else:
             default_model_path = None
             dataset_message += "Unknown model type, no default model loaded."
