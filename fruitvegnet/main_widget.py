@@ -246,6 +246,12 @@ class MainWidget(QWidget):
                 elif isinstance(self.model, ResNetModel):
                     if not all(key in checkpoint['model_state'] for key in ['layer1.0.conv1.weight', 'layer1.0.conv2.weight']):
                         raise ValueError("This model file is not compatible with ResNet architecture")
+                elif isinstance(self.model, VGG16Model):
+                    if not all(key in checkpoint['model_state'] for key in ['features.0.weight', 'features.2.weight', 'classifier.6.weight']):
+                        raise ValueError("This model file is not compatible with VGG16 architecture")
+                elif isinstance(self.model, EfficientNetModel):
+                    if not all(key in checkpoint['model_state'] for key in ['_conv_stem.weight', '_blocks.0._expand_conv.weight', 'classifier.1.weight']):
+                        raise ValueError("This model file is not compatible with EfficientNet architecture")
                 self.model.initialize_model()
                 # Load model and get metadata
                 metadata = self.model.load_model(file_path)
