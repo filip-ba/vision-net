@@ -2,7 +2,8 @@ from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTabWidget
 from PyQt6.QtGui import QAction, QIcon
 import os
 from fruitvegnet.main_widget import MainWidget
-
+from models.simple_cnn_model import SimpleCnnModel
+from models.resnet_model import ResNetModel
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -18,9 +19,13 @@ class MainWindow(QMainWindow):
         main_widget = QWidget(self)
         self.setCentralWidget(main_widget)
         main_layout = QVBoxLayout(main_widget)
+        # Create tab widget
         self.tab_widget = QTabWidget(self)
-        simple_cnn_model_tab = MainWidget()
-        self.tab_widget.addTab(simple_cnn_model_tab, "Simple CNN Model")
+        # Create tabs with different models
+        self.simple_cnn_tab = MainWidget(model_class=SimpleCnnModel)
+        self.resnet_tab = MainWidget(model_class=ResNetModel)
+        self.tab_widget.addTab(self.simple_cnn_tab, "Simple CNN Model")
+        self.tab_widget.addTab(self.resnet_tab, "ResNet Model")
         main_layout.addWidget(self.tab_widget)
         # MenuBar
         menu_bar = self.menuBar()
@@ -30,10 +35,23 @@ class MainWindow(QMainWindow):
         self.load_action = QAction("Load Model", self)
         file_menu.addAction(self.save_action)
         file_menu.addAction(self.load_action)
-        self.save_action.triggered.connect(simple_cnn_model_tab.save_model)
-        self.load_action.triggered.connect(simple_cnn_model_tab.load_model)
+        self.save_action.triggered.connect(self._save_current_model)
+        self.load_action.triggered.connect(self._load_current_model)
         file_menu.addSeparator()
         # Quit action
         self.quit_action = QAction("Quit", self)
         file_menu.addAction(self.quit_action)  
         self.quit_action.triggered.connect(self.close)
+
+
+    def _save_current_model(self):
+        """Save the model from the currently active tab"""
+        current_tab = self.tab_widget.currentWidget()
+        if current_tab:
+            current_tab.save_model()
+            
+    def _load_current_model(self):
+        """Load a model into the currently active tab"""
+        current_tab = self.tab_widget.currentWidget()
+        if current_tab:
+            current_tab.load_model()

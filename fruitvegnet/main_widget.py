@@ -3,21 +3,24 @@ from PyQt6.QtWidgets import (
     QFileDialog, QScrollArea, QStatusBar, QMessageBox )
 from PyQt6.QtGui import QPixmap, QImageReader
 import os
+import torch
 from fruitvegnet.progress_dialog import ProgressDialog
 from models.simple_cnn_model import SimpleCnnModel
 from fruitvegnet.plot_widget import PlotWidget
 from fruitvegnet.parameter_widget import ParameterWidget
 from fruitvegnet.image_classification_widget import ImageClassificationWidget
 from fruitvegnet.metrics_widget import MetricsWidget
+from models.resnet_model import ResNetModel
 
 
 class MainWidget(QWidget):
-    def __init__(self):
+    def __init__(self, model_class=SimpleCnnModel):
         super().__init__()
+        self.model_class = model_class
         self._create_ui()
         self.current_image_path = None
         # Model Initialization 
-        self.model = SimpleCnnModel()
+        self.model = model_class()
         self.model_loaded = False
         # Update model status
         self.update_model_status("No model loaded") 
@@ -90,8 +93,7 @@ class MainWidget(QWidget):
             valloader = self.model.valloader
             testloader = self.model.testloader
             old_classes = self.model.classes 
-            # Reset model
-            self.model = SimpleCnnModel()
+            self.model = self.model_class()
             self.model.initialize_model()
             # Restore dataset if it was loaded
             if dataset_loaded:
@@ -171,6 +173,7 @@ class MainWidget(QWidget):
         except Exception as e:
             self.status_bar.showMessage(f"Classification error: {str(e)}", 8000)
 
+
     def _try_load_dataset_and_default_model(self):
         """Attempts to load the dataset and the default model on startup"""
         dataset_message = ""
@@ -180,16 +183,27 @@ class MainWidget(QWidget):
             dataset_message = f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test. "
         except Exception as e:
             dataset_message = f"Error loading dataset: {str(e)}. "
+
+        # Determine the correct default model path based on model class
+        if self.model_class == SimpleCnnModel:
+            default_model_path = "./models/default_simple_cnn_model.pth"
+        elif self.model_class == ResNetModel:
+            default_model_path = "./models/default_resnet_model.pth"
+        else:
+            default_model_path = None
+            dataset_message += "Unknown model type, no default model loaded."
+            self.update_model_status("No model loaded", "red")
+            self.status_bar.showMessage(dataset_message, 10000)
+            return
+
         # Attempt to load default model
         try:
             self.model.initialize_model()
-            default_model_path = "./models/default_simple_cnn_model.pth" 
             if os.path.exists(default_model_path):
                 try:
                     metadata = self.model.load_model(default_model_path)
                     # Update UI with loaded data
                     self._update_ui_from_model_data()
-                    self.model.load_model(default_model_path)
                     self.model_loaded = True
                     self.update_model_status("Model loaded successfully", "green")
                     dataset_message += "Default model loaded successfully."
@@ -205,6 +219,7 @@ class MainWidget(QWidget):
         except Exception as e:
             dataset_message += f"Error initializing model: {str(e)}"
             self.update_model_status("Error initializing model", "red")     
+
         # Show status message
         self.status_bar.showMessage(dataset_message, 10000)
 
@@ -217,6 +232,14 @@ class MainWidget(QWidget):
         )
         if file_path:
             try:
+                # Load model and Check if the it's architecture matches
+                checkpoint = torch.load(file_path, weights_only=False)   
+                if isinstance(self.model, SimpleCnnModel):
+                    if not all(key in checkpoint['model_state'] for key in ['conv1.weight', 'conv2.weight']):
+                        raise ValueError("This model file is not compatible with Simple CNN architecture")
+                elif isinstance(self.model, ResNetModel):
+                    if not all(key in checkpoint['model_state'] for key in ['layer1.0.conv1.weight', 'layer1.0.conv2.weight']):
+                        raise ValueError("This model file is not compatible with ResNet architecture")
                 self.model.initialize_model()
                 # Load model and get metadata
                 metadata = self.model.load_model(file_path)

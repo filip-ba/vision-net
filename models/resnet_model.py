@@ -14,10 +14,9 @@ class ResNetModel:
         self.classes = None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.net = None
-        # ResNet requires different normalization values than your simple CNN
         self.transform = transforms.Compose([
             transforms.Resize(256),
-            transforms.CenterCrop(224),  # ResNet expects 224x224 images
+            transforms.CenterCrop(224), 
             transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(10),
             transforms.ToTensor(),
@@ -79,19 +78,15 @@ class ResNetModel:
     def initialize_model(self):
         """Initializes the ResNet model with transfer learning"""
         # Load pretrained ResNet18
-        self.net = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-        
+        self.net = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)      
         # Freeze all layers
         for param in self.net.parameters():
             param.requires_grad = False
-            
         # Replace the final fully connected layer
         num_features = self.net.fc.in_features
-        self.net.fc = nn.Linear(num_features, 6)  # 6 classes for your dataset
-        
+        self.net.fc = nn.Linear(num_features, 5)  
         # Move to device
         self.net = self.net.to(self.device)
-        
         # Loss function
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = None  # To be set during training
@@ -101,28 +96,22 @@ class ResNetModel:
         if self.net is None:
             raise ValueError("Model is not initialized")
         if not self.dataset_loaded:
-            raise ValueError("Dataset not loaded. Call load_data first.")
-            
+            raise ValueError("Dataset not loaded. Call load_data first.")   
         # Reset metrics before training
         self.reset_metrics()
-        
         # Store training parameters
         self.training_params = {
             'epochs': epochs,
             'learning_rate': learning_rate,
             'momentum': momentum
         }
-        
         # Only optimize the final layer parameters
         self.optimizer = optim.SGD(self.net.fc.parameters(), lr=learning_rate, momentum=momentum)
-        
         train_loss_history = []
         val_loss_history = []
-        
         for epoch in range(epochs):
             train_loss = 0.0
             val_loss = 0.0
-            
             # Training
             self.net.train()
             for i, (inputs, labels) in enumerate(self.trainloader):
@@ -133,11 +122,9 @@ class ResNetModel:
                 loss.backward()
                 self.optimizer.step()
                 train_loss += loss.item()
-                
                 if progress_callback:
                     progress = (epoch * len(self.trainloader) + i) / (epochs * len(self.trainloader))
-                    progress_callback(progress, train_loss / (i + 1))
-                    
+                    progress_callback(progress, train_loss / (i + 1)) 
             # Validation
             self.net.eval()
             with torch.no_grad():
@@ -145,17 +132,14 @@ class ResNetModel:
                     inputs, labels = inputs.to(self.device), labels.to(self.device)
                     outputs = self.net(inputs)
                     loss = self.criterion(outputs, labels)
-                    val_loss += loss.item()
-                    
+                    val_loss += loss.item()  
             train_loss_history.append(train_loss / len(self.trainloader))
             val_loss_history.append(val_loss / len(self.valloader))
-            
         # Store history
         self.history = {
             'train_loss': train_loss_history,
             'val_loss': val_loss_history
         }
-        
         return train_loss_history, val_loss_history
 
     def test(self):
@@ -164,11 +148,9 @@ class ResNetModel:
             raise ValueError("Model is not initialized")
         if not self.dataset_loaded:
             raise ValueError("Dataset not loaded. Call load_data first.")
-            
         self.net.eval()
         y_pred = []
         y_true = []
-        
         with torch.no_grad():
             for images, labels in self.testloader:
                 images, labels = images.to(self.device), labels.to(self.device)
@@ -176,13 +158,11 @@ class ResNetModel:
                 _, predicted = torch.max(outputs, 1)
                 y_pred.extend(predicted.cpu().numpy())
                 y_true.extend(labels.cpu().numpy())
-                
         conf_mat = confusion_matrix(y_true, y_pred)
         precision, recall, _, _ = precision_recall_fscore_support(
             y_true, y_pred, average='macro', zero_division=0
         )
         accuracy = (np.array(y_pred) == np.array(y_true)).mean()
-        
         metrics = {
             'accuracy': accuracy,
             'precision': precision,
@@ -196,7 +176,6 @@ class ResNetModel:
         """Predicts class for one image"""
         if self.net is None:
             raise ValueError("Model is not initialized")
-            
         try:
             with Image.open(image_path) as img:
                 if img.mode != 'RGB':
@@ -204,13 +183,11 @@ class ResNetModel:
                 image = self.test_transform(img).unsqueeze(0).to(self.device)
         except Exception as e:
             raise Exception(f"Error loading image: {str(e)}")
-            
         self.net.eval()
         with torch.no_grad():
             outputs = self.net(image)
             _, predicted = torch.max(outputs, 1)
             probabilities = F.softmax(outputs, dim=1)
-            
         return {
             'class': self.classes[predicted.item()],
             'probabilities': probabilities[0].cpu().numpy()
@@ -220,7 +197,6 @@ class ResNetModel:
         """Saves model state along with training parameters, metrics and history"""
         if self.net is None:
             raise ValueError("Model is not initialized")
-            
         save_dict = {
             'model_state': self.net.state_dict(),
             'training_params': self.training_params,
@@ -234,16 +210,13 @@ class ResNetModel:
         if self.net is None:
             self.initialize_model()     
         save_dict = torch.load(path, weights_only=False)
-        
         # Load model state
         self.net.load_state_dict(save_dict['model_state'])
         self.net.eval()
-        
         # Load metadata
         self.training_params = save_dict['training_params']
         self.metrics = save_dict['metrics']
         self.history = save_dict['history']
-        
         return {
             'training_params': self.training_params,
             'metrics': self.metrics,
