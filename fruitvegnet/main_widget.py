@@ -188,13 +188,13 @@ class MainWidget(QWidget):
 
         # Determine the correct default model path based on model class
         if self.model_class == SimpleCnnModel:
-            default_model_path = "./models/simple_cnn_default_model.pth"
+            default_model_path = "./models/trained_models/simple_cnn_default_model.pth"
         elif self.model_class == ResNetModel:
-            default_model_path = "./models/resnet_default_model.pth"
+            default_model_path = "./models/trained_models/resnet_default_model.pth"
         elif self.model_class == EfficientNetModel:
-            default_model_path = "./models/efficientnet_default_model.pth"
+            default_model_path = "./models/trained_models/efficientnet_default_model.pth"
         elif self.model_class == VGG16Model:
-            default_model_path = "./models/vgg16_default_model.pth"
+            default_model_path = "./models/trained_models/vgg16_default_model.pth"
         else:
             default_model_path = None
             dataset_message += "Unknown model type, no default model loaded."
