@@ -239,7 +239,10 @@ class MainWidget(QWidget):
         if file_path:
             try:
                 # Load model and Check if the it's architecture matches
-                checkpoint = torch.load(file_path, weights_only=False)   
+                checkpoint = torch.load(file_path, weights_only=False)  
+
+                print("Model state keys:", checkpoint['model_state'].keys())
+
                 if isinstance(self.model, SimpleCnnModel):
                     if not all(key in checkpoint['model_state'] for key in ['conv1.weight', 'conv2.weight']):
                         raise ValueError("This model file is not compatible with Simple CNN architecture")
@@ -250,7 +253,7 @@ class MainWidget(QWidget):
                     if not all(key in checkpoint['model_state'] for key in ['features.0.weight', 'features.2.weight', 'classifier.6.weight']):
                         raise ValueError("This model file is not compatible with VGG16 architecture")
                 elif isinstance(self.model, EfficientNetModel):
-                    if not all(key in checkpoint['model_state'] for key in ['_conv_stem.weight', '_blocks.0._expand_conv.weight', 'classifier.1.weight']):
+                    if not all(key in checkpoint['model_state'] for key in ['features.0.0.weight', 'features.1.0.block.0.0.weight', 'classifier.1.weight']):
                         raise ValueError("This model file is not compatible with EfficientNet architecture")
                 self.model.initialize_model()
                 # Load model and get metadata
