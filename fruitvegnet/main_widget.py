@@ -436,7 +436,7 @@ class MainWidget(QWidget):
         self.save_model_btn.setEnabled(False)
 
         # Add buttons to layout
-        for btn in [self.train_model_btn, self.save_model_btn, self.load_model_btn, self.clear_model_btn]:
+        for btn in [self.train_model_btn, self.load_model_btn, self.save_model_btn, self.clear_model_btn]:
             btn.setStyleSheet("""
                 QPushButton {
                     font-size: 14px;

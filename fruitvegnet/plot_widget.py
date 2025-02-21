@@ -49,10 +49,7 @@ class PlotWidget(QWidget):
         ax.set_xlabel('Predicted', labelpad=15)
         ax.set_ylabel('True', labelpad=15)
 
-        # Empty confusion matrix
-        if conf_mat is None or classes is None:
-            ax.set_title('(Will be populated after testing)', pad=10)
-        else:   # Populated confusion matrix
+        if conf_mat is not None or classes is not None:
             im = ax.imshow(conf_mat, cmap='Blues', aspect='auto')
             cbar = plot_widget.figure.colorbar(im)
             cbar.ax.tick_params(labelsize=8)
@@ -80,6 +77,7 @@ class PlotWidget(QWidget):
 
         if train_loss_history is not None and val_loss_history is not None:
             x = list(range(1, len(train_loss_history) + 1)) if epochs is None else list(range(1, epochs + 1))
+            
             # In case of single epoch, plot points instead of lines
             if len(train_loss_history) == 1:
                 ax.plot(x, train_loss_history, 'bo-', label='Training Loss', markersize=8)  
@@ -89,7 +87,5 @@ class PlotWidget(QWidget):
                 ax.plot(x, train_loss_history, 'b-', label='Training Loss')
                 ax.plot(x, val_loss_history, 'r-', label='Validation Loss')
             ax.legend()
-        else:
-            ax.set_title('(Will be populated after training)', pad=10)
             
         plot_widget.canvas.draw()
