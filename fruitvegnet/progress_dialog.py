@@ -57,6 +57,7 @@ class TestingThread(QThread):
 
 
 class ProgressDialog(QDialog):
+
     def __init__(self, parent=None, operation_type="Training", epochs=None, 
                  learning_rate=None, momentum=None):
         super().__init__(parent)
@@ -74,6 +75,7 @@ class ProgressDialog(QDialog):
         self.setFixedSize(400, 300)  
         self.setModal(True)
         layout = QVBoxLayout()
+
         # Add training parameters if available
         if self.operation_type == "Training" and all(param is not None for param in 
             [self.epochs, self.learning_rate, self.momentum]):
@@ -93,19 +95,23 @@ class ProgressDialog(QDialog):
                 }
             """)
             layout.addWidget(params_label)
+
         # Status label
         self.status_label = QLabel(f"{self.operation_type} in progress...")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.status_label)
+
         # Progress bar
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(0)
         layout.addWidget(self.progress_bar)
+
         # Time estimate label
         self.time_label = QLabel("Estimated time remaining: calculating...")
         self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.time_label)
+
         # Cancel button
         self.cancel_button = QPushButton("Cancel")
         self.cancel_button.clicked.connect(self.cancel)
@@ -138,6 +144,7 @@ class ProgressDialog(QDialog):
         """Updates progress bar and time estimate"""
         progress_percent = int(progress * 100)
         self.progress_bar.setValue(progress_percent)
+
         # Calculating the remaining time
         if self.start_time and progress > 0:
             elapsed_time = time.time() - self.start_time
@@ -147,6 +154,7 @@ class ProgressDialog(QDialog):
             seconds = int(remaining_time % 60)
             time_str = f"{minutes}m {seconds}s"
             status_text = f"{self.operation_type} in progress... "
+            
             if current_loss is not None:
                 status_text += f"(Loss: {current_loss:.4f})"
             self.status_label.setText(status_text)

@@ -8,12 +8,14 @@ import os
 
 
 class ImageClassificationWidget(QWidget):
+
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QHBoxLayout()
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(10)
+
         # Controls area with buttons
         controls_layout = QVBoxLayout()
         self.load_image_btn = QPushButton("Load Image")
@@ -34,6 +36,7 @@ class ImageClassificationWidget(QWidget):
                 border-radius: 5px;
             }
         """)
+
         # Small image preview
         self.image_display = QLabel()
         self.image_display.setFixedSize(120, 120)
@@ -50,13 +53,16 @@ class ImageClassificationWidget(QWidget):
         controls_layout.addWidget(self.classify_btn)
         controls_layout.addWidget(self.image_display, alignment=Qt.AlignmentFlag.AlignHCenter)
         controls_layout.addWidget(self.result_label)
+
         # Classification plot
         self.figure = Figure(figsize=(4, 3))
         self.canvas = FigureCanvas(self.figure)
         self.canvas.setFixedSize(300, 300) 
         self.init_plot()
+
         layout.addWidget(self.canvas)
         layout.addLayout(controls_layout)
+
         # Load placeholder image
         self._load_placeholder()
 
@@ -77,17 +83,19 @@ class ImageClassificationWidget(QWidget):
         self.figure.clear()
         ax = self.figure.add_subplot(111)
         bars = ax.bar(classes, probabilities)
+
         # Add value labels on top of each bar
         for bar in bars:
             height = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2., height,
                    f'{height:.0%}',
                    ha='center', va='bottom')
+            
         ax.set_title('Class Probabilities', fontsize=10)
         ax.set_xlabel('Class', fontsize=8)
         ax.set_ylabel('Probability', fontsize=8)
         ax.tick_params(axis='both', labelsize=8)
-        ax.set_ylim(0, 1.2)  # Make room for percentage labels
+        ax.set_ylim(0, 1.2) 
         plt.setp(ax.get_xticklabels(), rotation=45)
         self.figure.tight_layout()
         self.canvas.draw()
@@ -95,6 +103,7 @@ class ImageClassificationWidget(QWidget):
     def _load_placeholder(self):
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         placeholder_path = os.path.join(project_root, "assets", "placeholder_img.png")
+
         if os.path.exists(placeholder_path):
             pixmap = QPixmap(placeholder_path)
             self.image_display.setPixmap(pixmap.scaled(

@@ -3,6 +3,7 @@ from PyQt6.QtCore import Qt
 
 
 class ParameterWidget(QWidget):
+
     def __init__(self, label, min_val, max_val, default_val, decimals=0, parent=None):
         super().__init__(parent)
         layout = QHBoxLayout()
@@ -10,6 +11,7 @@ class ParameterWidget(QWidget):
         param_label = QLabel(label)
         param_label.setMinimumWidth(100)
         layout.addWidget(param_label)
+
         # SpinBox setup
         if decimals == 0:
             self.spinbox = QSpinBox()
@@ -20,6 +22,7 @@ class ParameterWidget(QWidget):
         self.spinbox.setValue(default_val)
         self.spinbox.setFixedWidth(100)
         layout.addWidget(self.spinbox)
+
         # Slider setup
         self.slider = QSlider(Qt.Orientation.Horizontal)
         if decimals > 0:
@@ -29,6 +32,7 @@ class ParameterWidget(QWidget):
             self.slider.setRange(int(min_val), int(max_val))
             self.slider.setValue(int(default_val))
         layout.addWidget(self.slider)
+
         # Connect signals
         self._setup_connections()
 

@@ -3,6 +3,7 @@ from PyQt6.QtCore import Qt
 
 
 class MetricsWidget(QWidget):
+
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QVBoxLayout()
@@ -25,6 +26,7 @@ class MetricsWidget(QWidget):
         for label in [self.accuracy_label, self.precision_label, self.recall_label]:
             label.setStyleSheet(metric_style)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            
         metrics_grid.addWidget(self.accuracy_label, 0, 0)
         metrics_grid.addWidget(self.precision_label, 0, 1)
         metrics_grid.addWidget(self.recall_label, 0, 2)

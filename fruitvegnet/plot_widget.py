@@ -1,5 +1,4 @@
-from PyQt6.QtWidgets import ( 
-    QWidget, QVBoxLayout, QLabel, QFrame, QSizePolicy )
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame, QSizePolicy
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 import numpy as np
@@ -9,11 +8,13 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 
 class PlotWidget(QWidget):
+
     def __init__(self, title, parent=None):
         super().__init__(parent)
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
         main_layout.setContentsMargins(0, 0, 0, 0)
+
         # Frame styled like a group box
         frame = QFrame()
         frame.setObjectName("StyledFrame")  
@@ -27,11 +28,13 @@ class PlotWidget(QWidget):
         """)
         frame_layout = QVBoxLayout(frame)
         main_layout.addWidget(frame)
+
         # Title label
         self.title_label = QLabel(title)
         self.title_label.setFont(QFont('Arial', 11, QFont.Weight.Bold))
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         frame_layout.addWidget(self.title_label)
+
         # Figure
         self.figure = Figure(figsize=(5, 4), dpi=100)
         self.canvas = FigureCanvas(self.figure)
@@ -45,6 +48,7 @@ class PlotWidget(QWidget):
         ax = plot_widget.figure.add_subplot(111)
         ax.set_xlabel('Predicted', labelpad=15)
         ax.set_ylabel('True', labelpad=15)
+
         # Empty confusion matrix
         if conf_mat is None or classes is None:
             ax.set_title('(Will be populated after testing)', pad=10)
@@ -61,7 +65,8 @@ class PlotWidget(QWidget):
                 for j in range(len(classes)):
                     ax.text(j, i, conf_mat[i, j], 
                         ha="center", va="center",
-                        color="white" if conf_mat[i, j] > conf_mat.max() / 2 else "black")         
+                        color="white" if conf_mat[i, j] > conf_mat.max() / 2 else "black")  
+                           
         plot_widget.canvas.draw()
 
     def plot_loss_history(self, plot_widget, epochs=None, train_loss_history=None, val_loss_history=None):
@@ -72,6 +77,7 @@ class PlotWidget(QWidget):
         ax.set_xlabel('Epochs')
         ax.set_ylabel('Loss')
         ax.grid(True)
+
         if train_loss_history is not None and val_loss_history is not None:
             x = list(range(1, len(train_loss_history) + 1)) if epochs is None else list(range(1, epochs + 1))
             # In case of single epoch, plot points instead of lines
@@ -85,4 +91,5 @@ class PlotWidget(QWidget):
             ax.legend()
         else:
             ax.set_title('(Will be populated after training)', pad=10)
+            
         plot_widget.canvas.draw()
