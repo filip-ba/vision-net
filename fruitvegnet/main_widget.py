@@ -429,13 +429,14 @@ class MainWidget(QWidget):
 
         # Model buttons
         buttons_layout = QHBoxLayout()
-        self.load_model_btn = QPushButton("Load")
         self.train_model_btn = QPushButton("Train")
         self.save_model_btn = QPushButton("Save")
+        self.load_model_btn = QPushButton("Load")
+        self.clear_model_btn = QPushButton("Clear Model")
         self.save_model_btn.setEnabled(False)
 
         # Add buttons to layout
-        for btn in [self.load_model_btn, self.train_model_btn, self.save_model_btn]:
+        for btn in [self.train_model_btn, self.save_model_btn, self.load_model_btn, self.clear_model_btn]:
             btn.setStyleSheet("""
                 QPushButton {
                     font-size: 14px;
@@ -456,7 +457,7 @@ class MainWidget(QWidget):
 
         model_layout.addLayout(buttons_layout)
 
-        # Status layout with Clear button
+        # Status layout 
         status_layout = QHBoxLayout()
         self.model_status = QLabel("No model loaded")
         self.model_status.setStyleSheet("""
@@ -468,28 +469,6 @@ class MainWidget(QWidget):
         """)
 
         status_layout.addWidget(self.model_status)
-
-        # Clear Model button with distinct style
-        self.clear_model_btn = QPushButton("Clear Model")
-        self.clear_model_btn.setFixedWidth(107)  
-        self.clear_model_btn.setStyleSheet("""
-            QPushButton {
-                font-size: 13px;
-                padding: 4px;
-                background-color: #f8f9fa;
-                border: 1px solid #6c757d;
-                border-radius: 4px;
-                color: #3d4145;
-            }
-            QPushButton:hover {
-                background-color: #e9ecef;
-            }
-            QPushButton:pressed {
-                background-color: #dee2e6;
-            }
-        """)
-
-        status_layout.addWidget(self.clear_model_btn)
 
         model_layout.addLayout(status_layout)
         model_layout.setContentsMargins(10,10,10,10)
