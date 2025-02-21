@@ -43,7 +43,6 @@ class MainWidget(QWidget):
         self.load_model_btn.clicked.connect(self.load_model)
         self.save_model_btn.clicked.connect(self.save_model)
         self.train_model_btn.clicked.connect(self.train_model)
-        self.test_model_btn.clicked.connect(self.test_model)
         self.clear_model_btn.clicked.connect(self.clear_model)
 
     def update_metrics_display(self, metrics):
@@ -135,9 +134,8 @@ class MainWidget(QWidget):
             self.image_widget.result_label.setText("Classification:\nNone")
             self.image_widget.init_plot()
 
-            # Disable buttons
+            # Disable button
             self.save_model_btn.setEnabled(False)
-            self.test_model_btn.setEnabled(False)
             self.status_bar.showMessage("Model cleared successfully", 8000)
 
     def load_image(self):
@@ -234,7 +232,6 @@ class MainWidget(QWidget):
                     self.update_model_status("Model loaded successfully", "green")
                     dataset_message += "Default model loaded successfully."
                     self.save_model_btn.setEnabled(True)
-                    self.test_model_btn.setEnabled(True)
                 except Exception as e:
                     dataset_message += f"Error loading default model: {str(e)}"
                     print(dataset_message)
@@ -291,7 +288,6 @@ class MainWidget(QWidget):
 
                 self.model_loaded = True
                 self.save_model_btn.setEnabled(True)
-                self.test_model_btn.setEnabled(True)
                 self.update_model_status("Model loaded successfully", "green")
 
                 # Customize status message based on whether metrics exist
@@ -358,9 +354,11 @@ class MainWidget(QWidget):
 
                 self.model_loaded = True
                 self.save_model_btn.setEnabled(True)
-                self.test_model_btn.setEnabled(True)
                 self.update_model_status("Model trained successfully", "green")
                 self.status_bar.showMessage("Training completed", 8000)
+
+                # Test the model
+                self.test_model()
             else:
                 self.status_bar.showMessage(
                     f"Training error: {getattr(dialog, 'error_message', 'Unknown error')}",
@@ -383,9 +381,6 @@ class MainWidget(QWidget):
                 conf_mat = metrics['confusion_matrix']
                 classes = self.model.classes
                 self.plot_widget2.plot_confusion_matrix(self.plot_widget2, conf_mat, classes)
-
-                # Status update
-                self.status_bar.showMessage("Testing completed", 8000)
             else:
                 self.status_bar.showMessage(
                     f"Testing error: {getattr(dialog, 'error_message', 'Unknown error')}",
@@ -438,11 +433,9 @@ class MainWidget(QWidget):
         self.train_model_btn = QPushButton("Train")
         self.save_model_btn = QPushButton("Save")
         self.save_model_btn.setEnabled(False)
-        self.test_model_btn = QPushButton("Test")
-        self.test_model_btn.setEnabled(False)
 
         # Add buttons to layout
-        for btn in [self.load_model_btn, self.train_model_btn, self.save_model_btn, self.test_model_btn]:
+        for btn in [self.load_model_btn, self.train_model_btn, self.save_model_btn]:
             btn.setStyleSheet("""
                 QPushButton {
                     font-size: 14px;
