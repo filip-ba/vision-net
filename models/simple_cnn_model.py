@@ -1,12 +1,14 @@
-from models.base_model import BaseModel
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torchvision import transforms
 
+from models.base_model import BaseModel
+
 
 class SimpleCnnModel(BaseModel):
+
     def get_transforms(self):
         train_transform = transforms.Compose([
             transforms.Resize((32, 32)),
@@ -15,7 +17,6 @@ class SimpleCnnModel(BaseModel):
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
-        
         test_transform = transforms.Compose([
             transforms.Resize((32, 32)),
             transforms.ToTensor(),

@@ -240,9 +240,6 @@ class MainWidget(QWidget):
             try:
                 # Load model and Check if the it's architecture matches
                 checkpoint = torch.load(file_path, weights_only=False)  
-
-                print("Model state keys:", checkpoint['model_state'].keys())
-
                 if isinstance(self.model, SimpleCnnModel):
                     if not all(key in checkpoint['model_state'] for key in ['conv1.weight', 'conv2.weight']):
                         raise ValueError("This model file is not compatible with Simple CNN architecture")

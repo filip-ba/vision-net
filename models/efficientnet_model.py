@@ -1,10 +1,12 @@
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import models, transforms
+
 from models.base_model import BaseModel
 
 
 class EfficientNetModel(BaseModel):
+
     def get_transforms(self):
         train_transform = transforms.Compose([
             transforms.Resize(256),
@@ -20,24 +22,17 @@ class EfficientNetModel(BaseModel):
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
+        
         return train_transform, test_transform
 
     def initialize_model(self):
         """Initializes the EfficientNet-B0 model with transfer learning"""
-        # Load pretrained EfficientNet-B0
         self.net = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT)
-        
-        # Freeze most layers except the last few blocks
         for name, param in self.net.named_parameters():
             if "features.7" not in name and "classifier" not in name:
-                param.requires_grad = False
-                
-        # Replace the classifier
+                param.requires_grad = False    
         num_ftrs = self.net.classifier[1].in_features
         self.net.classifier[1] = nn.Linear(num_ftrs, 5)
-        
-        # Move to device
         self.net = self.net.to(self.device)
-        # Only optimize the trainable parameters
         trainable_params = [p for p in self.net.parameters() if p.requires_grad]
         self.optimizer = optim.SGD(trainable_params, lr=0.001, momentum=0.9)
