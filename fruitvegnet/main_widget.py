@@ -8,7 +8,7 @@ import torch
 from fruitvegnet.progress_dialog import ProgressDialog
 from fruitvegnet.plot_widget import PlotWidget
 from fruitvegnet.parameter_widget import ParameterWidget
-from fruitvegnet.image_classification_widget import ImageClassificationWidget
+from fruitvegnet.image_classification_widget_LEGACY import ImageClassificationWidgetLEGACY
 from fruitvegnet.metrics_widget import MetricsWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
@@ -487,7 +487,7 @@ class MainWidget(QWidget):
         params_layout.setContentsMargins(10,10,10,10)
 
         # Image Classification
-        self.image_widget = ImageClassificationWidget()
+        self.image_widget = ImageClassificationWidgetLEGACY()
         image_group = QGroupBox("Image Classification")
         image_layout = QVBoxLayout()
         image_layout.addWidget(self.image_widget)
