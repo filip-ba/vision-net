@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(main_widget)
         main_layout = QVBoxLayout(main_widget)
         
-        # Shared image widget
+        # Image classification widget
         self.shared_image = ImageClassificationWidget()
         main_layout.addWidget(self.shared_image)
         
@@ -42,11 +42,6 @@ class MainWindow(QMainWindow):
         self.resnet_tab = MainWidget(model_class=ResNetModel)
         self.efficientnet_tab = MainWidget(model_class=EfficientNetModel)
         self.vgg16_tab = MainWidget(model_class=VGG16Model)
-        
-        # Hide individual image controls in tabs
-        for tab in [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]:
-            tab.image_widget.load_image_btn.hide()
-            tab.image_widget.image_display.hide()
         
         self.tab_widget.addTab(self.simple_cnn_tab, "Simple CNN")
         self.tab_widget.addTab(self.resnet_tab, "ResNet")
@@ -93,34 +88,32 @@ class MainWindow(QMainWindow):
             return
             
         model_map = {
-            self.simple_cnn_tab: 'Simple CNN',
-            self.resnet_tab: 'ResNet',
-            self.efficientnet_tab: 'EfficientNet',
-            self.vgg16_tab: 'VGG16'
+            self.simple_cnn_tab: {'type': 'simple_cnn', 'name': 'Simple CNN'},
+            self.resnet_tab: {'type': 'resnet', 'name': 'ResNet'},
+            self.efficientnet_tab: {'type': 'efficientnet', 'name': 'EfficientNet'},
+            self.vgg16_tab: {'type': 'vgg16', 'name': 'VGG16'}
         }
         
-        results = {}
-        for tab, model_name in model_map.items():
+        for tab, model_info in model_map.items():
             if tab.model_loaded:
                 try:
+                    # Get prediction
                     result = tab.model.predict_image(self.shared_image.current_image_path)
                     predicted_class = result['class']
                     probabilities = result['probabilities']
                     
-                    # Update tab's visualization
-                    tab.image_widget.result_label.setText(f"Classification:\n{predicted_class}")
-                    tab.image_widget.update_plot(tab.model.classes, probabilities)
+                    # Update result label
+                    self.shared_image.update_result(model_info['type'], predicted_class)
                     
-                    # Store result
-                    results[model_name] = predicted_class
+                    # Update plot for this model
+                    self.shared_image.update_plot(model_info['type'], tab.model.classes, probabilities)
+                    
                 except Exception as e:
-                    results[model_name] = "Error"
+                    self.shared_image.update_result(model_info['type'], "Error")
+                    print(f"Error in {model_info['name']} classification: {str(e)}")
             else:
-                results[model_name] = "No model"
-                
-        # Update the shared widget's results
-        self.shared_image.update_result(results)
-                
+                self.shared_image.update_result(model_info['type'], "No model")
+
     def _save_current_model(self):
         """Save the model from the currently active tab"""
         current_tab = self.tab_widget.currentWidget()
