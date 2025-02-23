@@ -8,7 +8,6 @@ import torch
 from fruitvegnet.progress_dialog import ProgressDialog
 from fruitvegnet.plot_widget import PlotWidget
 from fruitvegnet.parameter_widget import ParameterWidget
-from fruitvegnet.image_classification_widget_LEGACY import ImageClassificationWidgetLEGACY
 from fruitvegnet.metrics_widget import MetricsWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
@@ -38,8 +37,6 @@ class MainWidget(QWidget):
         self._setup_connections()    
 
     def _setup_connections(self):
-        self.image_widget.load_image_btn.clicked.connect(self.load_image)
-        self.image_widget.classify_btn.clicked.connect(self.classify_image)
         self.load_model_btn.clicked.connect(self.load_model)
         self.save_model_btn.clicked.connect(self.save_model)
         self.train_model_btn.clicked.connect(self.train_model)
@@ -486,14 +483,6 @@ class MainWidget(QWidget):
         params_group.setLayout(params_layout)
         params_layout.setContentsMargins(10,10,10,10)
 
-        # Image Classification
-        self.image_widget = ImageClassificationWidgetLEGACY()
-        image_group = QGroupBox("Image Classification")
-        image_layout = QVBoxLayout()
-        image_layout.addWidget(self.image_widget)
-        image_layout.setContentsMargins(10,10,10,10)
-        image_group.setLayout(image_layout)
-
         # Metrics Group Box
         self.metrics_widget = MetricsWidget()
         metrics_group = QGroupBox("Model Metrics")
@@ -503,7 +492,7 @@ class MainWidget(QWidget):
         metrics_layout.setContentsMargins(10,10,10,10)
 
         # Add all components to left panel
-        for widget in [model_group, params_group, image_group, metrics_group]:
+        for widget in [model_group, params_group, metrics_group]:
             widget.setStyleSheet("""
                 QGroupBox {
                     font-weight: bold;
@@ -534,7 +523,7 @@ class MainWidget(QWidget):
         self.plot_widget1 = PlotWidget("Loss History") 
         self.plot_widget2 = PlotWidget("Confusion Matrix")  
 
-        # Initialize empty Confusion Matrix
+        # Initialize empty plots
         self.plot_widget1.plot_loss_history(self.plot_widget1)
         self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
 
