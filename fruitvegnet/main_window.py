@@ -1,13 +1,8 @@
-from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QTabWidget, 
-    QFileDialog, QLabel, QPushButton, QHBoxLayout, QGridLayout
-)
-from PyQt6.QtGui import QIcon, QPixmap, QImageReader, QAction
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTabWidget, QSizePolicy
+from PyQt6.QtGui import QIcon, QAction
 import os
-import random
 
-from fruitvegnet.main_widget import MainWidget
+from fruitvegnet.tab_widget import TabWidget
 from fruitvegnet.image_classification_widget import ImageClassificationWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
@@ -33,15 +28,17 @@ class MainWindow(QMainWindow):
         main_layout = QVBoxLayout(main_widget)
         
         # Image classification widget
-        self.shared_image = ImageClassificationWidget()
-        main_layout.addWidget(self.shared_image)
+        self.image_classification_widget = ImageClassificationWidget()
+        self.image_classification_widget.setMaximumHeight(300)
+        main_layout.addWidget(self.image_classification_widget)
         
         # Create tab widget
         self.tab_widget = QTabWidget(self)
-        self.simple_cnn_tab = MainWidget(model_class=SimpleCnnModel)
-        self.resnet_tab = MainWidget(model_class=ResNetModel)
-        self.efficientnet_tab = MainWidget(model_class=EfficientNetModel)
-        self.vgg16_tab = MainWidget(model_class=VGG16Model)
+        self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  # Roztažení na zbytek prostoru
+        self.simple_cnn_tab = TabWidget(model_class=SimpleCnnModel)
+        self.resnet_tab = TabWidget(model_class=ResNetModel)
+        self.efficientnet_tab = TabWidget(model_class=EfficientNetModel)
+        self.vgg16_tab = TabWidget(model_class=VGG16Model)
         
         self.tab_widget.addTab(self.simple_cnn_tab, "Simple CNN")
         self.tab_widget.addTab(self.resnet_tab, "ResNet")
@@ -50,8 +47,8 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.tab_widget)
         
         # Connect shared image signals
-        self.shared_image.image_loaded.connect(self._update_all_tabs_image)
-        self.shared_image.classify_clicked.connect(self._classify_all)
+        self.image_classification_widget.image_loaded.connect(self._update_all_tabs_image)
+        self.image_classification_widget.classify_clicked.connect(self._classify_all)
         
         # MenuBar setup
         self._setup_menu()
@@ -84,7 +81,7 @@ class MainWindow(QMainWindow):
             
     def _classify_all(self):
         """Classify the current image using all loaded models"""
-        if not self.shared_image.current_image_path:
+        if not self.image_classification_widget.current_image_path:
             return
             
         model_map = {
@@ -98,21 +95,21 @@ class MainWindow(QMainWindow):
             if tab.model_loaded:
                 try:
                     # Get prediction
-                    result = tab.model.predict_image(self.shared_image.current_image_path)
+                    result = tab.model.predict_image(self.image_classification_widget.current_image_path)
                     predicted_class = result['class']
                     probabilities = result['probabilities']
                     
                     # Update result label
-                    self.shared_image.update_result(model_info['type'], predicted_class)
+                    self.image_classification_widget.update_result(model_info['type'], predicted_class)
                     
                     # Update plot for this model
-                    self.shared_image.update_plot(model_info['type'], tab.model.classes, probabilities)
+                    self.image_classification_widget.update_plot(model_info['type'], tab.model.classes, probabilities)
                     
                 except Exception as e:
-                    self.shared_image.update_result(model_info['type'], "Error")
+                    self.image_classification_widget.update_result(model_info['type'], "Error")
                     print(f"Error in {model_info['name']} classification: {str(e)}")
             else:
-                self.shared_image.update_result(model_info['type'], "No model")
+                self.image_classification_widget.update_result(model_info['type'], "No model")
 
     def _save_current_model(self):
         """Save the model from the currently active tab"""

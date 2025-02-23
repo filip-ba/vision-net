@@ -15,7 +15,7 @@ from models.efficientnet_model import EfficientNetModel
 from models.vgg16_model import VGG16Model
 
 
-class MainWidget(QWidget):
+class TabWidget(QWidget):
 
     def __init__(self, model_class=SimpleCnnModel):
         super().__init__()
