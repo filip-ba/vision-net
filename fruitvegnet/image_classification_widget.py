@@ -1,10 +1,13 @@
 from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QGroupBox, QVBoxLayout, 
-    QFileDialog, QLabel, QPushButton, QHBoxLayout )
-from PyQt6.QtGui import QIcon, QPixmap, QImageReader, QAction
+    QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, 
+    QFileDialog, QLabel, QPushButton, QStackedWidget
+)
+from PyQt6.QtGui import QIcon, QPixmap, QImageReader
 from PyQt6.QtCore import Qt, pyqtSignal
-import os
-import random
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+import os, random
+from matplotlib import pyplot as plt
 
 
 class ImageClassificationWidget(QWidget):
@@ -17,26 +20,12 @@ class ImageClassificationWidget(QWidget):
         self._create_ui()
         
     def _create_ui(self):
-        # Create main GroupBox
-        group_box = QGroupBox("Image Classification")
-        group_box.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 1px solid #c4c8cc;
-                border-radius: 6px;
-                margin-top: 20px;
-                padding: 5px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 0px;
-                padding: 0 3px 0 3px;
-            }
-        """)
+        # Main group box
+        main_group = QGroupBox("Image Classification")
+        main_layout = QHBoxLayout(main_group)
         
-        # Main layout inside GroupBox
-        main_layout = QHBoxLayout(group_box)
-        main_layout.setContentsMargins(10, 10, 10, 10)
+        # Left side - Image and buttons
+        left_layout = QVBoxLayout()
         
         # Image preview
         self.image_display = QLabel()
@@ -49,6 +38,7 @@ class ImageClassificationWidget(QWidget):
             }
         """)
         self.image_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        left_layout.addWidget(self.image_display)
         
         # Buttons
         button_layout = QVBoxLayout()
@@ -62,46 +52,97 @@ class ImageClassificationWidget(QWidget):
                     background-color: #f8f9fa;
                     border: 1px solid #dee2e6;
                     border-radius: 4px;
-                    min-width: 120px;
                 }
                 QPushButton:hover {
                     background-color: #e9ecef;
                 }
             """)
             button_layout.addWidget(btn)
+        left_layout.addLayout(button_layout)
+        left_layout.addStretch()
+        main_layout.addLayout(left_layout)
         
-        # Combined results label
-        self.results_label = QLabel("Classification Results:\n\n"
-                                  "Simple CNN: None\n"
-                                  "ResNet: None\n"
-                                  "EfficientNet: None\n"
-                                  "VGG16: None")
-        self.results_label.setStyleSheet("""
-            QLabel {
-                font-weight: bold;
-                color: #2c3e50;
-                padding: 10px;
-                background-color: #ecf0f1;
-                border-radius: 5px;
-                min-width: 200px;
-            }
-        """)
-        self.results_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        # Middle - Result labels with Show Plot buttons
+        middle_layout = QVBoxLayout()
+        self.result_labels = {}
+        self.plot_buttons = {}
         
-        # Layout setup
-        controls_layout = QVBoxLayout()
-        controls_layout.addLayout(button_layout)
-        controls_layout.addWidget(self.results_label)
-        controls_layout.addStretch()
+        for model_type, label_text in {
+            'simple_cnn': 'Simple CNN',
+            'resnet': 'ResNet',
+            'efficientnet': 'EfficientNet',
+            'vgg16': 'VGG16'
+        }.items():
+            # Create container for each model
+            container = QWidget()
+            container_layout = QVBoxLayout(container)
+            
+            # Create and style label
+            label = QLabel(f"{label_text}:None")
+            label.setStyleSheet("""
+                QLabel {
+                    font-weight: bold;
+                    color: #2c3e50;
+                    padding: 8px;
+                    background-color: #ecf0f1;
+                    border-radius: 5px;
+                    min-width: 120px;
+                }
+            """)
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            container_layout.addWidget(label)
+            
+            # Create and style Show Plot button
+            plot_btn = QPushButton("Show Plot")
+            plot_btn.setStyleSheet("""
+                QPushButton {
+                    padding: 5px;
+                    font-size: 12px;
+                    background-color: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #e9ecef;
+                }
+            """)
+            container_layout.addWidget(plot_btn)
+            
+            # Store references
+            self.result_labels[model_type] = label
+            self.plot_buttons[model_type] = plot_btn
+            
+            middle_layout.addWidget(container)
         
-        main_layout.addWidget(self.image_display)
-        main_layout.addLayout(controls_layout)
-        main_layout.addStretch()
+        middle_layout.addStretch()
+        main_layout.addLayout(middle_layout)
         
-        # Set the GroupBox as the main widget layout
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(group_box)
+        # Right side - Stacked Plot Widget
+        self.plot_stack = QStackedWidget()
+        
+        # Create plot widgets for each model
+        self.plot_widgets = {}
+        for model_type in ['simple_cnn', 'resnet', 'efficientnet', 'vgg16']:
+            figure = Figure(figsize=(5, 4))
+            canvas = FigureCanvas(figure)
+            self.plot_widgets[model_type] = {'figure': figure, 'canvas': canvas}
+            self.plot_stack.addWidget(canvas)
+            
+            # Initialize empty plot
+            self.init_plot(model_type)
+            
+            # Connect button to show this plot
+            self.plot_buttons[model_type].clicked.connect(
+                lambda checked, m=model_type: self.plot_stack.setCurrentWidget(
+                    self.plot_widgets[m]['canvas']
+                )
+            )
+        
+        main_layout.addWidget(self.plot_stack)
+        
+        # Set up main widget layout
+        widget_layout = QVBoxLayout(self)
+        widget_layout.addWidget(main_group)
         
         # Connect signals
         self.load_btn.clicked.connect(self.load_image)
@@ -110,6 +151,51 @@ class ImageClassificationWidget(QWidget):
         # Load initial image from dataset
         self.load_random_test_image()
         
+    def init_plot(self, model_type=None):
+        """Initialize empty probability plot for specified or all models"""
+        if model_type:
+            models = [model_type]
+        else:
+            models = self.plot_widgets.keys()
+            
+        for model in models:
+            figure = self.plot_widgets[model]['figure']
+            figure.clear()
+            ax = figure.add_subplot(111)
+            ax.set_title('Class Probabilities', fontsize=10)
+            ax.set_xlabel('Class', fontsize=8)
+            ax.set_ylabel('Probability', fontsize=8)
+            ax.tick_params(axis='both', labelsize=8)
+            ax.set_ylim(0, 1)
+            figure.tight_layout()
+            self.plot_widgets[model]['canvas'].draw()
+
+    def update_plot(self, model_type, classes, probabilities):
+        """Update probability plot for a specific model"""
+        if model_type not in self.plot_widgets:
+            return
+            
+        figure = self.plot_widgets[model_type]['figure']
+        figure.clear()
+        ax = figure.add_subplot(111)
+        bars = ax.bar(classes, probabilities)
+
+        # Add value labels on top of each bar
+        for bar in bars:
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height,
+                   f'{height:.0%}',
+                   ha='center', va='bottom')
+            
+        ax.set_title('Class Probabilities', fontsize=10)
+        ax.set_xlabel('Class', fontsize=8)
+        ax.set_ylabel('Probability', fontsize=8)
+        ax.tick_params(axis='both', labelsize=8)
+        ax.set_ylim(0, 1.2)
+        plt.setp(ax.get_xticklabels(), rotation=45)
+        figure.tight_layout()
+        self.plot_widgets[model_type]['canvas'].draw()
+
     def load_random_test_image(self):
         """Load a random image from the test dataset"""
         dataset_path = "./dataset/fruit_dataset/test"
@@ -174,9 +260,13 @@ class ImageClassificationWidget(QWidget):
                 self.image_display.setText("Failed to load image")
                 self.current_image_path = None
                 
-    def update_result(self, model_results):
-        """Update the classification results for all models"""
-        result_text = "Classification Results:\n\n"
-        for model_name, result in model_results.items():
-            result_text += f"{model_name}: {result}\n"
-        self.results_label.setText(result_text.rstrip())
+    def update_result(self, model_type, result):
+        """Update the classification result for a specific model"""
+        if model_type in self.result_labels:
+            model_name = {
+                'simple_cnn': 'Simple CNN',
+                'resnet': 'ResNet',
+                'efficientnet': 'EfficientNet',
+                'vgg16': 'VGG16'
+            }[model_type]
+            self.result_labels[model_type].setText(f"{model_name}:{result}")
