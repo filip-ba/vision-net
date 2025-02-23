@@ -8,19 +8,23 @@ class MetricsWidget(QWidget):
         super().__init__(parent)
         layout = QVBoxLayout()
         self.setLayout(layout)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(5, 5, 5, 5)
+
         metrics_grid = QGridLayout()
         metrics_grid.setSpacing(10)
+
         self.accuracy_label = QLabel("Accuracy: -")
         self.precision_label = QLabel("Precision: -")
         self.recall_label = QLabel("Recall: -")
+
         metric_style = """
             QLabel {
                 font-size: 14px;
                 padding: 8px;
-                background-color: #f8f9fa;
-                border: 1px solid #dee2e6;
-                border-radius: 4px;
+                background-color: #f0f0f0;
+                border: 1px solid #bbb;
+                border-radius: 5px;
+                font-weight: bold;
             }
         """
         for label in [self.accuracy_label, self.precision_label, self.recall_label]:
@@ -33,13 +37,11 @@ class MetricsWidget(QWidget):
         layout.addLayout(metrics_grid)
 
     def update_metrics(self, metrics):
-        """Updates the displayed metrics"""
         self.accuracy_label.setText(f"Accuracy: {metrics['accuracy']:.2%}")
         self.precision_label.setText(f"Precision: {metrics['precision']:.2%}")
         self.recall_label.setText(f"Recall: {metrics['recall']:.2%}")
 
     def reset_metrics(self):
-        """Resets all metrics to their initial state"""
         self.accuracy_label.setText("Accuracy: -")
         self.precision_label.setText("Precision: -")
         self.recall_label.setText("Recall: -")
