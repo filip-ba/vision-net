@@ -1,4 +1,5 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTabWidget, QSizePolicy
+from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
+                             QSizePolicy, QScrollArea)
 from PyQt6.QtGui import QIcon, QAction
 import os
 
@@ -22,9 +23,14 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("FruitVegNet")
         self.setGeometry(50, 50, 1000, 900)
         
-        # Main widget setup
-        main_widget = QWidget(self)
-        self.setCentralWidget(main_widget)
+        # Scroll Area Setup
+        scroll_area = QScrollArea(self)
+        scroll_area.setWidgetResizable(True)
+        self.setCentralWidget(scroll_area)
+        
+        # Main widget inside scroll area
+        main_widget = QWidget()
+        scroll_area.setWidget(main_widget)
         main_layout = QVBoxLayout(main_widget)
         
         # Create tab widget
