@@ -20,21 +20,16 @@ class MainWindow(QMainWindow):
         icon_path = os.path.join(project_root, "assets", "icon.png")  
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(50, 50, 1200, 920)
+        self.setGeometry(50, 50, 1000, 900)
         
         # Main widget setup
         main_widget = QWidget(self)
         self.setCentralWidget(main_widget)
         main_layout = QVBoxLayout(main_widget)
         
-        # Image classification widget
-        self.image_classification_widget = ImageClassificationWidget()
-        self.image_classification_widget.setMaximumHeight(300)
-        main_layout.addWidget(self.image_classification_widget)
-        
         # Create tab widget
         self.tab_widget = QTabWidget(self)
-        self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  # Roztažení na zbytek prostoru
+        self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  
         self.simple_cnn_tab = TabWidget(model_class=SimpleCnnModel)
         self.resnet_tab = TabWidget(model_class=ResNetModel)
         self.efficientnet_tab = TabWidget(model_class=EfficientNetModel)
@@ -46,6 +41,11 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.vgg16_tab, "VGG16")
         main_layout.addWidget(self.tab_widget)
         
+        # Image classification widget
+        self.image_classification_widget = ImageClassificationWidget()
+        self.image_classification_widget.setMaximumHeight(300)
+        main_layout.addWidget(self.image_classification_widget)
+
         # Connect shared image signals
         self.image_classification_widget.image_loaded.connect(self._update_all_tabs_image)
         self.image_classification_widget.classify_clicked.connect(self._classify_all)

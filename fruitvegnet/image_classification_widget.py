@@ -68,6 +68,18 @@ class ImageClassificationWidget(QWidget):
         self.result_labels = {}
         self.plot_buttons = {}
         
+        # Define new label style based on MetricsWidget
+        self.label_style = """
+            QLabel {
+                font-size: 14px;
+                padding: 8px;
+                background-color: #f0f0f0;
+                border: 1px solid #bbb;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+        """
+        
         # Define the button styles
         self.button_normal_style = """
             QPushButton {
@@ -82,7 +94,7 @@ class ImageClassificationWidget(QWidget):
         
         self.button_pressed_style = """
             QPushButton {
-                background-color: #a2a9af;
+                background-color: #6c757d;
                 border: 1px solid #495057;
                 border-radius: 4px;
             }
@@ -98,35 +110,32 @@ class ImageClassificationWidget(QWidget):
             container = QWidget()
             container_layout = QHBoxLayout(container)
             
-            # Create and style label
+            # Create and style label with new style
             label = QLabel(f"{label_text}: None")
-            label.setStyleSheet("""
-                QLabel {
-                    font-weight: bold;
-                    color: #2c3e50;
-                    padding: 8px;
-                    background-color: #ecf0f1;
-                    border-radius: 5px;
-                    text-align: left;
-                }
-            """)
+            label.setStyleSheet(self.label_style)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             label.setFixedSize(200, 40)
             container_layout.addWidget(label)
             
+
             # Create plot button
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             icon_path = os.path.join(project_root, "assets", "graph_icon.png")
-            
-            pixmap = QPixmap(icon_path)
-            plot_btn = QPushButton()
-            icon = QIcon(pixmap) 
+            #icon_path = "./assets/graph_icon.png"
 
+            # Ověření načtení obrázku
+            pixmap = QPixmap(icon_path)
+            if pixmap.isNull():
+                print("Chyba: Obrázek se nenačetl!")
+
+            # Vytvoření tlačítka s ikonou
+            plot_btn = QPushButton()
+            icon = QIcon(pixmap)  # Použití pixmapy pro vytvoření ikony
             plot_btn.setIcon(icon)
-            plot_btn.setIconSize(QSize(32, 32))  
+            plot_btn.setIconSize(QSize(32, 32))  # Nastavení velikosti ikony
             plot_btn.setFixedSize(40, 40)
             plot_btn.setStyleSheet(self.button_normal_style)
-            plot_btn.setCheckable(True)  
+            plot_btn.setCheckable(True)  # Make button checkable
             
             container_layout.addWidget(plot_btn)
             
@@ -144,6 +153,13 @@ class ImageClassificationWidget(QWidget):
         
         # Create plot widgets for each model
         self.plot_widgets = {}
+        self.model_names = {
+            'simple_cnn': 'Simple CNN',
+            'resnet': 'ResNet',
+            'efficientnet': 'EfficientNet',
+            'vgg16': 'VGG16'
+        }
+        
         for model_type in ['simple_cnn', 'resnet', 'efficientnet', 'vgg16']:
             figure = Figure(figsize=(5, 4))
             canvas = FigureCanvas(figure)
@@ -202,7 +218,11 @@ class ImageClassificationWidget(QWidget):
             figure = self.plot_widgets[model]['figure']
             figure.clear()
             ax = figure.add_subplot(111)
-            ax.set_title('Class Probabilities', fontsize=10)
+            
+            # Add model name to the title
+            model_name = self.model_names.get(model, model)
+            ax.set_title(f'{model_name} - Class Probabilities', fontsize=12, fontweight='bold')
+            
             ax.set_xlabel('Class', fontsize=8)
             ax.set_ylabel('Probability', fontsize=8)
             ax.tick_params(axis='both', labelsize=8)
@@ -227,7 +247,10 @@ class ImageClassificationWidget(QWidget):
                    f'{height:.0%}',
                    ha='center', va='bottom')
             
-        ax.set_title('Class Probabilities', fontsize=10)
+        # Add model name to the title with larger, bolder font
+        model_name = self.model_names.get(model_type, model_type)
+        ax.set_title(f'{model_name} - Class Probabilities', fontsize=12, fontweight='bold')
+        
         ax.set_xlabel('Class', fontsize=8)
         ax.set_ylabel('Probability', fontsize=8)
         ax.tick_params(axis='both', labelsize=8)
@@ -303,10 +326,5 @@ class ImageClassificationWidget(QWidget):
     def update_result(self, model_type, result):
         """Update the classification result for a specific model"""
         if model_type in self.result_labels:
-            model_name = {
-                'simple_cnn': 'Simple CNN',
-                'resnet': 'ResNet',
-                'efficientnet': 'EfficientNet',
-                'vgg16': 'VGG16'
-            }[model_type]
-            self.result_labels[model_type].setText(f"{model_name}: {result}")
+            model_name = self.model_names[model_type]
+            self.result_labels[model_type].setText(f"{model_name}:{result}")
