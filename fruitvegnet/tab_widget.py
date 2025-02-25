@@ -339,27 +339,17 @@ class TabWidget(QWidget):
             self.status_bar.showMessage(f"Testing error: {str(e)}", 8000)    
 
     def _create_ui(self):
-        # Main layout with scroll area
-        main_layout = QVBoxLayout(self)
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_widget = QWidget()
-        scroll_layout = QHBoxLayout(scroll_widget)
-        scroll_layout.setContentsMargins(0, 0, 0, 0)
-        scroll_layout.setSpacing(0)  
-
+        # Main layout
+        main_layout = QHBoxLayout(self)
+        
         # Left panel
         left_panel = self._create_left_panel()
-        scroll_layout.addWidget(left_panel)
-
+        main_layout.addWidget(left_panel)
+        
         # Right panel (plots)
         right_panel = self._create_right_panel()
-        scroll_layout.addWidget(right_panel)
+        main_layout.addWidget(right_panel)
         
-        # Set up scroll area
-        scroll_area.setWidget(scroll_widget)
-        main_layout.addWidget(scroll_area)
-
         # Add status bar
         self.status_bar = QStatusBar()
         self.status_bar.setSizeGripEnabled(False)
