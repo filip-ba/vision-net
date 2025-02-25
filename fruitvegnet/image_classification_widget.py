@@ -17,6 +17,7 @@ class ImageClassificationWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.current_image_path = None
+        self.active_plot_button = None  # Track currently active plot button
         self._create_ui()
         
     def _create_ui(self):
@@ -67,6 +68,26 @@ class ImageClassificationWidget(QWidget):
         self.result_labels = {}
         self.plot_buttons = {}
         
+        # Define the button styles
+        self.button_normal_style = """
+            QPushButton {
+                background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #e9ecef;
+            }
+        """
+        
+        self.button_pressed_style = """
+            QPushButton {
+                background-color: #a2a9af;
+                border: 1px solid #495057;
+                border-radius: 4px;
+            }
+        """
+        
         for model_type, label_text in {
             'simple_cnn': 'Simple CNN',
             'resnet': 'ResNet',
@@ -93,24 +114,20 @@ class ImageClassificationWidget(QWidget):
             label.setFixedSize(200, 40)
             container_layout.addWidget(label)
             
-
             # Create plot button
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             icon_path = os.path.join(project_root, "assets", "graph_icon.png")
-            #icon_path = "./assets/graph_icon.png"
-
-            # Ověření načtení obrázku
+            
             pixmap = QPixmap(icon_path)
-            if pixmap.isNull():
-                print("Chyba: Obrázek se nenačetl!")
-
-            # Vytvoření tlačítka s ikonou
             plot_btn = QPushButton()
-            icon = QIcon(pixmap)  # Použití pixmapy pro vytvoření ikony
-            plot_btn.setIcon(icon)
-            plot_btn.setIconSize(QSize(32, 32))  # Nastavení velikosti ikony
-            plot_btn.setFixedSize(40, 40)
+            icon = QIcon(pixmap) 
 
+            plot_btn.setIcon(icon)
+            plot_btn.setIconSize(QSize(32, 32))  
+            plot_btn.setFixedSize(40, 40)
+            plot_btn.setStyleSheet(self.button_normal_style)
+            plot_btn.setCheckable(True)  
+            
             container_layout.addWidget(plot_btn)
             
             # Store references
@@ -138,9 +155,7 @@ class ImageClassificationWidget(QWidget):
             
             # Connect button to show this plot
             self.plot_buttons[model_type].clicked.connect(
-                lambda checked, m=model_type: self.plot_stack.setCurrentWidget(
-                    self.plot_widgets[m]['canvas']
-                )
+                lambda checked, m=model_type: self.switch_plot(m)
             )
         
         main_layout.addWidget(self.plot_stack)
@@ -155,6 +170,26 @@ class ImageClassificationWidget(QWidget):
         
         # Load initial image from dataset
         self.load_random_test_image()
+        
+        # Set the first button as active by default
+        self.switch_plot('simple_cnn')
+        
+    def switch_plot(self, model_type):
+        """Switch to the specified plot and update button states"""
+        # Set the current widget in the stack
+        self.plot_stack.setCurrentWidget(self.plot_widgets[model_type]['canvas'])
+        
+        # Update button states
+        for btn_type, btn in self.plot_buttons.items():
+            if btn_type == model_type:
+                # Check the current button and apply pressed style
+                btn.setChecked(True)
+                btn.setStyleSheet(self.button_pressed_style)
+                self.active_plot_button = btn
+            else:
+                # Uncheck other buttons and restore normal style
+                btn.setChecked(False)
+                btn.setStyleSheet(self.button_normal_style)
         
     def init_plot(self, model_type=None):
         """Initialize empty probability plot for specified or all models"""
@@ -274,4 +309,4 @@ class ImageClassificationWidget(QWidget):
                 'efficientnet': 'EfficientNet',
                 'vgg16': 'VGG16'
             }[model_type]
-            self.result_labels[model_type].setText(f"{model_name}:{result}")
+            self.result_labels[model_type].setText(f"{model_name}: {result}")
