@@ -2,8 +2,8 @@ from PyQt6.QtWidgets import (
     QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, 
     QFileDialog, QLabel, QPushButton, QStackedWidget
 )
-from PyQt6.QtGui import QIcon, QPixmap, QImageReader
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QPixmap, QImageReader, QIcon
+from PyQt6.QtCore import Qt, pyqtSignal, QSize
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import os, random
@@ -29,7 +29,7 @@ class ImageClassificationWidget(QWidget):
         
         # Image preview
         self.image_display = QLabel()
-        self.image_display.setFixedSize(120, 120)
+        self.image_display.setFixedSize(150, 150)
         self.image_display.setStyleSheet("""
             QLabel {
                 border: 2px solid #ccc;
@@ -75,10 +75,10 @@ class ImageClassificationWidget(QWidget):
         }.items():
             # Create container for each model
             container = QWidget()
-            container_layout = QVBoxLayout(container)
+            container_layout = QHBoxLayout(container)
             
             # Create and style label
-            label = QLabel(f"{label_text}:None")
+            label = QLabel(f"{label_text}: None")
             label.setStyleSheet("""
                 QLabel {
                     font-weight: bold;
@@ -86,26 +86,31 @@ class ImageClassificationWidget(QWidget):
                     padding: 8px;
                     background-color: #ecf0f1;
                     border-radius: 5px;
-                    min-width: 120px;
+                    text-align: left;
                 }
             """)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            label.setFixedSize(200, 40)
             container_layout.addWidget(label)
             
-            # Create and style Show Plot button
-            plot_btn = QPushButton("Show Plot")
-            plot_btn.setStyleSheet("""
-                QPushButton {
-                    padding: 5px;
-                    font-size: 12px;
-                    background-color: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    border-radius: 4px;
-                }
-                QPushButton:hover {
-                    background-color: #e9ecef;
-                }
-            """)
+
+            # Create plot button
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            icon_path = os.path.join(project_root, "assets", "graph_icon.png")
+            #icon_path = "./assets/graph_icon.png"
+
+            # Ověření načtení obrázku
+            pixmap = QPixmap(icon_path)
+            if pixmap.isNull():
+                print("Chyba: Obrázek se nenačetl!")
+
+            # Vytvoření tlačítka s ikonou
+            plot_btn = QPushButton()
+            icon = QIcon(pixmap)  # Použití pixmapy pro vytvoření ikony
+            plot_btn.setIcon(icon)
+            plot_btn.setIconSize(QSize(32, 32))  # Nastavení velikosti ikony
+            plot_btn.setFixedSize(40, 40)
+
             container_layout.addWidget(plot_btn)
             
             # Store references
@@ -223,7 +228,7 @@ class ImageClassificationWidget(QWidget):
                     if not pixmap.isNull():
                         self.current_image_path = image_path
                         scaled_pixmap = pixmap.scaled(
-                            120, 120,
+                            150, 150,
                             Qt.AspectRatioMode.KeepAspectRatio,
                             Qt.TransformationMode.SmoothTransformation
                         )
@@ -250,7 +255,7 @@ class ImageClassificationWidget(QWidget):
             if not pixmap.isNull():
                 self.current_image_path = file_path
                 scaled_pixmap = pixmap.scaled(
-                    120, 120,
+                    150, 150,
                     Qt.AspectRatioMode.KeepAspectRatio,
                     Qt.TransformationMode.SmoothTransformation
                 )

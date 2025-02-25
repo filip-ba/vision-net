@@ -20,8 +20,8 @@ class PlotWidget(QWidget):
         frame.setObjectName("StyledFrame")  
         frame.setStyleSheet("""
             QFrame#StyledFrame {
-                border: 1px solid #c4c8cc;
-                border-radius: 6px;
+                border: 1px solid #b0b0b0;
+                border-radius: 8px
                 padding: 5px;
                 background-color: white;
             }
