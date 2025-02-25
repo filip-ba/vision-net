@@ -127,35 +127,9 @@ class TabWidget(QWidget):
             self.plot_widget1.plot_loss_history(self.plot_widget1)
             self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
 
-            # Reset image classification
-            self.image_widget.result_label.setText("Classification:\nNone")
-            self.image_widget.init_plot()
-
             # Disable button
             self.save_model_btn.setEnabled(False)
             self.status_bar.showMessage("Model cleared successfully", 8000)
-
-    def load_image(self):
-        supported_formats = [f"*.{fmt.data().decode()}" for fmt in QImageReader.supportedImageFormats()]
-        filter_string = "Image Files ({})".format(" ".join(supported_formats))
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Select Image",
-            "",
-            filter_string
-        )
-
-        if file_path:
-            pixmap = QPixmap(file_path)
-            if not pixmap.isNull():
-                self.current_image_path = file_path
-                self.image_widget.update_image(pixmap)
-                self.image_widget.result_label.setText("Classification:\nNone")
-                self.status_bar.showMessage(f"Loaded image: {os.path.basename(file_path)}", 8000)
-            else:
-                self.image_widget.image_display.setText("Failed to load image")
-                self.current_image_path = None
-                self.status_bar.showMessage("Failed to load image", 8000)
 
     def update_model_status(self, status, color="red"):
         self.model_status.setText(status)
@@ -166,28 +140,6 @@ class TabWidget(QWidget):
                 padding: 5px;
             }}
         """)
-
-    def classify_image(self):
-        if not self.current_image_path:
-            self.status_bar.showMessage("No image loaded", 8000)
-            return 
-        
-        if not self.model_loaded:
-            self.status_bar.showMessage("No model loaded", 8000)
-            return 
-        
-        try:
-            result = self.model.predict_image(self.current_image_path)
-            predicted_class = result['class']
-            probabilities = result['probabilities']
-            
-            # Update UI
-            self.image_widget.result_label.setText(f"Classification:\n{predicted_class}")
-            self.image_widget.update_plot(self.model.classes, probabilities)
-
-            self.status_bar.showMessage("Classification complete", 8000)
-        except Exception as e:
-            self.status_bar.showMessage(f"Classification error: {str(e)}", 8000)
 
     def _try_load_dataset_and_default_model(self):
         """Attempts to load the dataset and the default model on startup"""
