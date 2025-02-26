@@ -9,6 +9,8 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import os, random
 from matplotlib import pyplot as plt
 
+from fruitvegnet.utils.scrollable_figure_canvas import ScrollableFigureCanvas
+
 
 class ImageClassificationWidget(QWidget):
     image_loaded = pyqtSignal(str)  # Signal to notify when new image is loaded
@@ -162,7 +164,7 @@ class ImageClassificationWidget(QWidget):
         
         for model_type in ['simple_cnn', 'resnet', 'efficientnet', 'vgg16']:
             figure = Figure(figsize=(5, 4))
-            canvas = FigureCanvas(figure)
+            canvas = ScrollableFigureCanvas(figure)
             self.plot_widgets[model_type] = {'figure': figure, 'canvas': canvas}
             self.plot_stack.addWidget(canvas)
             

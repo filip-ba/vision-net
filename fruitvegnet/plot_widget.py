@@ -4,7 +4,8 @@ from PyQt6.QtGui import QFont
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+
+from fruitvegnet.utils.scrollable_figure_canvas import ScrollableFigureCanvas
 
 
 class PlotWidget(QWidget):
@@ -37,7 +38,7 @@ class PlotWidget(QWidget):
 
         # Figure
         self.figure = Figure(figsize=(5, 4), dpi=100)
-        self.canvas = FigureCanvas(self.figure)
+        self.canvas = ScrollableFigureCanvas(self.figure)
         self.canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         frame_layout.addWidget(self.canvas)
 
