@@ -5,7 +5,6 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QPixmap, QImageReader, QIcon
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import os, random
 from matplotlib import pyplot as plt
 

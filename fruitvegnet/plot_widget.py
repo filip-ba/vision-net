@@ -17,18 +17,18 @@ class PlotWidget(QWidget):
         main_layout.setContentsMargins(0, 0, 0, 0)
 
         # Frame styled like a group box
-        frame = QFrame()
-        frame.setObjectName("StyledFrame")  
-        frame.setStyleSheet("""
+        self.frame = QFrame()
+        self.frame.setObjectName("StyledFrame")  
+        self.frame.setStyleSheet("""
             QFrame#StyledFrame {
                 border: 1px solid #b0b0b0;
-                border-radius: 8px
+                border-radius: 8px;
                 padding: 5px;
                 background-color: white;
             }
         """)
-        frame_layout = QVBoxLayout(frame)
-        main_layout.addWidget(frame)
+        frame_layout = QVBoxLayout(self.frame)
+        main_layout.addWidget(self.frame)
 
         # Title label
         self.title_label = QLabel(title)
@@ -41,6 +41,29 @@ class PlotWidget(QWidget):
         self.canvas = ScrollableFigureCanvas(self.figure)
         self.canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         frame_layout.addWidget(self.canvas)
+        
+        # Explicitly apply the style to the frame
+        self.update_style()
+        
+    def update_style(self):
+        self.frame.setStyleSheet("""
+            QFrame#StyledFrame {
+                border: 1px solid #b0b0b0;
+                border-radius: 8px;
+                padding: 5px;
+                background-color: white;
+            }
+        """)
+        
+    def showEvent(self, event):
+        """Update styles when widget is displayed"""
+        super().showEvent(event)
+        self.update_style()
+        
+    def resizeEvent(self, event):
+        """Update styles when changing widget size"""
+        super().resizeEvent(event)
+        self.update_style()
 
     def plot_confusion_matrix(self, plot_widget, conf_mat = None, classes = None):
         plot_widget.figure.clear()
