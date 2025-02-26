@@ -12,58 +12,20 @@ class PlotWidget(QWidget):
 
     def __init__(self, title, parent=None):
         super().__init__(parent)
-        main_layout = QVBoxLayout()
-        self.setLayout(main_layout)
+        main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
-
-        # Frame styled like a group box
-        self.frame = QFrame()
-        self.frame.setObjectName("StyledFrame")  
-        self.frame.setStyleSheet("""
-            QFrame#StyledFrame {
-                border: 1px solid #b0b0b0;
-                border-radius: 8px;
-                padding: 5px;
-                background-color: white;
-            }
-        """)
-        frame_layout = QVBoxLayout(self.frame)
-        main_layout.addWidget(self.frame)
-
-        # Title label
+        
+        # Title
         self.title_label = QLabel(title)
         self.title_label.setFont(QFont('Arial', 11, QFont.Weight.Bold))
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        frame_layout.addWidget(self.title_label)
-
+        main_layout.addWidget(self.title_label)
+        
         # Figure
         self.figure = Figure(figsize=(5, 4), dpi=100)
         self.canvas = ScrollableFigureCanvas(self.figure)
         self.canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        frame_layout.addWidget(self.canvas)
-        
-        # Explicitly apply the style to the frame
-        self.update_style()
-        
-    def update_style(self):
-        self.frame.setStyleSheet("""
-            QFrame#StyledFrame {
-                border: 1px solid #b0b0b0;
-                border-radius: 8px;
-                padding: 5px;
-                background-color: white;
-            }
-        """)
-        
-    def showEvent(self, event):
-        """Update styles when widget is displayed"""
-        super().showEvent(event)
-        self.update_style()
-        
-    def resizeEvent(self, event):
-        """Update styles when changing widget size"""
-        super().resizeEvent(event)
-        self.update_style()
+        main_layout.addWidget(self.canvas)
 
     def plot_confusion_matrix(self, plot_widget, conf_mat = None, classes = None):
         plot_widget.figure.clear()

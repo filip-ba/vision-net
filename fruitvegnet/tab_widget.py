@@ -1,7 +1,6 @@
 from PyQt6.QtWidgets import ( 
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, 
-    QFileDialog, QScrollArea, QStatusBar, QMessageBox )
-from PyQt6.QtGui import QPixmap, QImageReader
+    QFileDialog, QStackedWidget, QStatusBar, QMessageBox, QFrame )
 import os
 import torch
 
@@ -461,17 +460,89 @@ class TabWidget(QWidget):
         right_layout.setSpacing(20) 
         right_layout.setContentsMargins(15, 30, 10, 10)
 
-        # Plot widgets
-        self.plot_widget1 = PlotWidget("Loss History") 
-        self.plot_widget2 = PlotWidget("Confusion Matrix")  
-
+        # Create StyledFrame
+        self.plot_frame = QFrame()
+        self.plot_frame.setObjectName("StyledFrame")  
+        self.plot_frame.setStyleSheet("""
+            QFrame#StyledFrame {
+                border: 1px solid #b0b0b0;
+                border-radius: 8px;
+                padding: 5px;
+                background-color: white;
+            }
+        """)
+        frame_layout = QVBoxLayout(self.plot_frame)
+        
+        # QStackedWidget for switching between charts
+        self.plot_stack = QStackedWidget()
+        
+        self.plot_widget1 = PlotWidget("Loss History")
+        self.plot_widget2 = PlotWidget("Confusion Matrix")
+        
         # Initialize empty plots
         self.plot_widget1.plot_loss_history(self.plot_widget1)
         self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
-
-        # Add to layout
-        right_layout.addWidget(self.plot_widget1)
-        right_layout.addWidget(self.plot_widget2)
+        
+        # Add plots to QStackedWidget
+        self.plot_stack.addWidget(self.plot_widget1)
+        self.plot_stack.addWidget(self.plot_widget2)
+        
+        frame_layout.addWidget(self.plot_stack)
+        
+        buttons_layout = QHBoxLayout()
+        buttons_layout.setContentsMargins(0, 10, 0, 0)
+        
+        self.btn_loss_history = QPushButton("Loss History")
+        self.btn_confusion_matrix = QPushButton("Confusion Matrix")
+        
+        # Button style
+        button_style = """
+            QPushButton {
+                font-size: 13px;
+                padding: 8px 15px;
+                background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #e9ecef;
+            }
+            QPushButton:checked {
+                background-color: #007bff;
+                color: white;
+                font-weight: bold;
+            }
+        """
+        self.btn_loss_history.setStyleSheet(button_style)
+        self.btn_confusion_matrix.setStyleSheet(button_style)
+        
+        self.btn_loss_history.setCheckable(True)
+        self.btn_confusion_matrix.setCheckable(True)
+        self.btn_loss_history.setChecked(True) 
+        
+        # Plot buttons connects
+        self.btn_loss_history.clicked.connect(lambda: self._switch_plot(0))
+        self.btn_confusion_matrix.clicked.connect(lambda: self._switch_plot(1))
+        
+        # Add buttons to the layout
+        buttons_layout.addStretch()
+        buttons_layout.addWidget(self.btn_loss_history)
+        buttons_layout.addWidget(self.btn_confusion_matrix)
+        buttons_layout.addStretch()
+        
+        # Add buttons to the frame layout
+        frame_layout.addLayout(buttons_layout)
+        
+        # Add frame to the right_layout
+        right_layout.addWidget(self.plot_frame)
         right_layout.addStretch()
 
         return right_panel
+
+    def _switch_plot(self, index):
+        """Switches between charts and updates button status"""
+        self.plot_stack.setCurrentIndex(index)
+        
+        buttons = [self.btn_loss_history, self.btn_confusion_matrix]
+        for i, btn in enumerate(buttons):
+            btn.setChecked(i == index)
