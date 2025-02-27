@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import ( 
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, 
-    QFileDialog, QStackedWidget, QStatusBar, QMessageBox, QFrame )
+    QFileDialog, QStackedWidget, QMessageBox, QFrame )
+from PyQt6.QtCore import pyqtSignal
 import os
 import torch
 
@@ -15,6 +16,8 @@ from models.vgg16_model import VGG16Model
 
 
 class TabWidget(QWidget):
+    # Signal to emit status messages to the main window
+    status_message = pyqtSignal(str, int)
 
     def __init__(self, model_class=SimpleCnnModel):
         super().__init__()
@@ -128,7 +131,7 @@ class TabWidget(QWidget):
 
             # Disable button
             self.save_model_btn.setEnabled(False)
-            self.status_bar.showMessage("Model cleared successfully", 8000)
+            self.status_message.emit("Model cleared successfully", 8000)
 
     def update_model_status(self, status, color="red"):
         self.model_status.setText(status)
@@ -164,7 +167,7 @@ class TabWidget(QWidget):
             default_model_path = None
             dataset_message += "Unknown model type, no default model loaded."
             self.update_model_status("No model loaded", "red")
-            self.status_bar.showMessage(dataset_message, 10000)
+            self.status_message.emit(dataset_message, 10000)
             return
 
         # Attempt to load default model
@@ -192,7 +195,7 @@ class TabWidget(QWidget):
             self.update_model_status("Error initializing model", "red")     
 
         # Show status message
-        self.status_bar.showMessage(dataset_message, 10000)
+        self.status_message.emit(dataset_message, 10000)
 
     def load_model(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -240,15 +243,15 @@ class TabWidget(QWidget):
 
                 # Customize status message based on whether metrics exist
                 if (metadata['metrics']['accuracy'] is not None):
-                    self.status_bar.showMessage(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
+                    self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
                 else:
-                    self.status_bar.showMessage("Model loaded successfully (untested model)", 8000)
+                    self.status_message.emit("Model loaded successfully (untested model)", 8000)
             except Exception as e:
-                self.status_bar.showMessage(f"Error loading model: {str(e)}", 8000)
+                self.status_message.emit(f"Error loading model: {str(e)}", 8000)
 
     def save_model(self):
         if not self.model_loaded:
-            self.status_bar.showMessage("No model to save", 8000)
+            self.status_message.emit("No model to save", 8000)
             return
         file_path, _ = QFileDialog.getSaveFileName(
             self,
@@ -260,9 +263,9 @@ class TabWidget(QWidget):
         if file_path:
             try:
                 self.model.save_model(file_path)
-                self.status_bar.showMessage("Model saved successfully", 8000)
+                self.status_message.emit("Model saved successfully", 8000)
             except Exception as e:
-                self.status_bar.showMessage(f"Error saving model: {str(e)}", 8000)
+                self.status_message.emit(f"Error saving model: {str(e)}", 8000)
 
     def train_model(self):
         epochs = self.epochs_widget.spinbox.value()
@@ -303,21 +306,21 @@ class TabWidget(QWidget):
                 self.model_loaded = True
                 self.save_model_btn.setEnabled(True)
                 self.update_model_status("Model trained successfully", "green")
-                self.status_bar.showMessage("Training completed", 8000)
+                self.status_message.emit("Training completed", 8000)
 
                 # Test the model
                 self.test_model()
             else:
-                self.status_bar.showMessage(
+                self.status_message.emit(
                     f"Training error: {getattr(dialog, 'error_message', 'Unknown error')}",
                     8000
                 )       
         except Exception as e:
-            self.status_bar.showMessage(f"Training error: {str(e)}", 8000)
+            self.status_message.emit(f"Training error: {str(e)}", 8000)
 
     def test_model(self):
         if not self.model_loaded:
-            self.status_bar.showMessage("No model loaded", 8000)
+            self.status_message.emit("No model loaded", 8000)
             return
         try:
             dialog = ProgressDialog(self, "Testing")
@@ -330,12 +333,12 @@ class TabWidget(QWidget):
                 classes = self.model.classes
                 self.plot_widget2.plot_confusion_matrix(self.plot_widget2, conf_mat, classes)
             else:
-                self.status_bar.showMessage(
+                self.status_message.emit(
                     f"Testing error: {getattr(dialog, 'error_message', 'Unknown error')}",
                     8000
                 ) 
         except Exception as e:
-            self.status_bar.showMessage(f"Testing error: {str(e)}", 8000)    
+            self.status_message.emit(f"Testing error: {str(e)}", 8000)    
 
     def _create_ui(self):
         # Main layout
@@ -348,11 +351,6 @@ class TabWidget(QWidget):
         # Right panel (plots)
         right_panel = self._create_right_panel()
         main_layout.addWidget(right_panel)
-        
-        # Add status bar
-        self.status_bar = QStatusBar()
-        self.status_bar.setSizeGripEnabled(False)
-        main_layout.addWidget(self.status_bar)
 
     def _create_left_panel(self):
         left_panel = QWidget()

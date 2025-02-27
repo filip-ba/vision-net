@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
-                             QSizePolicy, QScrollArea)
+                             QSizePolicy, QScrollArea, QStatusBar)
 from PyQt6.QtGui import QIcon, QAction
 import os
 
@@ -22,6 +22,11 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
         self.setGeometry(50, 50, 1000, 900)
+        
+        # Create status bar
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
+        self.status_bar.showMessage("Welcome to FruitVegNet", 10000)
         
         # Scroll Area Setup
         scroll_area = QScrollArea(self)
@@ -52,10 +57,22 @@ class MainWindow(QMainWindow):
         self.image_classification_widget.setMaximumHeight(300)
         main_layout.addWidget(self.image_classification_widget)
 
-        self.image_classification_widget.classify_clicked.connect(self._classify_all)
+        # Connects
+        self.image_classification_widget.classify_clicked.connect(self._classify_all) 
+        self._connect_tab_status_signals()
         
         # MenuBar setup
         self._setup_menu()
+        
+    def _connect_tab_status_signals(self):
+        """Connect signals from each tab to the main status bar"""
+        tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
+        for tab in tabs:
+            tab.status_message.connect(self.update_status_bar)
+            
+    def update_status_bar(self, message, timeout=8000):
+        """Update the main window status bar with a message"""
+        self.status_bar.showMessage(message, timeout)
         
     def _setup_menu(self):
         menu_bar = self.menuBar()
@@ -74,18 +91,11 @@ class MainWindow(QMainWindow):
         self.quit_action = QAction("Quit", self)
         file_menu.addAction(self.quit_action)  
         self.quit_action.triggered.connect(self.close)
-        
-    def _update_all_tabs_image(self, image_path):
-        """Update the image in all tabs when a new image is loaded"""
-        tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
-        for tab in tabs:
-            tab.current_image_path = image_path
-            tab.image_widget.result_label.setText("Classification:\nNone")
-            tab.image_widget.init_plot()
             
     def _classify_all(self):
         """Classify the current image using all loaded models"""
         if not self.image_classification_widget.current_image_path:
+            self.update_status_bar("No image loaded for classification")
             return
             
         model_map = {
@@ -95,6 +105,7 @@ class MainWindow(QMainWindow):
             self.vgg16_tab: {'type': 'vgg16', 'name': 'VGG16'}
         }
         
+        results = []
         for tab, model_info in model_map.items():
             if tab.model_loaded:
                 try:
@@ -109,11 +120,17 @@ class MainWindow(QMainWindow):
                     # Update plot for this model
                     self.image_classification_widget.update_plot(model_info['type'], tab.model.classes, probabilities)
                     
+                    results.append(f"{model_info['name']}: {predicted_class}")
                 except Exception as e:
                     self.image_classification_widget.update_result(model_info['type'], "Error")
                     print(f"Error in {model_info['name']} classification: {str(e)}")
             else:
                 self.image_classification_widget.update_result(model_info['type'], "No model")
+        
+        if results:
+            self.update_status_bar(f"Classification complete: {', '.join(results)}")
+        else:
+            self.update_status_bar("No models available for classification")
 
     def _save_current_model(self):
         """Save the model from the currently active tab"""
