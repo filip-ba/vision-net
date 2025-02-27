@@ -52,8 +52,6 @@ class MainWindow(QMainWindow):
         self.image_classification_widget.setMaximumHeight(300)
         main_layout.addWidget(self.image_classification_widget)
 
-        # Connect shared image signals
-        self.image_classification_widget.image_loaded.connect(self._update_all_tabs_image)
         self.image_classification_widget.classify_clicked.connect(self._classify_all)
         
         # MenuBar setup
