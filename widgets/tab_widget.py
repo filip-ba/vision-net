@@ -98,42 +98,45 @@ class TabWidget(QWidget):
         )
 
         if reply == QMessageBox.StandardButton.Yes:
-            dataset_loaded = self.model.is_data_loaded()
-            trainloader = self.model.trainloader
-            valloader = self.model.valloader
-            testloader = self.model.testloader
-            old_classes = self.model.classes 
-            self.model = self.model_class()
-            self.model.initialize_model()
-
-            # Restore dataset if it was loaded
-            if dataset_loaded:
-                self.model.dataset_loaded = dataset_loaded
-                self.model.trainloader = trainloader
-                self.model.valloader = valloader
-                self.model.testloader = testloader
-                self.model.classes = old_classes
-            self.model_loaded = False
-
-            # Reset UI elements
-            self.update_model_status("No model loaded", "red")
-
-            # Reset parameters to defaults
-            self.epochs_widget.spinbox.setValue(10)
-            self.learning_rate_widget.spinbox.setValue(0.001)
-            self.momentum_widget.spinbox.setValue(0.9)
-
-            # Reset metrics
-            self.metrics_widget.reset_metrics()
-
-            # Reset plots
-            self.plot_widget1.plot_loss_history(self.plot_widget1)
-            self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
-
-            # Disable buttons
-            self.save_model_btn.setEnabled(False)
-            self.clear_model_btn.setEnabled(False)
             self.status_message.emit("Model cleared successfully", 8000)
+            self.reset_model()
+
+    def reset_model(self):
+        dataset_loaded = self.model.is_data_loaded()
+        trainloader = self.model.trainloader
+        valloader = self.model.valloader
+        testloader = self.model.testloader
+        old_classes = self.model.classes 
+        self.model = self.model_class()
+        self.model.initialize_model()
+
+        # Restore dataset if it was loaded
+        if dataset_loaded:
+            self.model.dataset_loaded = dataset_loaded
+            self.model.trainloader = trainloader
+            self.model.valloader = valloader
+            self.model.testloader = testloader
+            self.model.classes = old_classes
+        self.model_loaded = False
+
+        # Reset UI elements
+        self.update_model_status("No model loaded", "red")
+
+        # Reset parameters to defaults
+        self.epochs_widget.spinbox.setValue(10)
+        self.learning_rate_widget.spinbox.setValue(0.001)
+        self.momentum_widget.spinbox.setValue(0.9)
+
+        # Reset metrics
+        self.metrics_widget.reset_metrics()
+
+        # Reset plots
+        self.plot_widget1.plot_loss_history(self.plot_widget1)
+        self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
+
+        # Disable buttons
+        self.save_model_btn.setEnabled(False)
+        self.clear_model_btn.setEnabled(False)
 
     def update_model_status(self, status, color="red"):
         self.model_status.setText(status)
@@ -303,12 +306,11 @@ class TabWidget(QWidget):
                 # Test the model
                 self.test_model()
             else:
-                self.status_message.emit(
-                    f"Training error: {getattr(dialog, 'error_message', 'Unknown error')}",
-                    8000
-                )       
+                self.status_message.emit("Training canceled, model was reset", 8000)       
+                self.reset_model()
         except Exception as e:
-            self.status_message.emit(f"Training error: {str(e)}", 8000)
+            self.status_message.emit("Training canceled, model was reset", 8000)  
+            self.reset_model()
 
     def test_model(self):
         if not self.model_loaded:

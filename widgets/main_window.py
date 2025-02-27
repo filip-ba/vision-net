@@ -12,6 +12,7 @@ from models.vgg16_model import VGG16Model
 
 
 class MainWindow(QMainWindow):
+    
     def __init__(self):
         super().__init__()
         self._create_ui()
@@ -68,7 +69,7 @@ class MainWindow(QMainWindow):
         tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
         for tab in tabs:
             tab.status_message.connect(self.update_status_bar)
-            
+
     def update_status_bar(self, message, timeout=8000):
         """Update the main window status bar with a message"""
         self.status_bar.showMessage(message, timeout)
