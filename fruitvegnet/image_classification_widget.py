@@ -8,7 +8,7 @@ from matplotlib.figure import Figure
 import os, random
 from matplotlib import pyplot as plt
 
-from fruitvegnet.utils.scrollable_figure_canvas import ScrollableFigureCanvas
+from utils.scrollable_figure_canvas import ScrollableFigureCanvas
 
 
 class ImageClassificationWidget(QWidget):

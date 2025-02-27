@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 
-from fruitvegnet.utils.scrollable_figure_canvas import ScrollableFigureCanvas
+from utils.scrollable_figure_canvas import ScrollableFigureCanvas
 
 
 class PlotWidget(QWidget):
