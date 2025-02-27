@@ -5,10 +5,10 @@ from PyQt6.QtCore import pyqtSignal
 import os
 import torch
 
-from fruitvegnet.progress_dialog import ProgressDialog
-from fruitvegnet.plot_widget import PlotWidget
-from fruitvegnet.parameter_widget import ParameterWidget
-from fruitvegnet.metrics_widget import MetricsWidget
+from widgets.progress_dialog import ProgressDialog
+from widgets.plot_widget import PlotWidget
+from widgets.parameter_widget import ParameterWidget
+from widgets.metrics_widget import MetricsWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
 from models.efficientnet_model import EfficientNetModel

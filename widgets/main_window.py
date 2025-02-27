@@ -3,8 +3,8 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
 from PyQt6.QtGui import QIcon, QAction
 import os
 
-from fruitvegnet.tab_widget import TabWidget
-from fruitvegnet.image_classification_widget import ImageClassificationWidget
+from widgets.tab_widget import TabWidget
+from widgets.image_classification_widget import ImageClassificationWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
 from models.efficientnet_model import EfficientNetModel
