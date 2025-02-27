@@ -33,7 +33,8 @@ class TabWidget(QWidget):
         self.update_model_status("No model loaded") 
 
         # Try to load the dataset and default model on startup
-        self._try_load_dataset_and_default_model()
+        self._load_dataset()
+        self._load_default_model()
 
         # Connect signals
         self._setup_connections()    
@@ -129,8 +130,9 @@ class TabWidget(QWidget):
             self.plot_widget1.plot_loss_history(self.plot_widget1)
             self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
 
-            # Disable button
+            # Disable buttons
             self.save_model_btn.setEnabled(False)
+            self.clear_model_btn.setEnabled(False)
             self.status_message.emit("Model cleared successfully", 8000)
 
     def update_model_status(self, status, color="red"):
@@ -143,16 +145,17 @@ class TabWidget(QWidget):
             }}
         """)
 
-    def _try_load_dataset_and_default_model(self):
-        """Attempts to load the dataset and the default model on startup"""
-        dataset_message = ""
-
-        # Attempt to load dataset
+    def _load_dataset(self):
+        """Loads the dataset on startup"""
         try:
             train_size, val_size, test_size = self.model.load_data("./dataset/fruit_dataset")
             dataset_message = f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test. "
         except Exception as e:
             dataset_message = f"Error loading dataset: {str(e)}. "
+        #print("--------------------DATASET", dataset_message)
+  
+    def _load_default_model(self):
+        """Attempts to load the default model on startup"""
 
         # Determine the correct default model path based on model class
         if self.model_class == SimpleCnnModel:
@@ -165,9 +168,7 @@ class TabWidget(QWidget):
             default_model_path = "./models/trained_models/vgg16_default_model.pth"
         else:
             default_model_path = None
-            dataset_message += "Unknown model type, no default model loaded."
             self.update_model_status("No model loaded", "red")
-            self.status_message.emit(dataset_message, 10000)
             return
 
         # Attempt to load default model
@@ -181,21 +182,14 @@ class TabWidget(QWidget):
                     self._update_ui_from_model_data()
                     self.model_loaded = True
                     self.update_model_status("Model loaded successfully", "green")
-                    dataset_message += "Default model loaded successfully."
                     self.save_model_btn.setEnabled(True)
+                    self.clear_model_btn.setEnabled(True)
                 except Exception as e:
-                    dataset_message += f"Error loading default model: {str(e)}"
-                    print(dataset_message)
                     self.update_model_status("Error loading default model", "red")
             else:
-                dataset_message += "No default model found."
                 self.update_model_status("No model loaded", "red")
         except Exception as e:
-            dataset_message += f"Error initializing model: {str(e)}"
             self.update_model_status("Error initializing model", "red")     
-
-        # Show status message
-        self.status_message.emit(dataset_message, 10000)
 
     def load_model(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -239,13 +233,10 @@ class TabWidget(QWidget):
 
                 self.model_loaded = True
                 self.save_model_btn.setEnabled(True)
+                self.clear_model_btn.setEnabled(True)
                 self.update_model_status("Model loaded successfully", "green")
 
-                # Customize status message based on whether metrics exist
-                if (metadata['metrics']['accuracy'] is not None):
-                    self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
-                else:
-                    self.status_message.emit("Model loaded successfully (untested model)", 8000)
+                self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
             except Exception as e:
                 self.status_message.emit(f"Error loading model: {str(e)}", 8000)
 
@@ -305,6 +296,7 @@ class TabWidget(QWidget):
 
                 self.model_loaded = True
                 self.save_model_btn.setEnabled(True)
+                self.clear_model_btn.setEnabled(True)
                 self.update_model_status("Model trained successfully", "green")
                 self.status_message.emit("Training completed", 8000)
 
@@ -370,6 +362,7 @@ class TabWidget(QWidget):
         self.load_model_btn = QPushButton("Load")
         self.clear_model_btn = QPushButton("Clear Model")
         self.save_model_btn.setEnabled(False)
+        self.clear_model_btn.setEnabled(False)
 
         # Add buttons to layout
         for btn in [self.train_model_btn, self.load_model_btn, self.save_model_btn, self.clear_model_btn]:

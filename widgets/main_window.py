@@ -26,7 +26,6 @@ class MainWindow(QMainWindow):
         # Create status bar
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
-        self.status_bar.showMessage("Welcome to FruitVegNet", 10000)
         
         # Scroll Area Setup
         scroll_area = QScrollArea(self)
