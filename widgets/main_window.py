@@ -53,11 +53,11 @@ class MainWindow(QMainWindow):
         
         # Image classification widget
         self.image_classification_widget = ImageClassificationWidget()
-        self.image_classification_widget.setMaximumHeight(300)
         main_layout.addWidget(self.image_classification_widget)
 
         # Connects
         self.image_classification_widget.classify_clicked.connect(self._classify_all) 
+        self.image_classification_widget.image_loaded.connect(self.update_status_bar) 
         self._connect_tab_status_signals()
         
         # MenuBar setup

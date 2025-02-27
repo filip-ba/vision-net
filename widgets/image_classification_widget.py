@@ -12,9 +12,9 @@ from utils.scrollable_figure_canvas import ScrollableFigureCanvas
 
 
 class ImageClassificationWidget(QWidget):
-    image_loaded = pyqtSignal(str)  # Signal to notify when new image is loaded
+    image_loaded = pyqtSignal(str, int)  # Signal to notify when new image is loaded
     classify_clicked = pyqtSignal()  # Signal for classify button clicks
-    
+
     def __init__(self):
         super().__init__()
         self.current_image_path = None
@@ -286,7 +286,6 @@ class ImageClassificationWidget(QWidget):
                             Qt.TransformationMode.SmoothTransformation
                         )
                         self.image_display.setPixmap(scaled_pixmap)
-                        self.image_loaded.emit(image_path)
                         return
                     
         # If we get here, something went wrong
@@ -313,9 +312,10 @@ class ImageClassificationWidget(QWidget):
                     Qt.TransformationMode.SmoothTransformation
                 )
                 self.image_display.setPixmap(scaled_pixmap)
-                self.image_loaded.emit(file_path)
+                self.image_loaded.emit("Image loaded", 8000)
             else:
                 self.image_display.setText("Failed to load image")
+                self.image_loaded.emit("Failed to load image", 8000)
                 self.current_image_path = None
                 
     def update_result(self, model_type, result):
