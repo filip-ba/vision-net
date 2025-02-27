@@ -120,16 +120,14 @@ class MainWindow(QMainWindow):
                     self.image_classification_widget.update_plot(model_info['type'], tab.model.classes, probabilities)
                     
                     results.append(f"{model_info['name']}: {predicted_class}")
+
+                    self.update_status_bar("Classification complete")
                 except Exception as e:
                     self.image_classification_widget.update_result(model_info['type'], "Error")
                     print(f"Error in {model_info['name']} classification: {str(e)}")
+                    self.update_status_bar("No models available for classification")
             else:
                 self.image_classification_widget.update_result(model_info['type'], "No model")
-        
-        if results:
-            self.update_status_bar(f"Classification complete: {', '.join(results)}")
-        else:
-            self.update_status_bar("No models available for classification")
 
     def _save_current_model(self):
         """Save the model from the currently active tab"""

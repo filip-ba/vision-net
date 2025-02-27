@@ -95,7 +95,7 @@ class ImageClassificationWidget(QWidget):
         
         self.button_pressed_style = """
             QPushButton {
-                background-color: #6c757d;
+                background-color: #88c2ff;
                 border: 1px solid #495057;
                 border-radius: 4px;
             }
@@ -118,25 +118,19 @@ class ImageClassificationWidget(QWidget):
             label.setFixedSize(200, 40)
             container_layout.addWidget(label)
             
-
-            # Create plot button
+            # Icon path
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             icon_path = os.path.join(project_root, "assets", "graph_icon.png")
-            #icon_path = "./assets/graph_icon.png"
-
-            # Ověření načtení obrázku
             pixmap = QPixmap(icon_path)
-            if pixmap.isNull():
-                print("Chyba: Obrázek se nenačetl!")
 
-            # Vytvoření tlačítka s ikonou
+            # Create plot button
             plot_btn = QPushButton()
-            icon = QIcon(pixmap)  # Použití pixmapy pro vytvoření ikony
+            icon = QIcon(pixmap) 
             plot_btn.setIcon(icon)
-            plot_btn.setIconSize(QSize(32, 32))  # Nastavení velikosti ikony
+            plot_btn.setIconSize(QSize(32, 32)) 
             plot_btn.setFixedSize(40, 40)
             plot_btn.setStyleSheet(self.button_normal_style)
-            plot_btn.setCheckable(True)  # Make button checkable
+            plot_btn.setCheckable(True)  
             
             container_layout.addWidget(plot_btn)
             
