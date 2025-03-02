@@ -51,6 +51,7 @@ class ImageClassificationWidget(QWidget):
                 QPushButton {
                     padding: 8px;
                     font-size: 14px;
+                    font-weight: 600;
                     background-color: #f8f9fa;
                     border: 1px solid #dee2e6;
                     border-radius: 4px;
@@ -77,7 +78,7 @@ class ImageClassificationWidget(QWidget):
                 background-color: #f0f0f0;
                 border: 1px solid #bbb;
                 border-radius: 5px;
-                font-weight: 600;
+                font-weight: 500;
             }
         """
         

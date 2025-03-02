@@ -429,7 +429,7 @@ class TabWidget(QWidget):
         for widget in [model_group, params_group, metrics_group]:
             widget.setStyleSheet("""
                 QGroupBox {
-                    font-weight: bold;
+                    font-weight: 600;
                     border: 1px solid #c4c8cc;
                     border-radius: 6px;
                     margin-top: 20px;
