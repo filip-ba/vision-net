@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (
-    QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, 
+    QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QFrame,
     QFileDialog, QLabel, QPushButton, QStackedWidget
 )
 from PyQt6.QtGui import QPixmap, QImageReader, QIcon
@@ -146,6 +146,19 @@ class ImageClassificationWidget(QWidget):
         # Right side - Stacked Plot Widget
         self.plot_stack = QStackedWidget()
         
+        # Create StyledFrame
+        self.plot_frame = QFrame()
+        self.plot_frame.setObjectName("StyledFrame")  
+        self.plot_frame.setStyleSheet("""
+            QFrame#StyledFrame {
+                border: 1px solid #b0b0b0;
+                border-radius: 8px;
+                padding: 5px;
+                background-color: white;
+            }
+        """)
+        frame_layout = QVBoxLayout(self.plot_frame)
+
         # Create plot widgets for each model
         self.plot_widgets = {}
         self.model_names = {
@@ -169,9 +182,8 @@ class ImageClassificationWidget(QWidget):
                 lambda checked, m=model_type: self.switch_plot(m)
             )
         
-        main_layout.addWidget(self.plot_stack)
-        
-        # Set up main widget layout
+        frame_layout.addWidget(self.plot_stack)
+        main_layout.addWidget(self.plot_frame)
         widget_layout = QVBoxLayout(self)
         widget_layout.addWidget(main_group)
         
