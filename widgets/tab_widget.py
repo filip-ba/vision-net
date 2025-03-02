@@ -450,12 +450,12 @@ class TabWidget(QWidget):
     def _create_right_panel(self):
         right_panel = QWidget()
         right_layout = QVBoxLayout(right_panel)
-        right_layout.setSpacing(20) 
+        right_layout.setSpacing(20)
         right_layout.setContentsMargins(15, 30, 10, 10)
-
+        
         # Create StyledFrame
         self.plot_frame = QFrame()
-        self.plot_frame.setObjectName("StyledFrame")  
+        self.plot_frame.setObjectName("StyledFrame")
         self.plot_frame.setStyleSheet("""
             QFrame#StyledFrame {
                 border: 1px solid #b0b0b0;
@@ -464,11 +464,11 @@ class TabWidget(QWidget):
                 background-color: white;
             }
         """)
+        
         frame_layout = QVBoxLayout(self.plot_frame)
         
-        # QStackedWidget for switching between charts
+        # QStackedWidget for switching between plots
         self.plot_stack = QStackedWidget()
-        
         self.plot_widget1 = PlotWidget("Loss History")
         self.plot_widget2 = PlotWidget("Confusion Matrix")
         
@@ -479,16 +479,14 @@ class TabWidget(QWidget):
         # Add plots to QStackedWidget
         self.plot_stack.addWidget(self.plot_widget1)
         self.plot_stack.addWidget(self.plot_widget2)
-        
         frame_layout.addWidget(self.plot_stack)
         
         buttons_layout = QHBoxLayout()
         buttons_layout.setContentsMargins(0, 10, 0, 0)
-        
         self.btn_loss_history = QPushButton("Loss History")
         self.btn_confusion_matrix = QPushButton("Confusion Matrix")
         
-        # Button style
+        # Button style 
         button_style = """
             QPushButton {
                 font-size: 13px;
@@ -496,6 +494,7 @@ class TabWidget(QWidget):
                 background-color: #f8f9fa;
                 border: 1px solid #dee2e6;
                 border-radius: 4px;
+                min-width: 120px;
             }
             QPushButton:hover {
                 background-color: #e9ecef;
@@ -504,14 +503,15 @@ class TabWidget(QWidget):
                 background-color: #007bff;
                 color: white;
                 font-weight: bold;
+                padding: 8px 17px;  
             }
         """
+        
         self.btn_loss_history.setStyleSheet(button_style)
         self.btn_confusion_matrix.setStyleSheet(button_style)
-        
         self.btn_loss_history.setCheckable(True)
         self.btn_confusion_matrix.setCheckable(True)
-        self.btn_loss_history.setChecked(True) 
+        self.btn_loss_history.setChecked(True)
         
         # Plot buttons connects
         self.btn_loss_history.clicked.connect(lambda: self._switch_plot(0))
@@ -529,7 +529,7 @@ class TabWidget(QWidget):
         # Add frame to the right_layout
         right_layout.addWidget(self.plot_frame)
         right_layout.addStretch()
-
+        
         return right_panel
 
     def _switch_plot(self, index):
