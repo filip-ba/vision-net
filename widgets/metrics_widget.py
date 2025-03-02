@@ -24,7 +24,7 @@ class MetricsWidget(QWidget):
                 background-color: #f0f0f0;
                 border: 1px solid #bbb;
                 border-radius: 5px;
-                font-weight: bold;
+                font-weight: 600;
             }
         """
         for label in [self.accuracy_label, self.precision_label, self.recall_label]:

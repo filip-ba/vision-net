@@ -77,7 +77,7 @@ class ImageClassificationWidget(QWidget):
                 background-color: #f0f0f0;
                 border: 1px solid #bbb;
                 border-radius: 5px;
-                font-weight: bold;
+                font-weight: 600;
             }
         """
         
@@ -228,7 +228,7 @@ class ImageClassificationWidget(QWidget):
             
             # Add model name to the title
             model_name = self.model_names.get(model, model)
-            ax.set_title(f'{model_name} - Class Probabilities', fontsize=12, fontweight='bold')
+            ax.set_title(f'{model_name} - Class Probabilities', fontsize=9, fontweight='bold')
             
             ax.set_xlabel('Class', fontsize=8)
             ax.set_ylabel('Probability', fontsize=8)
@@ -256,7 +256,7 @@ class ImageClassificationWidget(QWidget):
             
         # Add model name to the title with larger, bolder font
         model_name = self.model_names.get(model_type, model_type)
-        ax.set_title(f'{model_name} - Class Probabilities', fontsize=12, fontweight='bold')
+        ax.set_title(f'{model_name} - Class Probabilities', fontsize=9, fontweight='bold')
         
         ax.set_xlabel('Class', fontsize=8)
         ax.set_ylabel('Probability', fontsize=8)
