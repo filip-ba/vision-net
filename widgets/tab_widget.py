@@ -1,13 +1,13 @@
 from PyQt6.QtWidgets import ( 
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, 
-    QFileDialog, QStackedWidget, QMessageBox, QFrame )
+    QFileDialog, QStackedWidget, QMessageBox, QFrame, QDialog )
 from PyQt6.QtCore import pyqtSignal
 import os
 import torch
 
 from widgets.progress_dialog import ProgressDialog
 from widgets.plot_widget import PlotWidget
-from widgets.parameter_widget import ParameterWidget
+from widgets.parameter_dialog import ParameterDialog
 from widgets.metrics_widget import MetricsWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
@@ -53,12 +53,6 @@ class TabWidget(QWidget):
 
     def _update_ui_from_model_data(self):
         """Updates UI elements with model data"""
-        # Update parameter widgets if training params exist
-        if self.model.training_params['epochs'] is not None:
-            self.epochs_widget.spinbox.setValue(self.model.training_params['epochs'])
-            self.learning_rate_widget.spinbox.setValue(self.model.training_params['learning_rate'])
-            self.momentum_widget.spinbox.setValue(self.model.training_params['momentum'])    
-
         # Update metrics display if metrics exist
         if self.model.metrics['accuracy'] is not None:
             self.metrics_widget.update_metrics(self.model.metrics)
@@ -121,11 +115,6 @@ class TabWidget(QWidget):
 
         # Reset UI elements
         self.update_model_status("No model loaded", "red")
-
-        # Reset parameters to defaults
-        self.epochs_widget.spinbox.setValue(10)
-        self.learning_rate_widget.spinbox.setValue(0.001)
-        self.momentum_widget.spinbox.setValue(0.9)
 
         # Reset metrics
         self.metrics_widget.reset_metrics()
@@ -262,9 +251,28 @@ class TabWidget(QWidget):
                 self.status_message.emit(f"Error saving model: {str(e)}", 8000)
 
     def train_model(self):
-        epochs = self.epochs_widget.spinbox.value()
-        learning_rate = self.learning_rate_widget.spinbox.value()
-        momentum = self.momentum_widget.spinbox.value()
+        param_dialog = ParameterDialog(self)
+        
+        # If we have model parameters, set them in the dialog
+        if self.model.training_params['epochs'] is not None:
+            param_dialog.set_parameters(
+                epochs=self.model.training_params['epochs'],
+                learning_rate=self.model.training_params['learning_rate'],
+                momentum=self.model.training_params['momentum']
+            )
+        
+        # Show dialog and wait for user response
+        result = param_dialog.exec()
+        
+        # If user clicked Cancel, do nothing
+        if result != QDialog.DialogCode.Accepted:
+            return
+            
+        # Get parameters from dialog
+        params = param_dialog.get_parameters()
+        epochs = params['epochs']
+        learning_rate = params['learning_rate']
+        momentum = params['momentum']
 
         try:
             # Model Initialization
@@ -285,7 +293,7 @@ class TabWidget(QWidget):
             )
 
             result = dialog.start_training(self.model, epochs, learning_rate, momentum)    
-             
+            
             if result is not None:
                 train_loss_history, val_loss_history = result
 
@@ -405,18 +413,6 @@ class TabWidget(QWidget):
         model_layout.setContentsMargins(10,10,10,10)
         model_group.setLayout(model_layout)
 
-        # Parameters
-        params_group = QGroupBox("Parameters")
-        params_layout = QVBoxLayout()
-
-        self.epochs_widget = ParameterWidget("Epochs:", 1, 100, 10)
-        self.learning_rate_widget = ParameterWidget("Learning Rate:", 0.000001, 1.0, 0.001, 6)
-        self.momentum_widget = ParameterWidget("Momentum:", 0.0, 1.0, 0.9, 6)
-        for widget in [self.epochs_widget, self.learning_rate_widget, self.momentum_widget]:
-            params_layout.addWidget(widget)
-        params_group.setLayout(params_layout)
-        params_layout.setContentsMargins(10,10,10,10)
-
         # Metrics Group Box
         self.metrics_widget = MetricsWidget()
         metrics_group = QGroupBox("Model Metrics")
@@ -426,7 +422,7 @@ class TabWidget(QWidget):
         metrics_layout.setContentsMargins(10,10,10,10)
 
         # Add all components to left panel
-        for widget in [model_group, params_group, metrics_group]:
+        for widget in [model_group, metrics_group]:  
             widget.setStyleSheet("""
                 QGroupBox {
                     font-weight: 600;
