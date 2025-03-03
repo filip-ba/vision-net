@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
         icon_path = os.path.join(project_root, "assets", "icon.png")  
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(50, 50, 1000, 900)
+        self.setGeometry(50, 50, 1100, 900)
         
         # Create status bar
         self.status_bar = QStatusBar()
@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         
         # Create tab widget
         self.tab_widget = QTabWidget(self)
-        self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  
+        #self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  
         self.simple_cnn_tab = TabWidget(model_class=SimpleCnnModel)
         self.resnet_tab = TabWidget(model_class=ResNetModel)
         self.efficientnet_tab = TabWidget(model_class=EfficientNetModel)
