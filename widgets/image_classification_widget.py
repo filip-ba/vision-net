@@ -262,12 +262,9 @@ class ImageClassificationWidget(QWidget):
             figure.clear()
             ax = figure.add_subplot(111)
             
-            # Remove title from plot (we use external QLabel now)
             ax.set_title("")
-            
-            # Set consistent axis labels
-            ax.set_xlabel('Class', fontsize=8)
-            ax.set_ylabel('Probability', fontsize=8)
+            ax.set_xlabel('')
+            ax.set_ylabel('Probability', fontsize=9, labelpad=15)
             ax.tick_params(axis='both', labelsize=8)
             ax.set_ylim(0, 1)
             
@@ -290,17 +287,24 @@ class ImageClassificationWidget(QWidget):
         for bar in bars:
             height = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2., height,
-                   f'{height:.0%}',
-                   ha="center", va="bottom")
-        
-        # Remove title from figure (we use label instead)
+                f'{height:.0%}',
+                ha="center", va="bottom")
+
         ax.set_title("")
+        ax.set_xlabel('')
+        ax.set_ylabel('Probability', fontsize=9, labelpad=15)
+        ax.tick_params(axis='both', labelsize=9)
         
-        # Format axes consistently with PlotWidget
-        ax.set_xlabel('Class', fontsize=8)
-        ax.set_ylabel('Probability', fontsize=8)
-        ax.tick_params(axis='both', labelsize=8)
-        ax.set_ylim(0, 1.2)
+        # Dynamic y-axis limit based on data and model type
+        max_prob = max(probabilities)
+        if model_type == 'simple_cnn':
+            # For Simple CNN, set dynamic y-limit with 20% padding above the highest bar
+            y_max = min(1.0, max_prob * 1.2)
+            ax.set_ylim(0, max(y_max, 0.5))  # Ensure minimum height of 0.5 for visibility
+        else:
+            # For more accurate models, maintain consistent 0-1.2 scale
+            ax.set_ylim(0, 1.2)
+        
         plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
         
         # Consistent layout settings

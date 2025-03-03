@@ -44,8 +44,8 @@ class PlotWidget(QWidget):
             
             # Create shortened class names for x-axis (first 4 letters)
             shortened_classes = [cls[:4] for cls in classes]
-            ax.set_xticklabels(shortened_classes)
-            ax.set_yticklabels(classes)
+            ax.set_xticklabels(shortened_classes, fontsize=9)
+            ax.set_yticklabels(classes, fontsize=9)
             
             plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
             for i in range(len(classes)):
