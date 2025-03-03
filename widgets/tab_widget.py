@@ -53,11 +53,17 @@ class TabWidget(QWidget):
 
     def _update_ui_from_model_data(self):
         """Updates UI elements with model data"""
+        # Set model name
+        self.metrics_widget.set_model_name(self.model_name)
+        
         # Update metrics display if metrics exist
         if self.model.metrics['accuracy'] is not None:
             self.metrics_widget.update_metrics(self.model.metrics)
         else:
             self.metrics_widget.reset_metrics()
+        
+        # Update training parameters
+        self.metrics_widget.update_parameters(self.model.training_params)
 
         # Update loss history plot if history exists
         if (self.model.history['train_loss'] is not None and 
@@ -116,8 +122,9 @@ class TabWidget(QWidget):
         # Reset UI elements
         self.update_model_status("No model loaded", "red")
 
-        # Reset metrics
+        # Reset metrics and parameters
         self.metrics_widget.reset_metrics()
+        self.metrics_widget.reset_parameters()
 
         # Reset plots
         self.plot_widget1.plot_loss_history(self.plot_widget1)
@@ -148,20 +155,25 @@ class TabWidget(QWidget):
   
     def _load_default_model(self):
         """Attempts to load the default model on startup"""
-
         # Determine the correct default model path based on model class
         if self.model_class == SimpleCnnModel:
             default_model_path = "./models/trained_models/simple_cnn_default_model.pth"
+            self.model_name = "Simple CNN"
         elif self.model_class == ResNetModel:
             default_model_path = "./models/trained_models/resnet_default_model.pth"
+            self.model_name = "ResNet"
         elif self.model_class == EfficientNetModel:
             default_model_path = "./models/trained_models/efficientnet_default_model.pth"
+            self.model_name = "EfficientNet"
         elif self.model_class == VGG16Model:
             default_model_path = "./models/trained_models/vgg16_default_model.pth"
+            self.model_name = "VGG16"
         else:
             default_model_path = None
             self.update_model_status("No model loaded", "red")
             return
+
+        self.metrics_group.setTitle(f"{self.model_name} Stats")
 
         # Attempt to load default model
         try:
@@ -181,8 +193,8 @@ class TabWidget(QWidget):
             else:
                 self.update_model_status("No model loaded", "red")
         except Exception as e:
-            self.update_model_status("Error initializing model", "red")     
-
+            self.update_model_status("Error initializing model", "red")
+            
     def load_model(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self,
@@ -214,6 +226,9 @@ class TabWidget(QWidget):
                 # Load model and get metadata
                 metadata = self.model.load_model(file_path)
 
+                # Update GroupBox title with model name
+                self.metrics_group.setTitle(f"{self.model_name} Stats")
+
                 # Reset all metrics and plots first
                 self.metrics_widget.reset_metrics()
                 self.plot_widget1.plot_loss_history(self.plot_widget1)
@@ -231,6 +246,7 @@ class TabWidget(QWidget):
                 self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
             except Exception as e:
                 self.status_message.emit(f"Error loading model: {str(e)}", 8000)
+
 
     def save_model(self):
         if not self.model_loaded:
@@ -414,15 +430,16 @@ class TabWidget(QWidget):
         model_group.setLayout(model_layout)
 
         # Metrics Group Box
-        self.metrics_widget = MetricsWidget()
-        metrics_group = QGroupBox("Model Metrics")
+        self.model_name = ""
+        self.metrics_group = QGroupBox(f"{self.model_name} Stats")
         metrics_layout = QVBoxLayout()
+        self.metrics_widget = MetricsWidget()
         metrics_layout.addWidget(self.metrics_widget)
-        metrics_group.setLayout(metrics_layout)
+        self.metrics_group.setLayout(metrics_layout)
         metrics_layout.setContentsMargins(10,10,10,10)
 
         # Add all components to left panel
-        for widget in [model_group, metrics_group]:  
+        for widget in [model_group, self.metrics_group]:  
             widget.setStyleSheet("""
                 QGroupBox {
                     font-weight: 600;

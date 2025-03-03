@@ -8,6 +8,7 @@ import numpy as np
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 from PIL import Image
 from abc import ABC, abstractmethod
+import time
 
 
 class BaseModel(ABC):
@@ -29,7 +30,8 @@ class BaseModel(ABC):
         self.training_params = {
             'epochs': None,
             'learning_rate': None,
-            'momentum': None
+            'momentum': None,
+            'training_time': None 
         }
         self.metrics = {
             'accuracy': None,
@@ -93,9 +95,13 @@ class BaseModel(ABC):
         self.training_params = {
             'epochs': epochs,
             'learning_rate': learning_rate,
-            'momentum': momentum
+            'momentum': momentum,
+            'training_time': None 
         }
         
+        # Measure time
+        start_time = time.time()
+
         train_loss_history = []
         val_loss_history = []
         
@@ -130,6 +136,11 @@ class BaseModel(ABC):
             train_loss_history.append(train_loss / len(self.trainloader))
             val_loss_history.append(val_loss / len(self.valloader))
             
+        # End measuring
+        end_time = time.time()
+        training_time = end_time - start_time
+        self.training_params['training_time'] = training_time
+
         self.history = {
             'train_loss': train_loss_history,
             'val_loss': val_loss_history
