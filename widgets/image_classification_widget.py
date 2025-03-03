@@ -1,8 +1,8 @@
 from PyQt6.QtWidgets import (
     QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QFrame,
-    QFileDialog, QLabel, QPushButton, QStackedWidget
+    QFileDialog, QLabel, QPushButton, QStackedWidget, QSizePolicy
 )
-from PyQt6.QtGui import QPixmap, QImageReader, QIcon
+from PyQt6.QtGui import QPixmap, QImageReader, QIcon, QFont
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
 from matplotlib.figure import Figure
 import os, random
@@ -19,6 +19,15 @@ class ImageClassificationWidget(QWidget):
         super().__init__()
         self.current_image_path = None
         self.active_plot_button = None  # Track currently active plot button
+        
+        # Define model names first (moved up from below)
+        self.model_names = {
+            'simple_cnn': 'Simple CNN',
+            'resnet': 'ResNet',
+            'efficientnet': 'EfficientNet',
+            'vgg16': 'VGG16'
+        }
+        
         self._create_ui()
         
     def _create_ui(self):
@@ -102,12 +111,7 @@ class ImageClassificationWidget(QWidget):
             }
         """
         
-        for model_type, label_text in {
-            'simple_cnn': 'Simple CNN',
-            'resnet': 'ResNet',
-            'efficientnet': 'EfficientNet',
-            'vgg16': 'VGG16'
-        }.items():
+        for model_type, label_text in self.model_names.items():
             # Create container for each model
             container = QWidget()
             container_layout = QHBoxLayout(container)
@@ -144,9 +148,9 @@ class ImageClassificationWidget(QWidget):
         middle_layout.addStretch()
         main_layout.addLayout(middle_layout)
         
-        # Right side - Stacked Plot Widget
-        self.plot_stack = QStackedWidget()
-        
+        # Right side - Stacked Plot Widget with consistent sizing
+        right_layout = QVBoxLayout()
+  
         # Create StyledFrame
         self.plot_frame = QFrame()
         self.plot_frame.setObjectName("StyledFrame")  
@@ -158,20 +162,31 @@ class ImageClassificationWidget(QWidget):
                 background-color: white;
             }
         """)
+        self.plot_frame.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         frame_layout = QVBoxLayout(self.plot_frame)
+        
+        # Create the title labels for each plot 
+        self.plot_titles = {}
+        for model_type, title in self.model_names.items():
+            title_label = QLabel(f"{title} - Class Probabilities")
+            title_label.setFont(QFont('Arial', 11, QFont.Weight.Bold))
+            title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            title_label.setVisible(False)  # Initially hidden
+            self.plot_titles[model_type] = title_label
+            frame_layout.addWidget(title_label)
 
+        # Create plot stack
+        self.plot_stack = QStackedWidget()
+        self.plot_stack.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        
         # Create plot widgets for each model
         self.plot_widgets = {}
-        self.model_names = {
-            'simple_cnn': 'Simple CNN',
-            'resnet': 'ResNet',
-            'efficientnet': 'EfficientNet',
-            'vgg16': 'VGG16'
-        }
         
-        for model_type in ['simple_cnn', 'resnet', 'efficientnet', 'vgg16']:
-            figure = Figure(figsize=(5, 4))
+        for model_type in self.model_names.keys():
+            # Create figure with fixed size ratio
+            figure = Figure(figsize=(5, 4), dpi=100)
             canvas = ScrollableFigureCanvas(figure)
+            canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
             self.plot_widgets[model_type] = {'figure': figure, 'canvas': canvas}
             self.plot_stack.addWidget(canvas)
             
@@ -184,7 +199,9 @@ class ImageClassificationWidget(QWidget):
             )
         
         frame_layout.addWidget(self.plot_stack)
-        main_layout.addWidget(self.plot_frame)
+        right_layout.addWidget(self.plot_frame)
+        main_layout.addLayout(right_layout)
+        
         widget_layout = QVBoxLayout(self)
         widget_layout.addWidget(main_group)
         
@@ -202,6 +219,10 @@ class ImageClassificationWidget(QWidget):
         """Switch to the specified plot and update button states"""
         # Set the current widget in the stack
         self.plot_stack.setCurrentWidget(self.plot_widgets[model_type]['canvas'])
+        
+        # Update title visibility
+        for plot_type, title in self.plot_titles.items():
+            title.setVisible(plot_type == model_type)
         
         # Update button states
         for btn_type, btn in self.plot_buttons.items():
@@ -227,14 +248,17 @@ class ImageClassificationWidget(QWidget):
             figure.clear()
             ax = figure.add_subplot(111)
             
-            # Add model name to the title
-            model_name = self.model_names.get(model, model)
-            ax.set_title(f'{model_name} - Class Probabilities', fontsize=9, fontweight='bold')
+            # Remove title from plot (we use external QLabel now)
+            ax.set_title("")
             
+            # Set consistent axis labels
             ax.set_xlabel('Class', fontsize=8)
             ax.set_ylabel('Probability', fontsize=8)
             ax.tick_params(axis='both', labelsize=8)
             ax.set_ylim(0, 1)
+            
+            # Consistent layout settings
+            figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)
             figure.tight_layout()
             self.plot_widgets[model]['canvas'].draw()
 
@@ -253,17 +277,20 @@ class ImageClassificationWidget(QWidget):
             height = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2., height,
                    f'{height:.0%}',
-                   ha='center', va='bottom')
-            
-        # Add model name to the title with larger, bolder font
-        model_name = self.model_names.get(model_type, model_type)
-        ax.set_title(f'{model_name} - Class Probabilities', fontsize=9, fontweight='bold')
+                   ha="center", va="bottom")
         
+        # Remove title from figure (we use label instead)
+        ax.set_title("")
+        
+        # Format axes consistently with PlotWidget
         ax.set_xlabel('Class', fontsize=8)
         ax.set_ylabel('Probability', fontsize=8)
         ax.tick_params(axis='both', labelsize=8)
         ax.set_ylim(0, 1.2)
-        plt.setp(ax.get_xticklabels(), rotation=45)
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+        
+        # Consistent layout settings
+        figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)
         figure.tight_layout()
         self.plot_widgets[model_type]['canvas'].draw()
 
