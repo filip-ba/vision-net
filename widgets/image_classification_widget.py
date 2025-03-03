@@ -81,7 +81,7 @@ class ImageClassificationWidget(QWidget):
                 font-weight: 500;
             }
         """
-        
+
         # Define the button styles
         self.button_normal_style = """
             QPushButton {
@@ -115,7 +115,7 @@ class ImageClassificationWidget(QWidget):
             # Create and style label with new style
             label = QLabel(f"{label_text}: None")
             label.setStyleSheet(self.label_style)
-            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            label.setAlignment(Qt.AlignmentFlag.AlignLeft)
             label.setFixedSize(200, 40)
             container_layout.addWidget(label)
             
@@ -335,4 +335,4 @@ class ImageClassificationWidget(QWidget):
         """Update the classification result for a specific model"""
         if model_type in self.result_labels:
             model_name = self.model_names[model_type]
-            self.result_labels[model_type].setText(f"{model_name}:{result}")
+            self.result_labels[model_type].setText(f"{model_name}: {result}")
