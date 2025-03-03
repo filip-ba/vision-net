@@ -33,10 +33,14 @@ class ImageClassificationWidget(QWidget):
     def _create_ui(self):
         # Main group box
         main_group = QGroupBox("Image Classification")
+        main_group.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         main_layout = QHBoxLayout(main_group)
         
         # Left side - Image and buttons
         left_layout = QVBoxLayout()
+        left_widget = QWidget()
+        left_widget.setLayout(left_layout)
+        left_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         
         # Image preview
         self.image_display = QLabel()
@@ -72,10 +76,13 @@ class ImageClassificationWidget(QWidget):
             button_layout.addWidget(btn)
         left_layout.addLayout(button_layout)
         left_layout.addStretch()
-        main_layout.addLayout(left_layout)
         
         # Middle - Result labels with Show Plot buttons
         middle_layout = QVBoxLayout()
+        middle_widget = QWidget()
+        middle_widget.setLayout(middle_layout)
+        middle_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        
         self.result_labels = {}
         self.plot_buttons = {}
         
@@ -146,10 +153,12 @@ class ImageClassificationWidget(QWidget):
             middle_layout.addWidget(container)
         
         middle_layout.addStretch()
-        main_layout.addLayout(middle_layout)
         
         # Right side - Stacked Plot Widget with consistent sizing
         right_layout = QVBoxLayout()
+        right_widget = QWidget()
+        right_widget.setLayout(right_layout)
+        right_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
   
         # Create StyledFrame
         self.plot_frame = QFrame()
@@ -200,8 +209,13 @@ class ImageClassificationWidget(QWidget):
         
         frame_layout.addWidget(self.plot_stack)
         right_layout.addWidget(self.plot_frame)
-        main_layout.addLayout(right_layout)
         
+        # Set fixed size distribution between sections
+        main_layout.addWidget(left_widget, 1)    # 10% of width
+        main_layout.addWidget(middle_widget, 2)  # 20% of width 
+        main_layout.addWidget(right_widget, 7)   # 70% of width
+        
+        # Main widget layout
         widget_layout = QVBoxLayout(self)
         widget_layout.addWidget(main_group)
         

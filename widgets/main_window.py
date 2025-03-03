@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
-                             QSizePolicy, QScrollArea, QStatusBar)
+                             QSizePolicy, QScrollArea, QStatusBar, QSplitter)
 from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtCore import Qt
 import os
 
 from widgets.tab_widget import TabWidget
@@ -38,9 +39,13 @@ class MainWindow(QMainWindow):
         scroll_area.setWidget(main_widget)
         main_layout = QVBoxLayout(main_widget)
         
+        # Create a splitter to divide the screen 50/50
+        self.splitter = QSplitter(Qt.Orientation.Vertical)
+        self.splitter.setChildrenCollapsible(False)
+        
         # Create tab widget
-        self.tab_widget = QTabWidget(self)
-        #self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  
+        self.tab_widget = QTabWidget()
+        self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  
         self.simple_cnn_tab = TabWidget(model_class=SimpleCnnModel)
         self.resnet_tab = TabWidget(model_class=ResNetModel)
         self.efficientnet_tab = TabWidget(model_class=EfficientNetModel)
@@ -50,11 +55,20 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.resnet_tab, "ResNet")
         self.tab_widget.addTab(self.efficientnet_tab, "EfficientNet-B0")
         self.tab_widget.addTab(self.vgg16_tab, "VGG16")
-        main_layout.addWidget(self.tab_widget)
         
         # Image classification widget
         self.image_classification_widget = ImageClassificationWidget()
-        main_layout.addWidget(self.image_classification_widget)
+        self.image_classification_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        
+        # Add widgets to splitter
+        self.splitter.addWidget(self.tab_widget)
+        self.splitter.addWidget(self.image_classification_widget)
+        
+        # Set initial sizes to 50/50
+        self.splitter.setSizes([500, 500])
+        
+        # Add splitter to main layout
+        main_layout.addWidget(self.splitter)
 
         # Connects
         self.image_classification_widget.classify_clicked.connect(self._classify_all) 
