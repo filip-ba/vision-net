@@ -41,15 +41,19 @@ class PlotWidget(QWidget):
             cbar.ax.tick_params(labelsize=8)
             ax.set_xticks(np.arange(len(classes)))
             ax.set_yticks(np.arange(len(classes)))
-            ax.set_xticklabels(classes)
+            
+            # Create shortened class names for x-axis (first 4 letters)
+            shortened_classes = [cls[:4] for cls in classes]
+            ax.set_xticklabels(shortened_classes)
             ax.set_yticklabels(classes)
+            
             plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
             for i in range(len(classes)):
                 for j in range(len(classes)):
                     ax.text(j, i, conf_mat[i, j], 
                         ha="center", va="center",
                         color="white" if conf_mat[i, j] > conf_mat.max() / 2 else "black")  
-                           
+                        
         plot_widget.canvas.draw()
 
     def plot_loss_history(self, plot_widget, epochs=None, train_loss_history=None, val_loss_history=None):
@@ -57,8 +61,8 @@ class PlotWidget(QWidget):
         ax = plot_widget.figure.add_subplot(111)
         plot_widget.figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)
         ax.clear()
-        ax.set_xlabel('Epochs')
-        ax.set_ylabel('Loss')
+        ax.set_xlabel('Epochs', labelpad=15)
+        ax.set_ylabel('Loss', labelpad=15)
         ax.grid(True)
 
         if train_loss_history is not None and val_loss_history is not None:

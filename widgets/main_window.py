@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
         self.splitter.addWidget(self.image_classification_widget)
         
         # Set initial sizes to 50/50
-        self.splitter.setSizes([500, 500])
+        self.splitter.setSizes([550, 450])
         
         # Add splitter to main layout
         main_layout.addWidget(self.splitter)
