@@ -136,13 +136,7 @@ class TabWidget(QWidget):
 
     def update_model_status(self, status, color="red"):
         self.model_status.setText(status)
-        self.model_status.setStyleSheet(f"""
-            QLabel {{
-                font-weight: bold;
-                color: {color};
-                padding: 5px;
-            }}
-        """)
+        self.model_status.setStyleSheet(f"color: {color};")
 
     def _load_dataset(self):
         """Loads the dataset on startup"""
@@ -392,39 +386,14 @@ class TabWidget(QWidget):
 
         # Add buttons to layout
         for btn in [self.train_model_btn, self.load_model_btn, self.save_model_btn, self.clear_model_btn]:
-            btn.setStyleSheet("""
-                QPushButton {
-                    font-size: 14px;
-                    padding: 8px;
-                    background-color: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    border-radius: 4px;
-                }
-                QPushButton:hover {
-                    background-color: #e9ecef;
-                }
-                QPushButton:disabled {
-                    background-color: #e9ecef;
-                    color: #6c757d;
-                }
-            """)
             buttons_layout.addWidget(btn)
-
         model_layout.addLayout(buttons_layout)
 
         # Status layout 
         status_layout = QHBoxLayout()
         self.model_status = QLabel("No model loaded")
-        self.model_status.setStyleSheet("""
-            QLabel {
-                font-weight: bold;
-                color: #dc3545;
-                padding: 5px;
-            }
-        """)
-
+        self.model_status.setObjectName("ModelStatus")
         status_layout.addWidget(self.model_status)
-
         model_layout.addLayout(status_layout)
         model_layout.setContentsMargins(10,10,10,10)
         model_group.setLayout(model_layout)
@@ -440,22 +409,7 @@ class TabWidget(QWidget):
 
         # Add all components to left panel
         for widget in [model_group, self.metrics_group]:  
-            widget.setStyleSheet("""
-                QGroupBox {
-                    font-weight: 600;
-                    border: 1px solid #c4c8cc;
-                    border-radius: 6px;
-                    margin-top: 20px;
-                    padding: 5px;
-                }
-                QGroupBox::title {
-                    subcontrol-origin: margin;
-                    left: 0px;
-                    padding: 0 3px 0 3px;
-                }
-            """)
             left_layout.addWidget(widget)
-
         left_layout.addStretch()
 
         return left_panel
@@ -469,15 +423,7 @@ class TabWidget(QWidget):
         # Create StyledFrame
         self.plot_frame = QFrame()
         self.plot_frame.setObjectName("StyledFrame")
-        self.plot_frame.setStyleSheet("""
-            QFrame#StyledFrame {
-                border: 1px solid #b0b0b0;
-                border-radius: 8px;
-                padding: 5px;
-                background-color: white;
-            }
-        """)
-        
+
         frame_layout = QVBoxLayout(self.plot_frame)
         
         # QStackedWidget for switching between charts
@@ -494,39 +440,17 @@ class TabWidget(QWidget):
         self.plot_stack.addWidget(self.plot_widget1) 
         frame_layout.addWidget(self.plot_stack)
         
+        # Buttons
         buttons_layout = QHBoxLayout()
         buttons_layout.setContentsMargins(0, 10, 0, 0)
         self.btn_confusion_matrix = QPushButton("Confusion Matrix")  
+        self.btn_confusion_matrix.setObjectName("Plot")
         self.btn_loss_history = QPushButton("Loss History")
-        
-        # Button style
-        button_style = """
-            QPushButton {
-                font-size: 13px;
-                padding: 8px 15px;
-                background-color: #f8f9fa;
-                border: 1px solid #dee2e6;
-                border-radius: 4px;
-                min-width: 120px;
-            }
-            QPushButton:hover {
-                background-color: #e9ecef;
-            }
-            QPushButton:checked {
-                background-color: #007bff;
-                color: white;
-                font-weight: bold;
-                padding: 8px 17px;  /* Mírně zvětšené padding pro checked stav */
-            }
-        """
-        
-        self.btn_confusion_matrix.setStyleSheet(button_style)
-        self.btn_loss_history.setStyleSheet(button_style)
+        self.btn_loss_history.setObjectName("Plot")
         self.btn_confusion_matrix.setCheckable(True)
         self.btn_loss_history.setCheckable(True)
         self.btn_confusion_matrix.setChecked(True)  
-        
-        # Plot buttons connects 
+
         self.btn_confusion_matrix.clicked.connect(lambda: self._switch_plot(0))  
         self.btn_loss_history.clicked.connect(lambda: self._switch_plot(1)) 
         

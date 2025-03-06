@@ -60,19 +60,6 @@ class ImageClassificationWidget(QWidget):
         self.load_btn = QPushButton("Load Image")
         self.classify_btn = QPushButton("Classify All")
         for btn in [self.load_btn, self.classify_btn]:
-            btn.setStyleSheet("""
-                QPushButton {
-                    padding: 8px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    background-color: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    border-radius: 4px;
-                }
-                QPushButton:hover {
-                    background-color: #e9ecef;
-                }
-            """)
             button_layout.addWidget(btn)
         left_layout.addLayout(button_layout)
         left_layout.addStretch()

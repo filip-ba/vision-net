@@ -1,3 +1,4 @@
+/*default buttons*/
 QPushButton {
     font-size: 14px;
     font-weight: 600;
@@ -14,4 +15,53 @@ QPushButton:hover {
 QPushButton:disabled {
     background-color: #e9ecef;
     color: #6c757d;
+}
+
+/*plot frame*/
+QFrame[objectName^="StyledFrame"] {
+    border: 1px solid #b0b0b0;
+    border-radius: 8px;
+    padding: 5px;
+    background-color: white;
+}
+
+/*plot buttons*/
+QPushButton[objectName^="Plot"] {
+    font-size: 13px;
+    padding: 8px 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    min-width: 120px;
+}
+
+QPushButton:hover[objectName^="Plot"] {
+    background-color: #e9ecef;
+}
+
+QPushButton:checked[objectName^="Plot"] {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    padding: 8px 17px;
+}
+
+/*group box*/
+QGroupBox {
+    font-weight: 600;
+    border: 1px solid #c4c8cc;
+    border-radius: 6px;
+    margin-top: 20px;
+    padding: 5px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 0px;
+    padding: 0 3px 0 3px;
+}
+
+QLabel[objectName^="ModelStatus"] {
+    font-weight: bold;
+    padding: 5px;
 }
