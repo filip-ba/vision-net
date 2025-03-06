@@ -34,13 +34,16 @@ class ImageClassificationWidget(QWidget):
         # Main group box
         main_group = QGroupBox("Image Classification")
         main_group.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        main_layout = QHBoxLayout(main_group)
+        main_layout = QVBoxLayout(main_group)
+        
+        # Top section - Image, buttons, and result labels
+        top_layout = QHBoxLayout()
         
         # Left side - Image and buttons
         left_layout = QVBoxLayout()
         left_widget = QWidget()
         left_widget.setLayout(left_layout)
-        left_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        left_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         
         # Image preview
         self.image_display = QLabel()
@@ -68,12 +71,12 @@ class ImageClassificationWidget(QWidget):
         middle_layout = QVBoxLayout()
         middle_widget = QWidget()
         middle_widget.setLayout(middle_layout)
-        middle_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        middle_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         
         self.result_labels = {}
         self.plot_buttons = {}
         
-        # Define new label style based on MetricsWidget
+        # Define label style based on MetricsWidget
         self.label_style = """
             QLabel {
                 font-size: 14px;
@@ -141,24 +144,18 @@ class ImageClassificationWidget(QWidget):
         
         middle_layout.addStretch()
         
-        # Right side - Stacked Plot Widget with consistent sizing
-        right_layout = QVBoxLayout()
-        right_widget = QWidget()
-        right_widget.setLayout(right_layout)
-        right_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-  
+        # Add widgets to top layout
+        top_layout.addWidget(left_widget, 1)
+        top_layout.addWidget(middle_widget, 2)
+        
+        # Bottom section - Plot Widget with fixed size
+        bottom_layout = QVBoxLayout()
+        
         # Create StyledFrame
         self.plot_frame = QFrame()
-        self.plot_frame.setObjectName("StyledFrame")  
-        self.plot_frame.setStyleSheet("""
-            QFrame#StyledFrame {
-                border: 1px solid #b0b0b0;
-                border-radius: 8px;
-                padding: 5px;
-                background-color: white;
-            }
-        """)
+        self.plot_frame.setObjectName("StyledFrame")
         self.plot_frame.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.plot_frame.setMaximumHeight(400)  # Set maximum height for the plot
         frame_layout = QVBoxLayout(self.plot_frame)
         
         # Create the title labels for each plot 
@@ -195,12 +192,11 @@ class ImageClassificationWidget(QWidget):
             )
         
         frame_layout.addWidget(self.plot_stack)
-        right_layout.addWidget(self.plot_frame)
+        bottom_layout.addWidget(self.plot_frame)
         
-        # Set fixed size distribution between sections
-        main_layout.addWidget(left_widget, 1)    # 10% of width
-        main_layout.addWidget(middle_widget, 2)  # 20% of width 
-        main_layout.addWidget(right_widget, 7)   # 70% of width
+        # Add both layouts to main layout
+        main_layout.addLayout(top_layout)
+        main_layout.addLayout(bottom_layout)
         
         # Main widget layout
         widget_layout = QVBoxLayout(self)

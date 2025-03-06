@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
-                             QSizePolicy, QScrollArea, QStatusBar, QSplitter)
-from PyQt6.QtGui import QIcon, QAction
+                             QSizePolicy, QSpacerItem, QStatusBar, QFrame,
+                             QHBoxLayout, QStackedWidget, QPushButton, QLabel)
+from PyQt6.QtGui import QIcon, QAction, QFont, QPixmap
 from PyQt6.QtCore import Qt
 import os
 
@@ -23,27 +24,33 @@ class MainWindow(QMainWindow):
         icon_path = os.path.join(project_root, "assets", "icon.png")  
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(50, 50, 1100, 900)
+        self.setGeometry(50, 50, 1200, 600)
         
-        # Create status bar
-        self.status_bar = QStatusBar()
-        self.setStatusBar(self.status_bar)
+        # Zakažeme standardní status bar
+        # self.setStatusBar(None) - tohle nefunguje, status bar potřebujeme vytvořit později
         
-        # Scroll Area Setup
-        scroll_area = QScrollArea(self)
-        scroll_area.setWidgetResizable(True)
-        self.setCentralWidget(scroll_area)
+        # Hlavní widget pro layout
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
         
-        # Main widget inside scroll area
-        main_widget = QWidget()
-        scroll_area.setWidget(main_widget)
-        main_layout = QVBoxLayout(main_widget)
+        # Hlavní layout pro celé okno
+        main_layout = QHBoxLayout(central_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
         
-        # Create a splitter to divide the screen 50/50
-        self.splitter = QSplitter(Qt.Orientation.Vertical)
-        self.splitter.setChildrenCollapsible(False)
+        # Vytvoření sidebar
+        self.sidebar = self._create_sidebar()
         
-        # Create tab widget
+        # Vytvoření kontejneru pro obsah a status bar
+        content_container = QWidget()
+        content_layout = QVBoxLayout(content_container)
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(0)
+        
+        # Vytvoření stacked widgetu pro obsah
+        self.content_stack = QStackedWidget()
+        
+        # Vytvoření tab widgetu (první stránka)
         self.tab_widget = QTabWidget()
         self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  
         self.simple_cnn_tab = TabWidget(model_class=SimpleCnnModel)
@@ -56,43 +63,121 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.efficientnet_tab, "EfficientNet-B0")
         self.tab_widget.addTab(self.vgg16_tab, "VGG16")
         
-        # Image classification widget
+        # Vytvoření widgetu pro klasifikaci obrázků (druhá stránka)
         self.image_classification_widget = ImageClassificationWidget()
         self.image_classification_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
-        # Add widgets to splitter
-        self.splitter.addWidget(self.tab_widget)
-        self.splitter.addWidget(self.image_classification_widget)
+        # Přidání widgetů do stacku
+        self.content_stack.addWidget(self.tab_widget)
+        self.content_stack.addWidget(self.image_classification_widget)
         
-        # Set initial sizes to 50/50
-        self.splitter.setSizes([550, 450])
+        # Vytvoření status baru pro pravou část
+        self.status_bar = QStatusBar()
+        self.status_bar.setObjectName("status-bar")
         
-        # Add splitter to main layout
-        main_layout.addWidget(self.splitter)
-
-        # Connects
+        # Přidání obsahu a status baru do kontejneru obsahu
+        content_layout.addWidget(self.content_stack, 1)
+        content_layout.addWidget(self.status_bar, 0)
+        
+        # Přidání sidebaru a kontejneru obsahu do hlavního layoutu
+        main_layout.addWidget(self.sidebar, 1)  # Sidebar zabere 1 díl
+        main_layout.addWidget(content_container, 5)  # Obsah zabere 5 dílů
+        
+        # Propojení signálů
         self.image_classification_widget.classify_clicked.connect(self._classify_all) 
         self.image_classification_widget.image_loaded.connect(self.update_status_bar) 
         self._connect_tab_status_signals()
         
-        # MenuBar setup
-        self._setup_menu()
+        # Nastavení menu
+        #self._setup_menu()
+
+    def _create_sidebar(self):
+        sidebar = QWidget()
+        sidebar.setObjectName("sidebar")
+        sidebar.setMinimumWidth(200)
+        sidebar.setMaximumWidth(250)
+        
+        sidebar_layout = QVBoxLayout(sidebar)
+        sidebar_layout.setContentsMargins(0, 0, 0, 0)
+        sidebar_layout.setSpacing(0)
+        
+        # Přidání loga/hlavičky do sidebaru
+        logo_widget = QWidget()
+        logo_widget.setObjectName("logo-widget")
+        logo_widget.setMinimumHeight(80)
+        logo_layout = QVBoxLayout(logo_widget)
+        
+        # Logo a název aplikace
+        title_label = QLabel("FruitVegNet")
+        title_label.setObjectName("app-title")
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        logo_layout.addWidget(title_label)
+        
+        sidebar_layout.addWidget(logo_widget)
+
+        separator = QFrame()
+        separator.setFrameShape(QFrame.Shape.HLine)
+        separator.setFrameShadow(QFrame.Shadow.Plain)
+        separator.setStyleSheet("color: #e3e3e3; background-color: #f2f2f2; height: 1px; margin-left: 10px; margin-right: 10px;")
+
+        sidebar_layout.addWidget(separator)
+
+        # Přidání mezery pod čárou
+        spacer = QSpacerItem(20, 30, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        sidebar_layout.addItem(spacer)
+        
+        # Přidání navigačních tlačítek
+        models_btn = self._create_sidebar_button("Models", 0)
+        classify_btn = self._create_sidebar_button("Classification", 1)
+        
+        sidebar_layout.addWidget(models_btn)
+        sidebar_layout.addWidget(classify_btn)
+        
+        # Přidání roztažení, aby bylo tlačítka nahoře
+        sidebar_layout.addStretch()
+        
+        return sidebar
+    
+    def _create_sidebar_button(self, text, page_index):
+        button = QPushButton(text)
+        button.setObjectName("sidebar-button")
+        button.setMinimumHeight(50)
+        button.setCheckable(True)
+        
+        # Nastavení prvního tlačítka jako označeného
+        if page_index == 0:
+            button.setChecked(True)
+        
+        # Připojení tlačítka k přepínání stránek
+        button.clicked.connect(lambda: self._switch_page(page_index, button))
+        
+        return button
+    
+    def _switch_page(self, index, clicked_button):
+        # Přepnutí na vybranou stránku
+        self.content_stack.setCurrentIndex(index)
+        
+        # Aktualizace stavu tlačítek
+        for i in range(self.sidebar.layout().count() - 1):  # Přeskočení stretch itemu
+            item = self.sidebar.layout().itemAt(i)
+            if item and isinstance(item.widget(), QPushButton):
+                item.widget().setChecked(item.widget() == clicked_button)
         
     def _connect_tab_status_signals(self):
-        """Connect signals from each tab to the main status bar"""
+        """Propojení signálů z každé záložky do hlavního status baru"""
         tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
         for tab in tabs:
             tab.status_message.connect(self.update_status_bar)
 
     def update_status_bar(self, message, timeout=8000):
-        """Update the main window status bar with a message"""
+        """Aktualizace hlavního status baru zprávou"""
         self.status_bar.showMessage(message, timeout)
         
     def _setup_menu(self):
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu("File")
         
-        # Export and import actions
+        # Export a import akcí
         self.save_action = QAction("Save Model", self)
         self.load_action = QAction("Load Model", self)
         file_menu.addAction(self.save_action)
@@ -101,13 +186,13 @@ class MainWindow(QMainWindow):
         self.load_action.triggered.connect(self._load_current_model)
         file_menu.addSeparator()
         
-        # Quit action
+        # Akce ukončení
         self.quit_action = QAction("Quit", self)
         file_menu.addAction(self.quit_action)  
         self.quit_action.triggered.connect(self.close)
             
     def _classify_all(self):
-        """Classify the current image using all loaded models"""
+        """Klasifikace aktuálního obrázku pomocí všech načtených modelů"""
         if not self.image_classification_widget.current_image_path:
             self.update_status_bar("No image loaded for classification")
             return
@@ -123,15 +208,15 @@ class MainWindow(QMainWindow):
         for tab, model_info in model_map.items():
             if tab.model_loaded:
                 try:
-                    # Get prediction
+                    # Získání predikce
                     result = tab.model.predict_image(self.image_classification_widget.current_image_path)
                     predicted_class = result['class']
                     probabilities = result['probabilities']
                     
-                    # Update result label
+                    # Aktualizace výsledku
                     self.image_classification_widget.update_result(model_info['type'], predicted_class)
                     
-                    # Update plot for this model
+                    # Aktualizace grafu pro tento model
                     self.image_classification_widget.update_plot(model_info['type'], tab.model.classes, probabilities)
                     
                     results.append(f"{model_info['name']}: {predicted_class}")
@@ -145,13 +230,13 @@ class MainWindow(QMainWindow):
                 self.image_classification_widget.update_result(model_info['type'], "No model")
 
     def _save_current_model(self):
-        """Save the model from the currently active tab"""
+        """Uložení modelu z aktuálně aktivní záložky"""
         current_tab = self.tab_widget.currentWidget()
         if current_tab:
             current_tab.save_model()
             
     def _load_current_model(self):
-        """Load a model into the currently active tab"""
+        """Načtení modelu do aktuálně aktivní záložky"""
         current_tab = self.tab_widget.currentWidget()
         if current_tab:
             current_tab.load_model()
