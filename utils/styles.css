@@ -123,11 +123,18 @@ QGroupBox[objectName^="ModelInfo"]  {
 }
 
 /*------------------------------------------------- Label styling -------------------------------------------------*/
+QLabel {
+    font-size: 14px;
+    background-color: white;
+    color: #2d2d2d;
+}
+
 QLabel[objectName^="ModelStatus"] {
     font-weight: bold;
     margin: 0px 10px 0px 10px;
     padding: 0px;
 }
+
 QLabel[objectName^="ModelFileLabel"] {
     margin: 0px 10px 0px 10px;
     padding: 0px;
