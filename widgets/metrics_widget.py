@@ -1,5 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QGroupBox
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QFrame
 from PyQt6.QtCore import Qt
+from utils.custom_separator import create_separator
 
 
 class MetricsWidget(QWidget):
@@ -49,6 +50,7 @@ class MetricsWidget(QWidget):
         metrics_grid.addWidget(self.accuracy_label, 0, 0)
         metrics_grid.addWidget(self.precision_label, 0, 1)
         metrics_grid.addWidget(self.recall_label, 0, 2)
+        metrics_grid.setSpacing(10)
         layout.addLayout(metrics_grid)
         
         # Add training parameters section
@@ -56,8 +58,8 @@ class MetricsWidget(QWidget):
             QLabel {
                 font-size: 13px;
                 padding: 6px;
-                background-color: #f8f8f8;
-                border: 1px solid #ddd;
+                background-color: #ffffff;
+                border: 0px solid #ddd;
                 border-radius: 4px;
             }
         """
@@ -75,7 +77,8 @@ class MetricsWidget(QWidget):
         for label in [self.time_label, self.epochs_label, self.lr_label, self.momentum_label]:
             label.setStyleSheet(param_style)
             parameters_layout.addWidget(label)
-        
+            parameters_layout.addWidget(create_separator())
+
         layout.addLayout(parameters_layout)
 
     def update_metrics(self, metrics):
