@@ -9,6 +9,7 @@ from widgets.progress_dialog import ProgressDialog
 from widgets.plot_widget import PlotWidget
 from widgets.parameter_dialog import ParameterDialog
 from widgets.metrics_widget import MetricsWidget
+from widgets.model_info_widget import ModelInfoWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
 from models.efficientnet_model import EfficientNetModel
@@ -121,6 +122,7 @@ class TabWidget(QWidget):
 
         # Reset UI elements
         self.update_model_status("No model loaded", "red")
+        self.model_info_widget.set_model_file("Model File: None")
 
         # Reset metrics and parameters
         self.metrics_widget.reset_metrics()
@@ -135,8 +137,10 @@ class TabWidget(QWidget):
         self.clear_model_btn.setEnabled(False)
 
     def update_model_status(self, status, color="red"):
-        self.model_status.setText(status)
-        self.model_status.setStyleSheet(f"color: {color};")
+        """
+        Updates the model status in the ModelInfoWidget.
+        """
+        self.model_info_widget.set_model_status(status, color)
 
     def _load_dataset(self):
         """Loads the dataset on startup"""
@@ -168,6 +172,7 @@ class TabWidget(QWidget):
             return
 
         self.metrics_group.setTitle(f"{self.model_name} Stats")
+        self.model_info_widget.set_model_file(default_model_path.split("/")[-1]) 
 
         # Attempt to load default model
         try:
@@ -223,6 +228,9 @@ class TabWidget(QWidget):
                 # Update GroupBox title with model name
                 self.metrics_group.setTitle(f"{self.model_name} Stats")
 
+                # Update the model name label
+                self.model_info_widget.set_model_file(file_path.split("/")[-1]) 
+
                 # Reset all metrics and plots first
                 self.metrics_widget.reset_metrics()
                 self.plot_widget1.plot_loss_history(self.plot_widget1)
@@ -240,7 +248,6 @@ class TabWidget(QWidget):
                 self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
             except Exception as e:
                 self.status_message.emit(f"Error loading model: {str(e)}", 8000)
-
 
     def save_model(self):
         if not self.model_loaded:
@@ -374,6 +381,8 @@ class TabWidget(QWidget):
         # Model Controls
         model_group = QGroupBox("Model Controls")
         model_layout = QVBoxLayout()
+        model_layout.setContentsMargins(10, 10, 10, 10)
+        model_group.setLayout(model_layout)
 
         # Model buttons
         buttons_layout = QHBoxLayout()
@@ -389,26 +398,28 @@ class TabWidget(QWidget):
             buttons_layout.addWidget(btn)
         model_layout.addLayout(buttons_layout)
 
-        # Status layout 
-        status_layout = QHBoxLayout()
-        self.model_status = QLabel("No model loaded")
-        self.model_status.setObjectName("ModelStatus")
-        status_layout.addWidget(self.model_status)
-        model_layout.addLayout(status_layout)
-        model_layout.setContentsMargins(10,10,10,10)
-        model_group.setLayout(model_layout)
-
         # Metrics Group Box
         self.model_name = ""
         self.metrics_group = QGroupBox(f"{self.model_name} Stats")
+        self.metrics_group.setObjectName("ModelMetrics")
         metrics_layout = QVBoxLayout()
         self.metrics_widget = MetricsWidget()
         metrics_layout.addWidget(self.metrics_widget)
         self.metrics_group.setLayout(metrics_layout)
-        metrics_layout.setContentsMargins(10,10,10,10)
+        metrics_layout.setContentsMargins(10, 10, 10, 10)
+
+        # Model info Group Box
+        self.model_info_group = QGroupBox("")
+        self.model_info_group.setObjectName("ModelInfo")
+        model_info_layout = QVBoxLayout()
+        model_info_layout.setContentsMargins(0, 18, 0, 18)
+        self.model_info_widget = ModelInfoWidget()  
+        model_info_layout.addWidget(self.model_info_widget)
+        self.model_info_group.setLayout(model_info_layout)
+        self.model_info_group.setContentsMargins(0, 0, 0, 0)
 
         # Add all components to left panel
-        for widget in [model_group, self.metrics_group]:  
+        for widget in [model_group, self.metrics_group, self.model_info_group]:
             left_layout.addWidget(widget)
         left_layout.addStretch()
 
