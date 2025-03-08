@@ -150,6 +150,32 @@ QFrame[objectName^="StyledFrame"] {
     background-color: white;
 }
 
+/*------------------------------------------------- Slider styling -------------------------------------------------*/
+QSlider {
+    min-height: 10px;
+}
+
+QSlider::groove:horizontal {
+    border: none;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+
+QSlider::sub-page:horizontal {
+    background: #6f8396;
+    border-radius: 2px;
+}
+
+QSlider::handle:horizontal {
+    background: white;
+    border: 1px solid #e3e3e3;
+    width: 14px;
+    height: 14px;
+    margin: -5px 0;
+    border-radius: 7px;
+}
+
 /*------------------------------------------------- Status bar styling -------------------------------------------------*/
 QStatusBar {
     background-color: #fafafa;
@@ -227,14 +253,4 @@ QScrollBar::add-line, QScrollBar::sub-line {
 
 QScrollBar::add-page, QScrollBar::sub-page {
     background: none;
-}
-
-
-
-/* Additional widget styling */
-QLineEdit, QComboBox, QSpinBox {
-    padding: 6px;
-    border: 1px solid #dcdcdc;
-    border-radius: 4px;
-    background-color: white;
 }
