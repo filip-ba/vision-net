@@ -164,12 +164,17 @@ QLabel[objectName^="Model"] {
     padding: 0px;
 }
 
+#plot-label {
+    background-color: white;
+}
+
 /*------------------------------------------------- Plot Frame styling -------------------------------------------------*/
 #styled-frame {
-    border: 1px solid #b0b0b0;
-    border-radius: 8px;
+    border: 1px solid #e3e3e3;
+    border-radius: 12px;
     padding: 5px;
     background-color: white;
+    margin-top: 5px;
 }
 
 /*------------------------------------------------- Slider styling -------------------------------------------------*/

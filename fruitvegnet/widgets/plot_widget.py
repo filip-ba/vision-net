@@ -13,10 +13,12 @@ class PlotWidget(QWidget):
     def __init__(self, title, parent=None):
         super().__init__(parent)
         main_layout = QVBoxLayout(self)
+        main_layout.setSpacing(0)
         main_layout.setContentsMargins(0, 0, 0, 0)
         
         # Title
         self.title_label = QLabel(title)
+        self.title_label.setObjectName("plot-label")
         self.title_label.setFont(QFont('Arial', 11, QFont.Weight.Bold))
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(self.title_label)
