@@ -28,6 +28,7 @@ class PlotWidget(QWidget):
         main_layout.addWidget(self.canvas)
 
     def plot_confusion_matrix(self, plot_widget, conf_mat = None, classes = None):
+        """Plots confusion matrix"""
         plot_widget.figure.clear()
         plot_widget.figure.subplots_adjust(left=0.25, right=0.85, bottom=0.35, top=0.85)
         plot_widget.figure.tight_layout()
@@ -57,6 +58,7 @@ class PlotWidget(QWidget):
         plot_widget.canvas.draw()
 
     def plot_loss_history(self, plot_widget, epochs=None, train_loss_history=None, val_loss_history=None):
+        """Plots loss history"""
         plot_widget.figure.clear()
         ax = plot_widget.figure.add_subplot(111)
         plot_widget.figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)

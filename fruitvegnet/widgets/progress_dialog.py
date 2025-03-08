@@ -130,7 +130,7 @@ class ProgressDialog(QDialog):
         return getattr(self, 'result', None)
 
     def start_testing(self, model):
-        """Starts training in new thread"""
+        """Starts testing in new thread"""
         self.thread = TestingThread(model)
         self.thread.finished.connect(self.on_testing_finished)
         self.thread.error.connect(self.on_error)

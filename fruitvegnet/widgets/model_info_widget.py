@@ -10,20 +10,18 @@ class ModelInfoWidget(QWidget):
         self._create_ui()
 
     def _create_ui(self):
-        # Main layout
         layout = QVBoxLayout(self)
         layout.setSpacing(18)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        # Model Status Label
+        # Model status label
         self.model_status_label = QLabel("No model loaded")
         self.model_status_label.setObjectName("ModelStatus")
         layout.addWidget(self.model_status_label)
 
-        # Separator
         layout.addWidget(create_separator())
 
-        # Model File Label
+        # Model file label
         self.model_file_label = QLabel("Model File: None")
         self.model_file_label.setObjectName("ModelFileLabel")
         layout.addWidget(self.model_file_label)
