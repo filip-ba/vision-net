@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
                              QSizePolicy, QSpacerItem, QStatusBar, QFrame,
-                             QHBoxLayout, QStackedWidget, QPushButton, QLabel)
+                             QHBoxLayout, QStackedWidget, QPushButton, QLabel,
+                             QScrollArea)
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import Qt
 import os
@@ -34,13 +35,25 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
+        # Create scrollable sidebar
+        sidebar_scroll = QScrollArea()
+        sidebar_scroll.setWidgetResizable(True)
+        sidebar_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        sidebar_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        
         self.sidebar = self._create_sidebar()
+        sidebar_scroll.setWidget(self.sidebar)
         
         # Container for the model settings and image classification
         content_container = QWidget()
         content_layout = QVBoxLayout(content_container)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
+        
+        # Create a scrollable area for the content stack
+        content_scroll = QScrollArea()
+        content_scroll.setWidgetResizable(True)
+        content_scroll.setFrameShape(QFrame.Shape.NoFrame)
         
         # Create stacked widget for switching between settings and classification
         self.content_stack = QStackedWidget()
@@ -64,14 +77,17 @@ class MainWindow(QMainWindow):
         
         self.content_stack.addWidget(self.tab_widget)
         self.content_stack.addWidget(self.image_classification_widget)
+        
+        # Add the stacked widget to the scroll area
+        content_scroll.setWidget(self.content_stack)
 
         self.status_bar = QStatusBar()
         self.status_bar.setObjectName("status-bar")
         
-        content_layout.addWidget(self.content_stack, 1)
+        content_layout.addWidget(content_scroll, 1)
         content_layout.addWidget(self.status_bar, 0)
         
-        main_layout.addWidget(self.sidebar, 1)  
+        main_layout.addWidget(sidebar_scroll, 1)  
         main_layout.addWidget(content_container, 5)  
         
         # Signals
@@ -192,8 +208,6 @@ class MainWindow(QMainWindow):
                     self.update_status_bar("No models available for classification")
             else:
                 self.image_classification_widget.update_result(model_info['type'], "No model")
-
-
 
     """-----------------------Methods that probably won't be used-----------------------"""
     def _setup_menu(self):
