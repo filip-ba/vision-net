@@ -77,8 +77,8 @@ QPushButton {
     background-color: #ebebeb;
     border: none;
     padding: 8px 16px;
-    border-radius: 4px;
-    font-weight: bold;
+    border-radius: 6px;
+    font-weight: 700;
 }
 
 QPushButton:hover {
@@ -94,13 +94,35 @@ QPushButton:disabled {
     color: #7f8c8d;
 }
 
+QPushButton:checked {
+    background-color: #c2c2c2;
+}
+
+QPushButton:checked:pressed {
+    background-color: #adadad;
+}
+
+#conf-matrix {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+#loss-history {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+
 /*------------------------------------------------- Group Box styling -------------------------------------------------*/
 QGroupBox {
     font-weight: 700;
     font-size: 14px;
     border: 1px solid #e3e3e3;
     background-color: rgb(255, 255, 255);
-    border-radius: 14px;
+    border-radius: 12px;
     margin: 25px 15px 25px 15px;
     padding: 0px;
 }
@@ -112,21 +134,21 @@ QGroupBox::title {
     margin-top: -2px; 
 }
 
-#ModelControls {
+#model-controls {
     margin-bottom: 30px;
     padding: 5px;
 }
 
-#ModelMetrics {
+#model-metrics {
     margin-bottom: 5px;
 }
 
-#ModelParameters {
+#model-parameters {
     margin-bottom: 5px;
     margin-top: 0px;
 }
 
-#ModelInfo {
+#model-info {
     margin-top: 0px;
 }
 
@@ -143,7 +165,7 @@ QLabel[objectName^="Model"] {
 }
 
 /*------------------------------------------------- Plot Frame styling -------------------------------------------------*/
-QFrame[objectName^="StyledFrame"] {
+#styled-frame {
     border: 1px solid #b0b0b0;
     border-radius: 8px;
     padding: 5px;

@@ -383,7 +383,7 @@ class TabWidget(QWidget):
 
         # Model Controls
         model_group = QGroupBox("Model Controls")
-        model_group.setObjectName("ModelControls")
+        model_group.setObjectName("model-controls")
         model_layout = QVBoxLayout()
         model_layout.setContentsMargins(10, 10, 10, 10)
         model_group.setLayout(model_layout)
@@ -393,7 +393,7 @@ class TabWidget(QWidget):
         self.train_model_btn = QPushButton("Train")
         self.save_model_btn = QPushButton("Save")
         self.load_model_btn = QPushButton("Load")
-        self.clear_model_btn = QPushButton("Clear Model")
+        self.clear_model_btn = QPushButton("Clear")
         self.save_model_btn.setEnabled(False)
         self.clear_model_btn.setEnabled(False)
 
@@ -405,7 +405,7 @@ class TabWidget(QWidget):
         # Metrics group box
         self.model_name = ""
         self.metrics_group = QGroupBox(f"{self.model_name} Stats")
-        self.metrics_group.setObjectName("ModelMetrics")
+        self.metrics_group.setObjectName("model-metrics")
         metrics_layout = QVBoxLayout()
         self.metrics_widget = MetricsWidget()
         metrics_layout.addWidget(self.metrics_widget)
@@ -414,7 +414,7 @@ class TabWidget(QWidget):
 
         # Parameters group box
         self.parameters_group = QGroupBox("")
-        self.parameters_group.setObjectName("ModelParameters")
+        self.parameters_group.setObjectName("model-parameters")
         parameters_layout = QVBoxLayout()
         parameters_layout.setContentsMargins(0, 18, 0, 18)
         self.parameters_widget = ParametersWidget()
@@ -424,7 +424,7 @@ class TabWidget(QWidget):
 
         # Model info group box
         self.model_info_group = QGroupBox("")
-        self.model_info_group.setObjectName("ModelInfo")
+        self.model_info_group.setObjectName("model-info")
         model_info_layout = QVBoxLayout()
         model_info_layout.setContentsMargins(0, 18, 0, 18)
         self.model_info_widget = ModelInfoWidget()  
@@ -447,7 +447,7 @@ class TabWidget(QWidget):
         
         # Create StyledFrame
         self.plot_frame = QFrame()
-        self.plot_frame.setObjectName("StyledFrame")
+        self.plot_frame.setObjectName("styled-frame")
 
         frame_layout = QVBoxLayout(self.plot_frame)
         
@@ -467,11 +467,12 @@ class TabWidget(QWidget):
         
         # Buttons
         buttons_layout = QHBoxLayout()
-        buttons_layout.setContentsMargins(0, 10, 0, 0)
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(0)
         self.btn_confusion_matrix = QPushButton("Confusion Matrix")  
-        self.btn_confusion_matrix.setObjectName("Plot")
+        self.btn_confusion_matrix.setObjectName("conf-matrix")
         self.btn_loss_history = QPushButton("Loss History")
-        self.btn_loss_history.setObjectName("Plot")
+        self.btn_loss_history.setObjectName("loss-history")
         self.btn_confusion_matrix.setCheckable(True)
         self.btn_loss_history.setCheckable(True)
         self.btn_confusion_matrix.setChecked(True)  
@@ -480,10 +481,8 @@ class TabWidget(QWidget):
         self.btn_loss_history.clicked.connect(lambda: self._switch_plot(1)) 
         
         # Add buttons to the layout 
-        buttons_layout.addStretch()
-        buttons_layout.addWidget(self.btn_confusion_matrix)  #
+        buttons_layout.addWidget(self.btn_confusion_matrix)  
         buttons_layout.addWidget(self.btn_loss_history)
-        buttons_layout.addStretch()
         
         # Add buttons to the frame layout
         frame_layout.addLayout(buttons_layout)
