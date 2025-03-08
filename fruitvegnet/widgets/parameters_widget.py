@@ -10,22 +10,21 @@ class ParametersWidget(QWidget):
         super().__init__(parent)
         layout = QVBoxLayout()
         self.setLayout(layout)
+        layout.setSpacing(18)
         layout.setContentsMargins(0, 0, 0, 0)
-
-        parameters_layout = QVBoxLayout()
-        parameters_layout.setSpacing(8)
         
-        # Add parameters labels
         self.time_label = QLabel("Training Time: -")
         self.epochs_label = QLabel("Epochs: -")
         self.lr_label = QLabel("Learning Rate: -")
         self.momentum_label = QLabel("Momentum: -")
         
-        for label in [self.time_label, self.epochs_label, self.lr_label, self.momentum_label]:
-            parameters_layout.addWidget(label)
-            parameters_layout.addWidget(create_separator())
-
-        layout.addLayout(parameters_layout)
+        layout.addWidget(self.time_label)
+        layout.addWidget(create_separator())
+        layout.addWidget(self.epochs_label)
+        layout.addWidget(create_separator())
+        layout.addWidget(self.lr_label)
+        layout.addWidget(create_separator())
+        layout.addWidget(self.momentum_label)
   
     def update_parameters(self, params):
         """Update training parameters display"""

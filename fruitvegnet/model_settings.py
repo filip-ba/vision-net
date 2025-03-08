@@ -8,7 +8,8 @@ import torch
 from fruitvegnet.widgets.progress_dialog import ProgressDialog
 from fruitvegnet.widgets.plot_widget import PlotWidget
 from fruitvegnet.widgets.parameters_dialog import ParameterDialog
-from fruitvegnet.widgets.parameters_widget import MetricsWidget
+from fruitvegnet.widgets.parameters_widget import ParametersWidget
+from fruitvegnet.widgets.metrics_widget import MetricsWidget
 from fruitvegnet.widgets.model_info_widget import ModelInfoWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
@@ -54,8 +55,6 @@ class TabWidget(QWidget):
 
     def _update_ui_from_model_data(self):
         """Updates UI elements with model data"""
-        # Set model name
-        self.metrics_widget.set_model_name(self.model_name)
         
         # Update metrics display if metrics exist
         if self.model.metrics['accuracy'] is not None:
@@ -64,7 +63,7 @@ class TabWidget(QWidget):
             self.metrics_widget.reset_metrics()
         
         # Update training parameters
-        self.metrics_widget.update_parameters(self.model.training_params)
+        self.parameters_widget.update_parameters(self.model.training_params)
 
         # Update loss history plot if history exists
         if (self.model.history['train_loss'] is not None and 
@@ -127,7 +126,7 @@ class TabWidget(QWidget):
 
         # Reset metrics and parameters
         self.metrics_widget.reset_metrics()
-        self.metrics_widget.reset_parameters()
+        self.parameters_widget.reset_parameters()
 
         # Reset plots
         self.plot_widget1.plot_loss_history(self.plot_widget1)
@@ -230,8 +229,9 @@ class TabWidget(QWidget):
                 # Update the model name label
                 self.model_info_widget.set_model_file(file_path.split("/")[-1]) 
 
-                # Reset all metrics and plots first
+                # Reset metrics, parametrs and plots first
                 self.metrics_widget.reset_metrics()
+                self.parameters_widget.reset_parameters()
                 self.plot_widget1.plot_loss_history(self.plot_widget1)
                 self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
 
@@ -298,6 +298,7 @@ class TabWidget(QWidget):
 
             # Reset metrics display
             self.metrics_widget.reset_metrics()
+            self.parameters_widget.reset_parameters()
 
             # Reset confusion matrix plot
             self.plot_widget2.plot_confusion_matrix(self.plot_widget2)  
@@ -345,12 +346,12 @@ class TabWidget(QWidget):
             return
         try:
             dialog = ProgressDialog(self, "Testing")
-            metrics = dialog.start_testing(self.model)
-            if metrics is not None:
-                self.metrics_widget.update_metrics(metrics)
+            parameters = dialog.start_testing(self.model)
+            if parameters is not None:
+                self.parameters_widget.update_parameters(parameters)
 
                 # Confusion matrix 
-                conf_mat = metrics['confusion_matrix']
+                conf_mat = parameters['confusion_matrix']
                 classes = self.model.classes
                 self.plot_widget2.plot_confusion_matrix(self.plot_widget2, conf_mat, classes)
             else:
@@ -382,6 +383,7 @@ class TabWidget(QWidget):
 
         # Model Controls
         model_group = QGroupBox("Model Controls")
+        model_group.setObjectName("ModelControls")
         model_layout = QVBoxLayout()
         model_layout.setContentsMargins(10, 10, 10, 10)
         model_group.setLayout(model_layout)
@@ -400,7 +402,7 @@ class TabWidget(QWidget):
             buttons_layout.addWidget(btn)
         model_layout.addLayout(buttons_layout)
 
-        # Metrics Group Box
+        # Metrics group box
         self.model_name = ""
         self.metrics_group = QGroupBox(f"{self.model_name} Stats")
         self.metrics_group.setObjectName("ModelMetrics")
@@ -410,7 +412,17 @@ class TabWidget(QWidget):
         self.metrics_group.setLayout(metrics_layout)
         metrics_layout.setContentsMargins(10, 10, 10, 10)
 
-        # Model info Group Box
+        # Parameters group box
+        self.parameters_group = QGroupBox("")
+        self.parameters_group.setObjectName("ModelParameters")
+        parameters_layout = QVBoxLayout()
+        parameters_layout.setContentsMargins(0, 18, 0, 18)
+        self.parameters_widget = ParametersWidget()
+        parameters_layout.addWidget(self.parameters_widget)
+        self.parameters_group.setLayout(parameters_layout)
+        self.parameters_group.setContentsMargins(0, 0, 0, 0)
+
+        # Model info group box
         self.model_info_group = QGroupBox("")
         self.model_info_group.setObjectName("ModelInfo")
         model_info_layout = QVBoxLayout()
@@ -421,7 +433,7 @@ class TabWidget(QWidget):
         self.model_info_group.setContentsMargins(0, 0, 0, 0)
 
         # Add all components to left panel
-        for widget in [model_group, self.metrics_group, self.model_info_group]:
+        for widget in [model_group, self.metrics_group, self.parameters_group, self.model_info_group]:
             left_layout.addWidget(widget)
         left_layout.addStretch()
 
