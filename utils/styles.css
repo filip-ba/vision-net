@@ -160,3 +160,81 @@ QStatusBar {
 QStatusBar::item {
     border: none;
 }
+
+/*------------------------------------------------- Scroll bar styling -------------------------------------------------*/
+QScrollBar:vertical {
+    border: none;
+    background-color: transparent;
+    width: 9px;
+    border-radius: 4px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+QScrollBar:horizontal {
+    border: none;
+    background-color: transparent;
+    height: 9px;
+    border-radius: 4px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+QScrollBar:vertical:hover {
+    background-color: rgba(230, 230, 230, 0.7);
+}
+
+QScrollBar:horizontal:hover {
+    background-color: rgba(230, 230, 230, 0.7);
+}
+
+QScrollBar::handle:vertical {
+    background-color: #d2d2d2;
+    min-height: 30px;
+    border-radius: 4px;
+    margin: 0px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #d2d2d2;
+    min-width: 30px;
+    border-radius: 4px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #9c9c9c;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #9c9c9c;
+}
+
+QScrollBar::handle:vertical:pressed {
+    background-color: #787878;
+}
+
+QScrollBar::handle:horizontal:pressed {
+    background-color: #787878;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+    border: none;
+    background: none;
+    width: 0px;
+    height: 0px;
+}
+
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: none;
+}
+
+
+
+/* Additional widget styling */
+QLineEdit, QComboBox, QSpinBox {
+    padding: 6px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    background-color: white;
+}
