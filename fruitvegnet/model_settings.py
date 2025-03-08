@@ -89,7 +89,7 @@ class TabWidget(QWidget):
             self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
 
     def clear_model(self):
-        """Clears the current model and resets UI elements while preserving dataset"""   
+        """Calls the reset_model function that resets the loaded model"""   
         reply = QMessageBox.question(
             self,
             'Clear Model',
@@ -103,6 +103,7 @@ class TabWidget(QWidget):
             self.reset_model()
 
     def reset_model(self):
+        """Clears the current model and resets UI elements while preserving dataset"""   
         dataset_loaded = self.model.is_data_loaded()
         trainloader = self.model.trainloader
         valloader = self.model.valloader
@@ -137,19 +138,15 @@ class TabWidget(QWidget):
         self.clear_model_btn.setEnabled(False)
 
     def update_model_status(self, status, color="red"):
-        """
-        Updates the model status in the ModelInfoWidget.
-        """
+        """Updates the model status in the ModelInfoWidget."""
         self.model_info_widget.set_model_status(status, color)
 
     def _load_dataset(self):
         """Loads the dataset on startup"""
         try:
             train_size, val_size, test_size = self.model.load_data("./dataset/fruit_dataset")
-            dataset_message = f"Dataset loaded: {train_size} train, {val_size} val, {test_size} test. "
         except Exception as e:
-            dataset_message = f"Error loading dataset: {str(e)}. "
-        #print("--------------------DATASET", dataset_message)
+            print("--------------------------------------Error loading dataset: {str(e)}. ")
   
     def _load_default_model(self):
         """Attempts to load the default model on startup"""
@@ -171,6 +168,7 @@ class TabWidget(QWidget):
             self.update_model_status("No model loaded", "red")
             return
 
+        # Set the group box title and loaded model file name
         self.metrics_group.setTitle(f"{self.model_name} Stats")
         self.model_info_widget.set_model_file(default_model_path.split("/")[-1]) 
 
@@ -195,6 +193,7 @@ class TabWidget(QWidget):
             self.update_model_status("Error initializing model", "red")
             
     def load_model(self):
+        """Loads the trained neural network model"""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Load Model",
@@ -250,6 +249,7 @@ class TabWidget(QWidget):
                 self.status_message.emit(f"Error loading model: {str(e)}", 8000)
 
     def save_model(self):
+        """Saves the trained neural network model"""
         if not self.model_loaded:
             self.status_message.emit("No model to save", 8000)
             return
@@ -268,6 +268,7 @@ class TabWidget(QWidget):
                 self.status_message.emit(f"Error saving model: {str(e)}", 8000)
 
     def train_model(self):
+        """Trains the neural network"""
         param_dialog = ParameterDialog(self)
         
         # If we have model parameters, set them in the dialog
@@ -338,6 +339,7 @@ class TabWidget(QWidget):
             self.reset_model()
 
     def test_model(self):
+        """Test the neural network model"""
         if not self.model_loaded:
             self.status_message.emit("No model loaded", 8000)
             return
@@ -481,7 +483,7 @@ class TabWidget(QWidget):
         return right_panel
 
     def _switch_plot(self, index):
-        """Switches between charts and updates button status"""
+        """Switches between plots and updates button status"""
         self.plot_stack.setCurrentIndex(index)
         buttons = [self.btn_confusion_matrix, self.btn_loss_history]
         for i, btn in enumerate(buttons):
