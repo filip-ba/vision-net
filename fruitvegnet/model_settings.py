@@ -7,8 +7,8 @@ import torch
 
 from fruitvegnet.widgets.progress_dialog import ProgressDialog
 from fruitvegnet.widgets.plot_widget import PlotWidget
-from fruitvegnet.widgets.parameter_dialog import ParameterDialog
-from fruitvegnet.widgets.metrics_widget import MetricsWidget
+from fruitvegnet.widgets.parameters_dialog import ParameterDialog
+from fruitvegnet.widgets.parameters_widget import MetricsWidget
 from fruitvegnet.widgets.model_info_widget import ModelInfoWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
