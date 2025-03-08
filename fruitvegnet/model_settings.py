@@ -32,7 +32,7 @@ class TabWidget(QWidget):
         self.model_loaded = False
 
         # Update model status
-        self.update_model_status("No model loaded") 
+        self.model_info_widget.set_model_status("No model loaded") 
 
         # Try to load the dataset and default model on startup
         self._load_dataset()
@@ -121,7 +121,7 @@ class TabWidget(QWidget):
         self.model_loaded = False
 
         # Reset UI elements
-        self.update_model_status("No model loaded", "red")
+        self.model_info_widget.set_model_status("No model loaded", "red")
         self.model_info_widget.set_model_file("None")
 
         # Reset metrics and parameters
@@ -135,10 +135,6 @@ class TabWidget(QWidget):
         # Disable buttons
         self.save_model_btn.setEnabled(False)
         self.clear_model_btn.setEnabled(False)
-
-    def update_model_status(self, status, color="red"):
-        """Updates the model status in the ModelInfoWidget."""
-        self.model_info_widget.set_model_status(status, color)
 
     def _load_dataset(self):
         """Loads the dataset on startup"""
@@ -164,7 +160,7 @@ class TabWidget(QWidget):
             self.model_name = "VGG16"
         else:
             default_model_path = None
-            self.update_model_status("No model loaded", "red")
+            self.model_info_widget.set_model_status("No model loaded", "red")
             return
 
         # Set the group box title and loaded model file name
@@ -181,15 +177,15 @@ class TabWidget(QWidget):
                     # Update UI with loaded data
                     self._update_ui_from_model_data()
                     self.model_loaded = True
-                    self.update_model_status("Model loaded successfully", "green")
+                    self.model_info_widget.set_model_status("Model loaded successfully", "green")
                     self.save_model_btn.setEnabled(True)
                     self.clear_model_btn.setEnabled(True)
                 except Exception as e:
-                    self.update_model_status("Error loading default model", "red")
+                    self.model_info_widget.set_model_status("Error loading default model", "red")
             else:
-                self.update_model_status("No model loaded", "red")
+                self.model_info_widget.set_model_status("No model loaded", "red")
         except Exception as e:
-            self.update_model_status("Error initializing model", "red")
+            self.model_info_widget.set_model_status("Error initializing model", "red")
             
     def load_model(self):
         """Loads the trained neural network model"""
@@ -242,7 +238,7 @@ class TabWidget(QWidget):
                 self.model_loaded = True
                 self.save_model_btn.setEnabled(True)
                 self.clear_model_btn.setEnabled(True)
-                self.update_model_status("Model loaded successfully", "green")
+                self.model_info_widget.set_model_status("Model loaded successfully", "green")
 
                 self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
             except Exception as e:
@@ -300,6 +296,10 @@ class TabWidget(QWidget):
             self.metrics_widget.reset_metrics()
             self.parameters_widget.reset_parameters()
 
+            # Update model status
+            self.model_info_widget.set_model_status("No model loaded")
+            self.model_info_widget.set_model_file("")
+
             # Reset confusion matrix plot
             self.plot_widget2.plot_confusion_matrix(self.plot_widget2)  
 
@@ -327,7 +327,7 @@ class TabWidget(QWidget):
                 self.model_loaded = True
                 self.save_model_btn.setEnabled(True)
                 self.clear_model_btn.setEnabled(True)
-                self.update_model_status("Model trained successfully", "green")
+                self.model_info_widget.set_model_status("Model trained successfully", "green")
                 self.status_message.emit("Training completed", 8000)
 
                 # Test the model
