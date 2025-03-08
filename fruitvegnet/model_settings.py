@@ -1,15 +1,15 @@
 from PyQt6.QtWidgets import ( 
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, 
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox,
     QFileDialog, QStackedWidget, QMessageBox, QFrame, QDialog )
 from PyQt6.QtCore import pyqtSignal
 import os
 import torch
 
-from widgets.progress_dialog import ProgressDialog
-from widgets.plot_widget import PlotWidget
-from widgets.parameter_dialog import ParameterDialog
-from widgets.metrics_widget import MetricsWidget
-from widgets.model_info_widget import ModelInfoWidget
+from fruitvegnet.widgets.progress_dialog import ProgressDialog
+from fruitvegnet.widgets.plot_widget import PlotWidget
+from fruitvegnet.widgets.parameter_dialog import ParameterDialog
+from fruitvegnet.widgets.metrics_widget import MetricsWidget
+from fruitvegnet.widgets.model_info_widget import ModelInfoWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
 from models.efficientnet_model import EfficientNetModel
@@ -122,7 +122,7 @@ class TabWidget(QWidget):
 
         # Reset UI elements
         self.update_model_status("No model loaded", "red")
-        self.model_info_widget.set_model_file("Model File: None")
+        self.model_info_widget.set_model_file("None")
 
         # Reset metrics and parameters
         self.metrics_widget.reset_metrics()
@@ -376,7 +376,7 @@ class TabWidget(QWidget):
         left_layout = QVBoxLayout(left_panel)
         left_layout.setSpacing(10)
         left_layout.setContentsMargins(10, 10, 15, 10)
-        left_panel.setFixedWidth(500)
+        #left_panel.setFixedWidth(500)
 
         # Model Controls
         model_group = QGroupBox("Model Controls")

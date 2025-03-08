@@ -1,7 +1,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication
 
-from widgets.main_window import MainWindow
+from fruitvegnet.widgets.main_window import MainWindow
 
 def load_stylesheet(path):
     with open(path, "r") as f:

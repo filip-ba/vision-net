@@ -1,12 +1,12 @@
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
                              QSizePolicy, QSpacerItem, QStatusBar, QFrame,
                              QHBoxLayout, QStackedWidget, QPushButton, QLabel)
-from PyQt6.QtGui import QIcon, QAction, QFont, QPixmap
+from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import Qt
 import os
 
-from widgets.tab_widget import TabWidget
-from widgets.image_classification_widget import ImageClassificationWidget
+from fruitvegnet.model_settings import TabWidget
+from fruitvegnet.image_classification import ImageClassificationWidget
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
 from models.efficientnet_model import EfficientNetModel
@@ -22,23 +22,20 @@ class MainWindow(QMainWindow):
     def _create_ui(self):
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         icon_path = os.path.join(project_root, "assets", "icon.png")  
+
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(50, 50, 1200, 600)
-        
-        # Zakažeme standardní status bar
-        # self.setStatusBar(None) - tohle nefunguje, status bar potřebujeme vytvořit později
-        
-        # Hlavní widget pro layout
+        self.setGeometry(50, 50, 1300, 700)
+
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Hlavní layout pro celé okno
+        # Main layout
         main_layout = QHBoxLayout(central_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # Vytvoření sidebar
+        # Create Sidebar
         self.sidebar = self._create_sidebar()
         
         # Vytvoření kontejneru pro obsah a status bar
@@ -94,8 +91,8 @@ class MainWindow(QMainWindow):
     def _create_sidebar(self):
         sidebar = QWidget()
         sidebar.setObjectName("sidebar")
-        sidebar.setMinimumWidth(200)
-        sidebar.setMaximumWidth(250)
+        #sidebar.setMinimumWidth(200)
+        #sidebar.setMaximumWidth(250)
         
         sidebar_layout = QVBoxLayout(sidebar)
         sidebar_layout.setContentsMargins(0, 0, 0, 0)
