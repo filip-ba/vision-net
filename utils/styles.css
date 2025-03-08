@@ -112,21 +112,21 @@ QGroupBox::title {
     margin-top: -2px; 
 }
 
-QGroupBox[objectName^="ModelControls"]  {
+#ModelControls {
     margin-bottom: 30px;
     padding: 5px;
 }
 
-QGroupBox[objectName^="ModelMetrics"]  {
+#ModelMetrics {
     margin-bottom: 5px;
 }
 
-QGroupBox[objectName^="ModelParameters"]  {
+#ModelParameters {
     margin-bottom: 5px;
     margin-top: 0px;
 }
 
-QGroupBox[objectName^="ModelInfo"]  {
+#ModelInfo {
     margin-top: 0px;
 }
 
@@ -137,13 +137,7 @@ QLabel {
     color: #2d2d2d;
 }
 
-QLabel[objectName^="ModelStatus"] {
-    font-weight: bold;
-    margin: 0px 10px 0px 10px;
-    padding: 0px;
-}
-
-QLabel[objectName^="ModelFileLabel"] {
+QLabel[objectName^="Model"] {
     margin: 0px 10px 0px 10px;
     padding: 0px;
 }

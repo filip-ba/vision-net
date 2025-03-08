@@ -14,9 +14,13 @@ class ParametersWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         
         self.time_label = QLabel("Training Time: -")
+        self.time_label.setObjectName("ModelTimeLabel")
         self.epochs_label = QLabel("Epochs: -")
+        self.epochs_label.setObjectName("ModelEpochsLabel")
         self.lr_label = QLabel("Learning Rate: -")
+        self.lr_label.setObjectName("ModelLrLabel")
         self.momentum_label = QLabel("Momentum: -")
+        self.momentum_label.setObjectName("ModelMomentumLabel")
         
         layout.addWidget(self.time_label)
         layout.addWidget(create_separator())
