@@ -102,7 +102,7 @@ QGroupBox {
     background-color: rgb(255, 255, 255);
     border-radius: 14px;
     margin: 25px 15px 25px 15px;
-    padding: 5px;
+    padding: 0px;
 }
 
 QGroupBox::title {
@@ -110,16 +110,24 @@ QGroupBox::title {
     subcontrol-position: top left;
     margin-left: 15px;
     margin-top: -2px; 
+}
 
+QGroupBox[objectName^="ModelControls"]  {
+    margin-bottom: 30px;
+    padding: 5px;
 }
 
 QGroupBox[objectName^="ModelMetrics"]  {
     margin-bottom: 5px;
 }
 
+QGroupBox[objectName^="ModelParameters"]  {
+    margin-bottom: 5px;
+    margin-top: 0px;
+}
+
 QGroupBox[objectName^="ModelInfo"]  {
-    margin: 0px 15px 0px 15px;
-    padding: 0px;
+    margin-top: 0px;
 }
 
 /*------------------------------------------------- Label styling -------------------------------------------------*/
