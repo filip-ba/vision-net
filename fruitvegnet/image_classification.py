@@ -2,8 +2,8 @@ from PyQt6.QtWidgets import (
     QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QFrame,
     QFileDialog, QLabel, QPushButton, QStackedWidget, QSizePolicy
 )
-from PyQt6.QtGui import QPixmap, QImageReader, QIcon, QFont
-from PyQt6.QtCore import Qt, pyqtSignal, QSize
+from PyQt6.QtGui import QPixmap, QImageReader, QFont
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 from matplotlib.figure import Figure
 import os, random
 from matplotlib import pyplot as plt
@@ -30,7 +30,9 @@ class ImageClassificationWidget(QWidget):
         }
         
         self._create_ui()
+        QTimer.singleShot(0, self.scale_image)
         
+
     def _create_ui(self):
         main_layout = QVBoxLayout()
         
@@ -75,19 +77,16 @@ class ImageClassificationWidget(QWidget):
         # Create a horizontal layout that will contain the two columns
         results_columns_layout = QHBoxLayout()
         results_columns_layout.setContentsMargins(0, 0, 0, 0)
-        results_main_layout.addStretch()
         
         # Left column for model names
         left_column = QVBoxLayout()
         left_column.setSpacing(18)
         left_column.setContentsMargins(0, 0, 0, 0)
-        left_column.addStretch()
 
         # Right column for results
         right_column = QVBoxLayout()
         right_column.setSpacing(18)
         right_column.setContentsMargins(0, 0, 0, 0)
-        right_column.addStretch()
 
         # Create a fixed vertical line between columns
         vertical_separator = QFrame()
@@ -102,28 +101,35 @@ class ImageClassificationWidget(QWidget):
 
         simple_cnn_label = QLabel("Simple CNN")
         simple_cnn_label.setObjectName("ModelSimpleCnn")
-        left_column.addWidget(simple_cnn_label)
+        simple_cnn_label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        left_column.addWidget(simple_cnn_label, 1)
         left_column.addWidget(create_separator())
+        
         res_net_label = QLabel("ResNet")
         res_net_label.setObjectName("ModelResNet")
-        left_column.addWidget(res_net_label)
+        res_net_label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        left_column.addWidget(res_net_label, 1)
         left_column.addWidget(create_separator())
+        
         efficient_net_label = QLabel("EfficientNet")
         efficient_net_label.setObjectName("ModelEfficientNet")
-        left_column.addWidget(efficient_net_label)
+        efficient_net_label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        left_column.addWidget(efficient_net_label, 1)
         left_column.addWidget(create_separator())
+        
         vgg_16_label = QLabel("VGG 16")
         vgg_16_label.setObjectName("ModelVgg16")
-        left_column.addWidget(vgg_16_label)
-
+        vgg_16_label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        left_column.addWidget(vgg_16_label, 1)
 
         # Create result labels in the right column
         self.result_labels = {}
         for i, model_id in enumerate(self.model_names.keys()):
             result_label = QLabel("None")
             result_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            result_label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
             self.result_labels[model_id] = result_label
-            right_column.addWidget(result_label)
+            right_column.addWidget(result_label, 1)
             
             # Add horizontal separator after each result label except the last one
             if model_id != list(self.model_names.keys())[-1]:
@@ -137,7 +143,6 @@ class ImageClassificationWidget(QWidget):
         
         # Add the columns layout to the results main layout
         results_main_layout.addLayout(results_columns_layout)
-        results_main_layout.addStretch()
         
         # Add widgets to top layout
         top_layout.addWidget(image_layout_group, 1)
@@ -220,6 +225,8 @@ class ImageClassificationWidget(QWidget):
         
         # Set the first button as active by default
         self.switch_plot('simple_cnn')
+
+
         
     def switch_plot(self, model_type):
         """Switch to the specified plot and update button states"""
