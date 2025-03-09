@@ -54,14 +54,14 @@ class TabWidget(QWidget):
         self.recall_label.setText(f"Recall: {metrics['recall']:.2%}")
 
     def _update_ui_from_model_data(self):
-        """Updates UI elements with model data"""
+        """Updates UI elements with model data after the application starts"""
         
         # Update metrics display if metrics exist
         if self.model.metrics['accuracy'] is not None:
             self.metrics_widget.update_metrics(self.model.metrics)
         else:
             self.metrics_widget.reset_metrics()
-        
+
         # Update training parameters
         self.parameters_widget.update_parameters(self.model.training_params)
 
@@ -330,6 +330,8 @@ class TabWidget(QWidget):
                 self.model_info_widget.set_model_status("Model trained successfully", "green")
                 self.status_message.emit("Training completed", 8000)
 
+                self.parameters_widget.update_parameters(self.model.training_params)
+
                 # Test the model
                 self.test_model()
             else:
@@ -346,12 +348,12 @@ class TabWidget(QWidget):
             return
         try:
             dialog = ProgressDialog(self, "Testing")
-            parameters = dialog.start_testing(self.model)
-            if parameters is not None:
-                self.parameters_widget.update_parameters(parameters)
+            metrics = dialog.start_testing(self.model)
+            if metrics is not None:
+                self.metrics_widget.update_metrics(metrics)
 
                 # Confusion matrix 
-                conf_mat = parameters['confusion_matrix']
+                conf_mat = metrics['confusion_matrix']
                 classes = self.model.classes
                 self.plot_widget2.plot_confusion_matrix(self.plot_widget2, conf_mat, classes)
             else:
