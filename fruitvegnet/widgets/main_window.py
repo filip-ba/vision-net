@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(150, 50, 700, 700)
+        self.setGeometry(50, 50, 1200, 700)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -75,9 +75,8 @@ class MainWindow(QMainWindow):
         self.image_classification_widget = ImageClassificationWidget()
         self.image_classification_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
-        
-        self.content_stack.addWidget(self.image_classification_widget)
         self.content_stack.addWidget(self.tab_widget)
+        self.content_stack.addWidget(self.image_classification_widget)
 
         # Add the stacked widget to the scroll area
         content_scroll.setWidget(self.content_stack)

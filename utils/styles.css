@@ -145,19 +145,20 @@ QGroupBox {
     border: 1px solid #e3e3e3;
     background-color: rgb(255, 255, 255);
     border-radius: 12px;
-    margin: 25px 15px 25px 15px;
+    margin: 25px;
     padding: 0px;
 }
 
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    margin-left: 15px;
+    margin-left: 25px;
     margin-top: -2px; 
 }
 
 #model-controls {
     margin-bottom: 30px;
+    margin-top: 25px;
     padding: 5px;
 }
 
@@ -175,11 +176,18 @@ QGroupBox::title {
 }
 
 #results-group {
-    margin-left: 0px;
+    margin-left: 2px;
 }
 
 #classification-group {
-    margin-right: 0px;
+    margin-right: 3px;
+}
+
+#results-group:title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    margin-left: 0px;
+    margin-top: -2px; 
 }
 
 /*------------------------------------------------- Label styling -------------------------------------------------*/
@@ -210,12 +218,16 @@ QLabel[objectName^="Model"] {
     border-radius: 12px;
     padding: 5px;
     background-color: white;
-    margin-top: 5px;
+    margin-left: 25px;
+    margin-right: 25px;
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 /*------------------------------------------------- Slider styling -------------------------------------------------*/
 QSlider {
     min-height: 10px;
+    background-color: white;
 }
 
 QSlider::groove:horizontal {

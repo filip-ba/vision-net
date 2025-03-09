@@ -367,7 +367,8 @@ class TabWidget(QWidget):
     def _create_ui(self):
         # Main layout
         main_layout = QHBoxLayout(self)
-        
+        main_layout.setContentsMargins(10, 10, 10, 10   )
+
         # Left panel
         left_panel = self._create_left_panel()
         main_layout.addWidget(left_panel)
@@ -379,8 +380,8 @@ class TabWidget(QWidget):
     def _create_left_panel(self):
         left_panel = QWidget()
         left_layout = QVBoxLayout(left_panel)
-        left_layout.setSpacing(10)
-        left_layout.setContentsMargins(10, 10, 10, 10)
+        #left_layout.setSpacing(10)
+        left_layout.setContentsMargins(0, 0, 0, 0)
 
         # Model Controls
         model_group = QGroupBox("Model Controls")

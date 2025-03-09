@@ -35,12 +35,15 @@ class ImageClassificationWidget(QWidget):
 
     def _create_ui(self):
         main_layout = QVBoxLayout()
-        
+        main_layout.setContentsMargins(10, 10, 10, 10)
+
         # Top section - Image, buttons, and result labels
         top_layout = QHBoxLayout()
-        
+        top_layout.setContentsMargins(0, 0, 0, 0)
+
         # Image and buttons - Set up the group box
         image_layout_group = QGroupBox("Image Classification")
+        image_layout_group.setObjectName("classification-group")
         image_layout = QVBoxLayout()
         image_layout.setContentsMargins(15, 15, 15, 15)
         image_layout.setSpacing(15)
@@ -71,6 +74,7 @@ class ImageClassificationWidget(QWidget):
         
         # Results layout - Create a group box for the results
         results_group = QGroupBox("Results")
+        results_group.setObjectName("results-group")
         results_main_layout = QVBoxLayout(results_group)
         results_main_layout.setContentsMargins(0, 18, 0, 18)
         
@@ -126,6 +130,7 @@ class ImageClassificationWidget(QWidget):
         self.result_labels = {}
         for i, model_id in enumerate(self.model_names.keys()):
             result_label = QLabel("None")
+            result_label.setObjectName("ModelResultLabel")
             result_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
             result_label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
             self.result_labels[model_id] = result_label
