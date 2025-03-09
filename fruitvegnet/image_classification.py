@@ -9,6 +9,7 @@ import os, random
 from matplotlib import pyplot as plt
 
 from utils.scrollable_figure_canvas import ScrollableFigureCanvas
+from utils.custom_separator import create_separator
 
 
 class ImageClassificationWidget(QWidget):
@@ -20,7 +21,7 @@ class ImageClassificationWidget(QWidget):
         self.current_image_path = None
         self.active_plot_button = None  # Track currently active plot button
         
-        # Define model names first (moved up from below)
+        # Define model names
         self.model_names = {
             'simple_cnn': 'Simple CNN',
             'resnet': 'ResNet',
@@ -31,131 +32,124 @@ class ImageClassificationWidget(QWidget):
         self._create_ui()
         
     def _create_ui(self):
-        # Main group box
-        main_group = QGroupBox("Image Classification")
-        main_group.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        main_layout = QVBoxLayout(main_group)
+        main_layout = QVBoxLayout()
         
         # Top section - Image, buttons, and result labels
         top_layout = QHBoxLayout()
         
-        # Left side - Image and buttons
-        left_layout = QVBoxLayout()
-        left_widget = QWidget()
-        left_widget.setLayout(left_layout)
-        left_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        # Image and buttons - Set up the group box
+        image_layout_group = QGroupBox("Image Classification")
+        image_layout = QVBoxLayout()
+        image_layout.setContentsMargins(15, 15, 15, 15)
+        image_layout.setSpacing(15)
         
-        # Image preview
+        # Create image container with proper size policy
         self.image_display = QLabel()
-        self.image_display.setFixedSize(150, 150)
-        self.image_display.setStyleSheet("""
-            QLabel {
-                border: 2px solid #ccc;
-                border-radius: 5px;
-                background-color: #f8f9fa;
-            }
-        """)
+        self.image_display.setObjectName("image-display")
+        self.image_display.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.image_display.setMinimumSize(100, 100)  
         self.image_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        left_layout.addWidget(self.image_display)
+        image_layout.addWidget(self.image_display)
         
-        # Buttons
-        button_layout = QVBoxLayout()
-        self.load_btn = QPushButton("Load Image")
-        self.classify_btn = QPushButton("Classify All")
-        for btn in [self.load_btn, self.classify_btn]:
-            button_layout.addWidget(btn)
-        left_layout.addLayout(button_layout)
-        left_layout.addStretch()
+        # Buttons - Now horizontally arranged below the image
+        button_layout = QHBoxLayout()
+        button_layout.setContentsMargins(0, 0, 0, 0)
+        button_layout.setSpacing(5)
         
-        # Middle - Result labels with Show Plot buttons
-        middle_layout = QVBoxLayout()
-        middle_widget = QWidget()
-        middle_widget.setLayout(middle_layout)
-        middle_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        self.load_btn = QPushButton("Load")
+        self.classify_btn = QPushButton("Classify")
         
+        # Add buttons to layout with stretch to fill the entire width
+        button_layout.addWidget(self.load_btn)
+        button_layout.addWidget(self.classify_btn)
+        
+        # Add the button layout to the main image layout
+        image_layout.addLayout(button_layout)
+        image_layout_group.setLayout(image_layout)
+        
+        # Results layout - Create a group box for the results
+        results_group = QGroupBox("Results")
+        results_main_layout = QVBoxLayout(results_group)
+        results_main_layout.setContentsMargins(0, 18, 0, 18)
+        
+        # Create a horizontal layout that will contain the two columns
+        results_columns_layout = QHBoxLayout()
+        results_columns_layout.setContentsMargins(0, 0, 0, 0)
+        results_main_layout.addStretch()
+        
+        # Left column for model names
+        left_column = QVBoxLayout()
+        left_column.setSpacing(18)
+        left_column.setContentsMargins(0, 0, 0, 0)
+        left_column.addStretch()
+
+        # Right column for results
+        right_column = QVBoxLayout()
+        right_column.setSpacing(18)
+        right_column.setContentsMargins(0, 0, 0, 0)
+        right_column.addStretch()
+
+        # Create a fixed vertical line between columns
+        vertical_separator = QFrame()
+        vertical_separator.setFrameShape(QFrame.Shape.VLine)
+        vertical_separator.setFrameShadow(QFrame.Shadow.Plain)
+        vertical_separator.setStyleSheet(
+            "color: #e3e3e3; "
+            "width: 1px; "
+            "margin: 0px; "
+            "padding: 0px;"
+        )
+
+        simple_cnn_label = QLabel("Simple CNN")
+        simple_cnn_label.setObjectName("ModelSimpleCnn")
+        left_column.addWidget(simple_cnn_label)
+        left_column.addWidget(create_separator())
+        res_net_label = QLabel("ResNet")
+        res_net_label.setObjectName("ModelResNet")
+        left_column.addWidget(res_net_label)
+        left_column.addWidget(create_separator())
+        efficient_net_label = QLabel("EfficientNet")
+        efficient_net_label.setObjectName("ModelEfficientNet")
+        left_column.addWidget(efficient_net_label)
+        left_column.addWidget(create_separator())
+        vgg_16_label = QLabel("VGG 16")
+        vgg_16_label.setObjectName("ModelVgg16")
+        left_column.addWidget(vgg_16_label)
+
+
+        # Create result labels in the right column
         self.result_labels = {}
-        self.plot_buttons = {}
+        for i, model_id in enumerate(self.model_names.keys()):
+            result_label = QLabel("None")
+            result_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            self.result_labels[model_id] = result_label
+            right_column.addWidget(result_label)
+            
+            # Add horizontal separator after each result label except the last one
+            if model_id != list(self.model_names.keys())[-1]:
+                h_separator = create_separator()
+                right_column.addWidget(h_separator)
         
-        # Define label style based on MetricsWidget
-        self.label_style = """
-            QLabel {
-                font-size: 14px;
-                padding: 8px;
-                background-color: #f0f0f0;
-                border: 1px solid #bbb;
-                border-radius: 5px;
-                font-weight: 500;
-            }
-        """
-
-        # Define the button styles
-        self.button_normal_style = """
-            QPushButton {
-                background-color: #f8f9fa;
-                border: 1px solid #dee2e6;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #e9ecef;
-            }
-        """
+        # Add both columns and vertical separator to main results layout
+        results_columns_layout.addLayout(left_column)
+        results_columns_layout.addWidget(vertical_separator)
+        results_columns_layout.addLayout(right_column)
         
-        self.button_pressed_style = """
-            QPushButton {
-                background-color: #88c2ff;
-                border: 1px solid #495057;
-                border-radius: 4px;
-            }
-        """
-        
-        for model_type, label_text in self.model_names.items():
-            # Create container for each model
-            container = QWidget()
-            container_layout = QHBoxLayout(container)
-            
-            # Create and style label with new style
-            label = QLabel(f"{label_text}: None")
-            label.setStyleSheet(self.label_style)
-            label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-            label.setFixedSize(200, 40)
-            container_layout.addWidget(label)
-            
-            # Icon path
-            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            icon_path = os.path.join(project_root, "assets", "graph_icon.png")
-            pixmap = QPixmap(icon_path)
-
-            # Create plot button
-            plot_btn = QPushButton()
-            icon = QIcon(pixmap) 
-            plot_btn.setIcon(icon)
-            plot_btn.setIconSize(QSize(32, 32)) 
-            plot_btn.setFixedSize(40, 40)
-            plot_btn.setStyleSheet(self.button_normal_style)
-            plot_btn.setCheckable(True)  
-            
-            container_layout.addWidget(plot_btn)
-            
-            # Store references
-            self.result_labels[model_type] = label
-            self.plot_buttons[model_type] = plot_btn
-            
-            middle_layout.addWidget(container)
-        
-        middle_layout.addStretch()
+        # Add the columns layout to the results main layout
+        results_main_layout.addLayout(results_columns_layout)
+        results_main_layout.addStretch()
         
         # Add widgets to top layout
-        top_layout.addWidget(left_widget, 1)
-        top_layout.addWidget(middle_widget, 2)
+        top_layout.addWidget(image_layout_group, 1)
+        top_layout.addWidget(results_group, 2)
         
-        # Bottom section - Plot Widget with fixed size
+        # Bottom section - Plot Widget 
         bottom_layout = QVBoxLayout()
         
-        # Create StyledFrame
+        # Create plot frame
         self.plot_frame = QFrame()
-        self.plot_frame.setObjectName("StyledFrame")
+        self.plot_frame.setObjectName("styled-frame")
         self.plot_frame.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.plot_frame.setMaximumHeight(400)  # Set maximum height for the plot
         frame_layout = QVBoxLayout(self.plot_frame)
         
         # Create the title labels for each plot 
@@ -164,7 +158,7 @@ class ImageClassificationWidget(QWidget):
             title_label = QLabel(f"{title} - Class Probabilities")
             title_label.setFont(QFont('Arial', 11, QFont.Weight.Bold))
             title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            title_label.setVisible(False)  # Initially hidden
+            title_label.setVisible(False)
             self.plot_titles[model_type] = title_label
             frame_layout.addWidget(title_label)
 
@@ -185,23 +179,38 @@ class ImageClassificationWidget(QWidget):
             
             # Initialize empty plot
             self.init_plot(model_type)
+        
+        frame_layout.addWidget(self.plot_stack)
+        
+        # Add buttons layout below the plot - stretched to edges
+        buttons_layout = QHBoxLayout()
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(0)
+        
+        # Create plot buttons
+        self.plot_buttons = {}
+        for model_type, label_text in self.model_names.items():
+            btn = QPushButton(label_text)
+            btn.setCheckable(True)
+            btn.setObjectName(f"plot-{model_type}")
+            self.plot_buttons[model_type] = btn
+            buttons_layout.addWidget(btn, 1)  # Equal stretch factor for all buttons
             
             # Connect button to show this plot
-            self.plot_buttons[model_type].clicked.connect(
+            btn.clicked.connect(
                 lambda checked, m=model_type: self.switch_plot(m)
             )
         
-        frame_layout.addWidget(self.plot_stack)
+        frame_layout.addLayout(buttons_layout)
+        
         bottom_layout.addWidget(self.plot_frame)
         
         # Add both layouts to main layout
-        main_layout.addLayout(top_layout)
-        main_layout.addLayout(bottom_layout)
+        main_layout.addLayout(top_layout, 4)
+        main_layout.addLayout(bottom_layout, 6)
         
-        # Main widget layout
-        widget_layout = QVBoxLayout(self)
-        widget_layout.addWidget(main_group)
-        
+        self.setLayout(main_layout)
+
         # Connect signals
         self.load_btn.clicked.connect(self.load_image)
         self.classify_btn.clicked.connect(self.classify_clicked.emit)
@@ -224,14 +233,10 @@ class ImageClassificationWidget(QWidget):
         # Update button states
         for btn_type, btn in self.plot_buttons.items():
             if btn_type == model_type:
-                # Check the current button and apply pressed style
                 btn.setChecked(True)
-                btn.setStyleSheet(self.button_pressed_style)
                 self.active_plot_button = btn
             else:
-                # Uncheck other buttons and restore normal style
                 btn.setChecked(False)
-                btn.setStyleSheet(self.button_normal_style)
         
     def init_plot(self, model_type=None):
         """Initialize empty probability plot for specified or all models"""
@@ -280,6 +285,7 @@ class ImageClassificationWidget(QWidget):
         
         # Dynamic y-axis limit based on data and model type
         max_prob = max(probabilities)
+
         if model_type == 'simple_cnn':
             # For Simple CNN, set dynamic y-limit with 20% padding above the highest bar
             y_max = min(1.0, max_prob * 1.2)
@@ -318,16 +324,9 @@ class ImageClassificationWidget(QWidget):
                     image_path = os.path.join(class_path, random_image)
                     
                     # Load the image
-                    pixmap = QPixmap(image_path)
-                    if not pixmap.isNull():
-                        self.current_image_path = image_path
-                        scaled_pixmap = pixmap.scaled(
-                            150, 150,
-                            Qt.AspectRatioMode.KeepAspectRatio,
-                            Qt.TransformationMode.SmoothTransformation
-                        )
-                        self.image_display.setPixmap(scaled_pixmap)
-                        return
+                    self.current_image_path = image_path
+                    self.update_image_display(image_path)
+                    return
                     
         # If we get here, something went wrong
         self.image_display.setText("No image")
@@ -347,20 +346,48 @@ class ImageClassificationWidget(QWidget):
             pixmap = QPixmap(file_path)
             if not pixmap.isNull():
                 self.current_image_path = file_path
-                scaled_pixmap = pixmap.scaled(
-                    150, 150,
-                    Qt.AspectRatioMode.KeepAspectRatio,
-                    Qt.TransformationMode.SmoothTransformation
-                )
-                self.image_display.setPixmap(scaled_pixmap)
+                self.update_image_display(file_path)
                 self.image_loaded.emit("Image loaded", 8000)
             else:
                 self.image_display.setText("Failed to load image")
                 self.image_loaded.emit("Failed to load image", 8000)
                 self.current_image_path = None
                 
+    def update_image_display(self, image_path):
+        """Update the image display with proper aspect ratio scaling"""
+        if not image_path:
+            return
+            
+        pixmap = QPixmap(image_path)
+        if pixmap.isNull():
+            return
+            
+        # We'll keep the original pixmap and scale it in resizeEvent
+        self.original_pixmap = pixmap
+        
+        # Scale pixmap to current size while maintaining aspect ratio
+        self.scale_image()
+        
+    def scale_image(self):
+        """Scale the image to fit the current display size while preserving aspect ratio"""
+        if not hasattr(self, 'original_pixmap') or self.original_pixmap.isNull():
+            return
+            
+        display_size = self.image_display.size()
+        scaled_pixmap = self.original_pixmap.scaled(
+            display_size.width(), 
+            display_size.height(),
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        self.image_display.setPixmap(scaled_pixmap)
+        
+    def resizeEvent(self, event):
+        """Handle resize events to properly scale the image"""
+        super().resizeEvent(event)
+        self.scale_image()
+                
     def update_result(self, model_type, result):
         """Update the classification result for a specific model"""
         if model_type in self.result_labels:
-            model_name = self.model_names[model_type]
-            self.result_labels[model_type].setText(f"{model_name}: {result}")
+            self.result_labels[model_type].setText(result)

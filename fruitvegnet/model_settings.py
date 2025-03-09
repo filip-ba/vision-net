@@ -380,8 +380,7 @@ class TabWidget(QWidget):
         left_panel = QWidget()
         left_layout = QVBoxLayout(left_panel)
         left_layout.setSpacing(10)
-        left_layout.setContentsMargins(10, 10, 15, 10)
-        #left_panel.setFixedWidth(500)
+        left_layout.setContentsMargins(10, 10, 10, 10)
 
         # Model Controls
         model_group = QGroupBox("Model Controls")

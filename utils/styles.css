@@ -116,6 +116,28 @@ QPushButton:checked:pressed {
     border-bottom-left-radius: 0px;
 }
 
+#plot-simple_cnn {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+#plot-vgg16 {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+
+#plot-resnet {
+    border-radius: 0px;
+}
+
+#plot-efficientnet {
+    border-radius: 0px;
+}
+
 /*------------------------------------------------- Group Box styling -------------------------------------------------*/
 QGroupBox {
     font-weight: 700;
@@ -152,6 +174,14 @@ QGroupBox::title {
     margin-top: 0px;
 }
 
+#results-group {
+    margin-left: 0px;
+}
+
+#classification-group {
+    margin-right: 0px;
+}
+
 /*------------------------------------------------- Label styling -------------------------------------------------*/
 QLabel {
     font-size: 14px;
@@ -166,6 +196,12 @@ QLabel[objectName^="Model"] {
 
 #plot-label {
     background-color: white;
+}
+
+#image-display {
+    border: 1px solid #dcdcdc;
+    border-radius: 0px;
+    background-color: #fafafa;
 }
 
 /*------------------------------------------------- Plot Frame styling -------------------------------------------------*/
