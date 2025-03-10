@@ -85,14 +85,7 @@ class ProgressDialog(QDialog):
                 f"Momentum: {self.momentum}"
             )
             params_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-            params_label.setStyleSheet("""
-                QLabel {
-                    background-color: #f8f9fa;
-                    padding: 10px;
-                    border-radius: 5px;
-                    border: 1px solid #dee2e6;
-                }
-            """)
+            params_label.setObjectName("param-label")
             layout.addWidget(params_label)
 
         # Status label

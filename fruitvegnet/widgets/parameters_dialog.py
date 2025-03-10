@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import ( QDialog, QVBoxLayout, QGroupBox, QHBoxLayout, QDia
 from PyQt6.QtCore import Qt
 
 
-class ParameterWidget(QWidget):
+class ParametersWidget(QWidget):
 
     def __init__(self, label, min_val, max_val, default_val, decimals=0, parent=None):
         super().__init__(parent)
@@ -56,7 +56,7 @@ class ParameterWidget(QWidget):
             self.slider.setValue(int(value))
 
 
-class ParameterDialog(QDialog):
+class ParametersDialog(QDialog):
     """Creates dialog with parameters for training"""
 
     def __init__(self, parent=None):
@@ -68,12 +68,13 @@ class ParameterDialog(QDialog):
         
         # Parameters group
         params_group = QGroupBox("")
+        params_group.setObjectName("params-group")
         params_layout = QVBoxLayout()
         
         # Create parameter widgets
-        self.epochs_widget = ParameterWidget("Epochs:", 1, 100, 10)
-        self.learning_rate_widget = ParameterWidget("Learning Rate:", 0.000001, 1.0, 0.001, 6)
-        self.momentum_widget = ParameterWidget("Momentum:", 0.0, 1.0, 0.9, 6)
+        self.epochs_widget = ParametersWidget("Epochs:", 1, 100, 10)
+        self.learning_rate_widget = ParametersWidget("Learning Rate:", 0.000001, 1.0, 0.001, 6)
+        self.momentum_widget = ParametersWidget("Momentum:", 0.0, 1.0, 0.9, 6)
         
         # Add parameter widgets to layout
         for widget in [self.epochs_widget, self.learning_rate_widget, self.momentum_widget]:

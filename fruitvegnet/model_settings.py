@@ -7,7 +7,7 @@ import torch
 
 from fruitvegnet.widgets.progress_dialog import ProgressDialog
 from fruitvegnet.widgets.plot_widget import PlotWidget
-from fruitvegnet.widgets.parameters_dialog import ParameterDialog
+from fruitvegnet.widgets.parameters_dialog import ParametersDialog
 from fruitvegnet.widgets.parameters_widget import ParametersWidget
 from fruitvegnet.widgets.metrics_widget import MetricsWidget
 from fruitvegnet.widgets.model_info_widget import ModelInfoWidget
@@ -265,7 +265,7 @@ class TabWidget(QWidget):
 
     def train_model(self):
         """Trains the neural network"""
-        param_dialog = ParameterDialog(self)
+        param_dialog = ParametersDialog(self)
         
         # If we have model parameters, set them in the dialog
         if self.model.training_params['epochs'] is not None:

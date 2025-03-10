@@ -189,6 +189,10 @@ QGroupBox::title {
     margin-top: 20px; 
 }
 
+#params-group {
+    margin-top: 20px;
+}
+
 /*------------------------------------------------- Label styling -------------------------------------------------*/
 QLabel {
     font-size: 14px;
@@ -209,6 +213,13 @@ QLabel[objectName^="Model"] {
     border: 1px solid #dcdcdc;
     border-radius: 0px;
     background-color: #fafafa;
+}
+
+#param-label {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
 }
 
 /*------------------------------------------------- Plot Frame styling -------------------------------------------------*/
