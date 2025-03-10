@@ -367,7 +367,8 @@ class TabWidget(QWidget):
     def _create_ui(self):
         # Main layout
         main_layout = QHBoxLayout(self)
-        main_layout.setContentsMargins(10, 10, 10, 10   )
+        main_layout.setContentsMargins(10, 10, 10, 10)
+        main_layout.setSpacing(0)
 
         # Left panel
         left_panel = self._create_left_panel()
@@ -387,7 +388,7 @@ class TabWidget(QWidget):
         model_group = QGroupBox("Model Controls")
         model_group.setObjectName("model-controls")
         model_layout = QVBoxLayout()
-        model_layout.setContentsMargins(10, 10, 10, 10)
+        model_layout.setContentsMargins(0, 0, 0, 0)
         model_group.setLayout(model_layout)
 
         # Model buttons
@@ -412,7 +413,7 @@ class TabWidget(QWidget):
         self.metrics_widget = MetricsWidget()
         metrics_layout.addWidget(self.metrics_widget)
         self.metrics_group.setLayout(metrics_layout)
-        metrics_layout.setContentsMargins(10, 10, 10, 10)
+        #metrics_layout.setContentsMargins(30, 30, 30, 30)
 
         # Parameters group box
         self.parameters_group = QGroupBox("")
@@ -444,14 +445,15 @@ class TabWidget(QWidget):
     def _create_right_panel(self):
         right_panel = QWidget()
         right_layout = QVBoxLayout(right_panel)
-        right_layout.setSpacing(20)
-        right_layout.setContentsMargins(15, 30, 10, 10)
+        right_layout.setSpacing(0)
+        right_layout.setContentsMargins(0, 0, 0, 0)
         
         # Create StyledFrame
         self.plot_frame = QFrame()
-        self.plot_frame.setObjectName("styled-frame")
+        self.plot_frame.setObjectName("plot-1-2-frame")
 
         frame_layout = QVBoxLayout(self.plot_frame)
+        frame_layout.setSpacing(0)
         
         # QStackedWidget for switching between charts
         self.plot_stack = QStackedWidget()

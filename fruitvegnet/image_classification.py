@@ -35,17 +35,19 @@ class ImageClassificationWidget(QWidget):
 
     def _create_ui(self):
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(10, 10, 10, 10)
+        main_layout.setContentsMargins(10, 10, 10, 0)
+        main_layout.setSpacing(0)
 
         # Top section - Image, buttons, and result labels
         top_layout = QHBoxLayout()
         top_layout.setContentsMargins(0, 0, 0, 0)
+        top_layout.setSpacing(0)
 
         # Image and buttons - Set up the group box
         image_layout_group = QGroupBox("Image Classification")
         image_layout_group.setObjectName("classification-group")
         image_layout = QVBoxLayout()
-        image_layout.setContentsMargins(15, 15, 15, 15)
+        image_layout.setContentsMargins(15, 15, 15, 15) # Margin in image layout
         image_layout.setSpacing(15)
         
         # Create image container with proper size policy
@@ -158,7 +160,7 @@ class ImageClassificationWidget(QWidget):
         
         # Create plot frame
         self.plot_frame = QFrame()
-        self.plot_frame.setObjectName("styled-frame")
+        self.plot_frame.setObjectName("plot-3-frame")
         self.plot_frame.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         frame_layout = QVBoxLayout(self.plot_frame)
         
@@ -191,11 +193,12 @@ class ImageClassificationWidget(QWidget):
             self.init_plot(model_type)
         
         frame_layout.addWidget(self.plot_stack)
-        
-        # Add buttons layout below the plot - stretched to edges
+        frame_layout.setSpacing(0) #  No space between title, plot and buttons
+
+        # Plot buttons
         buttons_layout = QHBoxLayout()
         buttons_layout.setContentsMargins(0, 0, 0, 0)
-        buttons_layout.setSpacing(0)
+        buttons_layout.setSpacing(0) # No space between buttons
         
         # Create plot buttons
         self.plot_buttons = {}

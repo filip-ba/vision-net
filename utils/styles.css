@@ -145,49 +145,48 @@ QGroupBox {
     border: 1px solid #e3e3e3;
     background-color: rgb(255, 255, 255);
     border-radius: 12px;
-    margin: 25px;
+    margin: 20px;
+    margin-top: 50px;
     padding: 0px;
 }
 
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    margin-left: 25px;
-    margin-top: -2px; 
+    margin-left: 18px;
+    margin-top: 18px; 
 }
 
 #model-controls {
-    margin-bottom: 30px;
-    margin-top: 25px;
-    padding: 5px;
+    padding: 15px;
+    margin-bottom: 5px;
 }
 
 #model-metrics {
-    margin-bottom: 5px;
+    margin-bottom: 0px;
+    padding: 0px;
 }
 
 #model-parameters {
-    margin-bottom: 5px;
-    margin-top: 0px;
+    margin-top: 5px;
+    margin-bottom: 0px;
 }
 
 #model-info {
-    margin-top: 0px;
+    margin-top: 5px;
 }
 
 #results-group {
-    margin-left: 2px;
+    margin-left: 0px;
 }
 
 #classification-group {
-    margin-right: 3px;
+    margin-right: 10px;
 }
 
 #results-group:title {
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-    margin-left: 0px;
-    margin-top: -2px; 
+    margin-left: -2px;
+    margin-top: 20px; 
 }
 
 /*------------------------------------------------- Label styling -------------------------------------------------*/
@@ -213,15 +212,26 @@ QLabel[objectName^="Model"] {
 }
 
 /*------------------------------------------------- Plot Frame styling -------------------------------------------------*/
-#styled-frame {
+#plot-1-2-frame {
     border: 1px solid #e3e3e3;
     border-radius: 12px;
-    padding: 5px;
+    padding: 0px;
     background-color: white;
-    margin-left: 25px;
-    margin-right: 25px;
-    margin-top: 0px;
+    margin-left: 10px;
+    margin-right: 20px;
+    margin-top: 50px;
+    margin-bottom: 20px;
+}
+
+#plot-3-frame {
+    border: 1px solid #e3e3e3;
+    border-radius: 12px;
+    padding: 0px;
+    background-color: white;
+    margin-left: 20px;
+    margin-right: 20px;
     margin-bottom: 0px;
+    margin-top: 10px;
 }
 
 /*------------------------------------------------- Slider styling -------------------------------------------------*/
