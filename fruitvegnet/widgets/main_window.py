@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(50, 50, 1200, 700)
+        self.setGeometry(50, 50, 1000, 700)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -75,8 +75,17 @@ class MainWindow(QMainWindow):
         self.image_classification_widget = ImageClassification()
         self.image_classification_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
+        # Create settings page (third page)
+        self.settings_widget = QWidget() 
+        settings_layout = QVBoxLayout(self.settings_widget)
+        settings_label = QLabel("Settings Page")
+        settings_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        settings_layout.addWidget(settings_label)
+        self.settings_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
         self.content_stack.addWidget(self.tab_widget)
         self.content_stack.addWidget(self.image_classification_widget)
+        self.content_stack.addWidget(self.settings_widget) 
 
         # Add the stacked widget to the scroll area
         content_scroll.setWidget(self.content_stack)
@@ -135,7 +144,19 @@ class MainWindow(QMainWindow):
         sidebar_layout.addWidget(models_btn)
         sidebar_layout.addWidget(classify_btn)
         
+        # Add stretch to push the settings button to the bottom
         sidebar_layout.addStretch()
+        
+        # Add separator above settings button
+        bottom_separator = QFrame()
+        bottom_separator.setFrameShape(QFrame.Shape.HLine)
+        bottom_separator.setFrameShadow(QFrame.Shadow.Plain)
+        bottom_separator.setStyleSheet("color: #e3e3e3; background-color: #f2f2f2; height: 1px; margin-left: 10px; margin-right: 10px;")
+        sidebar_layout.addWidget(bottom_separator)
+        
+        # Add Settings button at the bottom
+        settings_btn = self._create_sidebar_button("Settings", 2)
+        sidebar_layout.addWidget(settings_btn)
         
         return sidebar
     
@@ -155,10 +176,10 @@ class MainWindow(QMainWindow):
         """Switch between model controls and image classification pages"""
         self.content_stack.setCurrentIndex(index)
         
-        # Update button state
-        for i in range(self.sidebar.layout().count() - 1):  # Skip stretch item
+        # Update button state - find all buttons and uncheck them except the clicked one
+        for i in range(self.sidebar.layout().count()):
             item = self.sidebar.layout().itemAt(i)
-            if item and isinstance(item.widget(), QPushButton):
+            if item and item.widget() and isinstance(item.widget(), QPushButton):
                 item.widget().setChecked(item.widget() == clicked_button)
         
     def _connect_tab_status_signals(self):
