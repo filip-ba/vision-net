@@ -156,7 +156,8 @@ class ImageClassification(QWidget):
         # Create result labels
         self.result_labels = {}
         for i, model_id in enumerate(self.model_names.keys()):
-            result_label = QLabel("None")
+            result_label = QLabel("None") 
+            result_label.setStyleSheet("font-weight: 700;")
             result_label.setObjectName("ModelResultLabel")
             result_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
             result_label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
