@@ -216,10 +216,28 @@ QLabel[objectName^="Model"] {
 }
 
 #param-label {
-    background-color: #f8f9fa;
+    background-color: #ffffff;
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #dee2e6;
+}
+
+#status-label {
+    background-color: #fafafa;
+}
+
+#time-label {
+    background-color: #fafafa;
+}
+
+/*------------------------------------------------- Progress bar styling -------------------------------------------------*/
+QProgressBar {
+    background-color: #e0e0e0;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: #6f8396;
 }
 
 /*------------------------------------------------- Plot Frame styling -------------------------------------------------*/

@@ -72,7 +72,9 @@ class ProgressDialog(QDialog):
     def setup_ui(self):
         """UI component initialization"""
         layout = QVBoxLayout()
-        self.setFixedWidth(400)  
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(20)
+        self.resize(400, 300)
         self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMinimizeButtonHint)
 
         # Add training parameters if available
@@ -90,6 +92,7 @@ class ProgressDialog(QDialog):
 
         # Status label
         self.status_label = QLabel(f"{self.operation_type} in progress...")
+        self.status_label.setObjectName("status-label")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.status_label)
 
@@ -101,6 +104,7 @@ class ProgressDialog(QDialog):
 
         # Time estimate label
         self.time_label = QLabel("Estimated time remaining: calculating...")
+        self.time_label.setObjectName("time-label")
         self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.time_label)
 
