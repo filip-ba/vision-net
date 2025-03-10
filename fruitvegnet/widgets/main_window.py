@@ -7,7 +7,7 @@ from PyQt6.QtCore import Qt
 import os
 
 from fruitvegnet.model_settings import TabWidget
-from fruitvegnet.image_classification import ImageClassificationWidget
+from fruitvegnet.image_classification import ImageClassification
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
 from models.efficientnet_model import EfficientNetModel
@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.vgg16_tab, "VGG16")
         
         # Create image classification (second page)
-        self.image_classification_widget = ImageClassificationWidget()
+        self.image_classification_widget = ImageClassification()
         self.image_classification_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         self.content_stack.addWidget(self.tab_widget)

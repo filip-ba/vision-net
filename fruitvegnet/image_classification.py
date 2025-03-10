@@ -12,7 +12,7 @@ from utils.scrollable_figure_canvas import ScrollableFigureCanvas
 from utils.custom_separator import create_separator
 
 
-class ImageClassificationWidget(QWidget):
+class ImageClassification(QWidget):
     image_loaded = pyqtSignal(str, int)  # Signal to notify when new image is loaded
     classify_clicked = pyqtSignal()  # Signal for classify button clicks
 
