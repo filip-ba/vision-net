@@ -29,9 +29,7 @@ class ImageClassification(QWidget):
             'vgg16': 'VGG16'
         }
         
-        self._create_ui()
-        QTimer.singleShot(0, self.scale_image)
-        
+        self._create_ui()    
 
     def _create_ui(self):
         main_layout = QVBoxLayout()
@@ -396,3 +394,9 @@ class ImageClassification(QWidget):
         """Update the classification result for a specific model"""
         if model_type in self.result_labels:
             self.result_labels[model_type].setText(result)
+
+    def showEvent(self, event):
+        """Handle the widget being shown for the first time"""
+        super().showEvent(event)
+        # Scale the image after the widget is visible and has proper dimensions
+        QTimer.singleShot(50, self.scale_image)
