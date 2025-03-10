@@ -389,7 +389,6 @@ class TabWidget(QWidget):
     def _create_left_panel(self):
         left_panel = QWidget()
         left_layout = QVBoxLayout(left_panel)
-        #left_layout.setSpacing(10)
         left_layout.setContentsMargins(0, 0, 0, 0)
 
         # Model Controls
@@ -418,10 +417,10 @@ class TabWidget(QWidget):
         self.metrics_group = QGroupBox(f"{self.model_name} Stats")
         self.metrics_group.setObjectName("model-metrics")
         metrics_layout = QVBoxLayout()
+        metrics_layout.setContentsMargins(18, 0, 18, 0)
         self.metrics_widget = MetricsWidget()
         metrics_layout.addWidget(self.metrics_widget)
         self.metrics_group.setLayout(metrics_layout)
-        #metrics_layout.setContentsMargins(30, 30, 30, 30)
 
         # Parameters group box
         self.parameters_group = QGroupBox("")
