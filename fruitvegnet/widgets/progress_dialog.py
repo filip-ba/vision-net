@@ -7,6 +7,7 @@ class TrainingThread(QThread):
     """Class for model training in a separate thread"""
     progress_updated = pyqtSignal(float, float)  # (progress, loss)
     finished = pyqtSignal(tuple)  # (train_loss_history, val_loss_history)
+    testing_finished = pyqtSignal(dict)  # metrics dictionary
     error = pyqtSignal(str)
 
     def __init__(self, model, epochs, learning_rate, momentum):
@@ -24,36 +25,33 @@ class TrainingThread(QThread):
                     raise InterruptedError("Training canceled by user")
                 self.progress_updated.emit(progress, loss)
 
+            # Start training
             result = self.model.train(
                 self.epochs,
                 self.learning_rate,
                 self.momentum,
                 progress_callback
             )
+            
+            if self._is_canceled:
+                return
+                
+            # Signal training is finished
+            self.finished.emit(result)
+            
+            # Continue with testing in the same thread
             if not self._is_canceled:
-                self.finished.emit(result)
+                try:
+                    metrics = self.model.test()
+                    self.testing_finished.emit(metrics)
+                except Exception as e:
+                    self.error.emit(f"Testing error: {str(e)}")
+                    
         except Exception as e:
             self.error.emit(str(e))
 
     def cancel(self):
         self._is_canceled = True
-
-
-class TestingThread(QThread):
-    """Class for model testing in a separate thread"""
-    finished = pyqtSignal(dict)  # metrics dictionary
-    error = pyqtSignal(str)
-
-    def __init__(self, model):
-        super().__init__()
-        self.model = model
-
-    def run(self):
-        try:
-            metrics = self.model.test()
-            self.finished.emit(metrics)
-        except Exception as e:
-            self.error.emit(str(e))
 
 
 class ProgressDialog(QDialog):
@@ -67,14 +65,15 @@ class ProgressDialog(QDialog):
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.momentum = momentum
+        self.training_result = None
+        self.testing_result = None
         self.setup_ui()
         
     def setup_ui(self):
         """UI component initialization"""
-        self.setWindowTitle(f"Model {self.operation_type}")
-        self.setFixedSize(400, 300)  
-        self.setModal(True)
         layout = QVBoxLayout()
+        self.setFixedWidth(400)  
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMinimizeButtonHint)
 
         # Add training parameters if available
         if self.operation_type == "Training" and all(param is not None for param in 
@@ -123,22 +122,12 @@ class ProgressDialog(QDialog):
         self.thread = TrainingThread(model, epochs, learning_rate, momentum)
         self.thread.progress_updated.connect(self.update_progress)
         self.thread.finished.connect(self.on_training_finished)
+        self.thread.testing_finished.connect(self.on_testing_finished)
         self.thread.error.connect(self.on_error)
         self.start_time = time.time()
         self.thread.start()
         self.exec()  
-        return getattr(self, 'result', None)
-
-    def start_testing(self, model):
-        """Starts testing in new thread"""
-        self.thread = TestingThread(model)
-        self.thread.finished.connect(self.on_testing_finished)
-        self.thread.error.connect(self.on_error)
-        self.start_time = time.time()
-        self.progress_bar.setMaximum(0) 
-        self.thread.start()
-        self.exec()  
-        return getattr(self, 'result', None)
+        return self.training_result, self.testing_result
 
     def update_progress(self, progress, current_loss):
         """Updates progress bar and time estimate"""
@@ -162,22 +151,30 @@ class ProgressDialog(QDialog):
 
     def cancel(self):
         """Cancels the operation"""
-        if isinstance(self.thread, TrainingThread):
+        if self.thread:
             self.thread.cancel()
         self.reject()
 
     def on_training_finished(self, result):
         """Training finished callback"""
-        self.result = result
-        self.accept()
+        self.training_result = result
+        self.status_label.setText("Training completed. Starting testing...")
+        self.progress_bar.setValue(0)
+        self.progress_bar.setMaximum(0)  # Switch to indeterminate mode for testing
+        self.time_label.setText("Testing in progress...")
 
     def on_testing_finished(self, metrics):
         """Testing finished callback"""
-        self.result = metrics
+        self.testing_result = metrics
+        self.status_label.setText("Testing completed.")
+        self.progress_bar.setMaximum(100)
+        self.progress_bar.setValue(100)
+        self.time_label.setText("Done!")
         self.accept()
 
     def on_error(self, error_message):
         """Error callback"""
-        self.result = None
+        self.training_result = None
+        self.testing_result = None
         self.error_message = error_message
         self.reject()

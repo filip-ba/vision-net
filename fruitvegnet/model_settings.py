@@ -311,10 +311,10 @@ class TabWidget(QWidget):
                 momentum=momentum
             )
 
-            result = dialog.start_training(self.model, epochs, learning_rate, momentum)    
+            training_result, testing_result = dialog.start_training(self.model, epochs, learning_rate, momentum)    
             
-            if result is not None:
-                train_loss_history, val_loss_history = result
+            if training_result is not None:
+                train_loss_history, val_loss_history = training_result
 
                 # Plotting loss history
                 self.plot_widget1.plot_loss_history(
@@ -328,17 +328,25 @@ class TabWidget(QWidget):
                 self.save_model_btn.setEnabled(True)
                 self.clear_model_btn.setEnabled(True)
                 self.model_info_widget.set_model_status("Model trained successfully", "green")
-                self.status_message.emit("Training completed", 8000)
-
                 self.parameters_widget.update_parameters(self.model.training_params)
-
-                # Test the model
-                self.test_model()
+                
+                # Update UI with testing results
+                if testing_result is not None:
+                    self.metrics_widget.update_metrics(testing_result)
+                    
+                    # Confusion matrix
+                    conf_mat = testing_result['confusion_matrix']
+                    classes = self.model.classes
+                    self.plot_widget2.plot_confusion_matrix(self.plot_widget2, conf_mat, classes)
+                    
+                    self.status_message.emit("Training and testing completed", 8000)
+                else:
+                    self.status_message.emit("Training completed but testing failed", 8000)
             else:
                 self.status_message.emit("Training canceled, model was reset", 8000)       
                 self.reset_model()
         except Exception as e:
-            self.status_message.emit("Training canceled, model was reset", 8000)  
+            self.status_message.emit(f"Error: {str(e)}", 8000)  
             self.reset_model()
 
     def test_model(self):
