@@ -25,6 +25,8 @@ QMainWindow, QWidget {
     padding: 5px;
 }
 
+/*------------------------------------------------- Sidebar button styling -------------------------------------------------*/
+
 #sidebar-button {
     background-color: transparent;
     color: #2d2d2d;
@@ -45,31 +47,9 @@ QMainWindow, QWidget {
     color: #2d2d2d;
 }
 
-/*------------------------------------------------- Tab Widget styling -------------------------------------------------*/
-QTabWidget::pane {
-    background-color: #fafafa;
-    border-top: 1px solid  #e3e3e3;;
-}
-
-QTabBar::tab {
-    background-color: #fafafa;
-    min-width: 100px;
-    min-height: 20px;
-    padding: 8px 12px;
-    margin-left: 0px;
-    margin-top: 0px;
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
-}
-
-QTabBar::tab:selected {
-    background-color: #fafafa;
-    border-bottom: 4px solid #d8d8d8;
-    border-radius: 0px;
-}
-
-QTabBar::tab:hover:!selected {
-    background-color: #dedede;
+#sidebar-button:checked:pressed {
+    background-color: #c7c7c7;
+    color: #2d2d2d;
 }
 
 /*------------------------------------------------- Button styling -------------------------------------------------*/
@@ -138,6 +118,33 @@ QPushButton:checked:pressed {
     border-radius: 0px;
 }
 
+/*------------------------------------------------- Tab Widget styling -------------------------------------------------*/
+QTabWidget::pane {
+    background-color: #fafafa;
+    border-top: 1px solid  #e3e3e3;;
+}
+
+QTabBar::tab {
+    background-color: #fafafa;
+    min-width: 100px;
+    min-height: 20px;
+    padding: 8px 12px;
+    margin-left: 0px;
+    margin-top: 0px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+
+QTabBar::tab:selected {
+    background-color: #fafafa;
+    border-bottom: 4px solid #d8d8d8;
+    border-radius: 0px;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #dedede;
+}
+
 /*------------------------------------------------- Group Box styling -------------------------------------------------*/
 QGroupBox {
     font-weight: 700;
@@ -202,6 +209,11 @@ QLabel {
 
 QLabel[objectName^="Model"] {
     margin: 0px 10px 0px 10px;
+    padding: 0px;
+}
+
+QLabel[objectName^="Metrics"] {
+    margin: 10px 0px 10px 0px;
     padding: 0px;
 }
 
