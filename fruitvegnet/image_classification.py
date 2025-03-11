@@ -67,8 +67,8 @@ class ImageClassification(QWidget):
         results_group = self._create_results_section()
         
         # Add widgets to top layout
-        top_layout.addWidget(image_layout_group, 1)
-        top_layout.addWidget(results_group, 2)
+        top_layout.addWidget(image_layout_group, 2)
+        top_layout.addWidget(results_group, 3)
         
         return top_layout
         
@@ -147,6 +147,7 @@ class ImageClassification(QWidget):
         for model_id, label in model_labels.items():
             label.setObjectName(f"Model{model_id.title().replace('_', '')}")
             label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+            label.setMinimumWidth(70)
             left_column.addWidget(label, 1)
             
             # Add separator after each label except the last one
@@ -161,6 +162,7 @@ class ImageClassification(QWidget):
             result_label.setObjectName("ModelResultLabel")
             result_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
             result_label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+            result_label.setMinimumWidth(70)
             self.result_labels[model_id] = result_label
             right_column.addWidget(result_label, 1)
             
@@ -174,6 +176,9 @@ class ImageClassification(QWidget):
         results_columns_layout.addLayout(right_column)
         results_main_layout.addLayout(results_columns_layout)
         
+        results_group.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        results_group.setMinimumWidth(100)
+
         return results_group
     
     def _create_bottom_layout(self):
@@ -199,13 +204,15 @@ class ImageClassification(QWidget):
         # Plot stack widget
         self.plot_stack = QStackedWidget()
         self.plot_stack.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        
+        self.plot_stack.setMinimumWidth(200)
+
         # Create plot widgets for each model
         self.plot_widgets = {}
         for model_type in self.model_names.keys():
             figure = Figure(figsize=(5, 4), dpi=100)
             canvas = ScrollableFigureCanvas(figure)
             canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            canvas.setMinimumWidth(180)
             self.plot_widgets[model_type] = {'figure': figure, 'canvas': canvas}
             self.plot_stack.addWidget(canvas)
             self.init_plot(model_type)

@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
         # Add responsive sidebar settings
         self.MIN_SIDEBAR_WIDTH = 190
         self.MAX_SIDEBAR_WIDTH = 260
-        self.SIDEBAR_HIDE_THRESHOLD = 500  # Hide sidebar when window width is less than this
+        self.SIDEBAR_HIDE_THRESHOLD = 700  # Hide sidebar when window width is less than this
         
         # Install event filter for window resize
         self.installEventFilter(self)
