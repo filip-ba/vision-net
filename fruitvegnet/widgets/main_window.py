@@ -2,8 +2,8 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
                              QSizePolicy, QSpacerItem, QStatusBar, QFrame,
                              QHBoxLayout, QStackedWidget, QPushButton, QLabel,
                              QScrollArea)
-from PyQt6.QtGui import QIcon, QAction, QPixmap, QPainter
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QIcon, QPixmap, QPainter
+from PyQt6.QtCore import Qt, QSize, QTimer, QEvent
 import os
 
 from fruitvegnet.model_settings import TabWidget
@@ -18,6 +18,15 @@ class MainWindow(QMainWindow):
     
     def __init__(self):
         super().__init__()
+        
+        # Add responsive sidebar settings
+        self.MIN_SIDEBAR_WIDTH = 190
+        self.MAX_SIDEBAR_WIDTH = 260
+        self.SIDEBAR_HIDE_THRESHOLD = 500  # Hide sidebar when window width is less than this
+        
+        # Install event filter for window resize
+        self.installEventFilter(self)
+        
         self._create_ui()
         
     def _create_ui(self):
@@ -26,23 +35,27 @@ class MainWindow(QMainWindow):
 
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(50, 50, 1000, 700)
+        self.setGeometry(50, 50, 1100, 700)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        main_layout = QHBoxLayout(central_widget)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        self.main_layout = QHBoxLayout(central_widget)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
         
         # Create scrollable sidebar
-        sidebar_scroll = QScrollArea()
-        sidebar_scroll.setWidgetResizable(True)
-        sidebar_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        sidebar_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.sidebar_scroll = QScrollArea()
+        self.sidebar_scroll.setWidgetResizable(True)
+        self.sidebar_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.sidebar_scroll.setFrameShape(QFrame.Shape.NoFrame)
         
         self.sidebar = self._create_sidebar()
-        sidebar_scroll.setWidget(self.sidebar)
+        self.sidebar_scroll.setWidget(self.sidebar)
+        
+        # Set fixed minimum width to start
+        self.sidebar_scroll.setMinimumWidth(self.MIN_SIDEBAR_WIDTH)
+        self.sidebar_scroll.setMaximumWidth(self.MIN_SIDEBAR_WIDTH)
         
         # Container for the model settings and image classification
         content_container = QWidget()
@@ -96,8 +109,9 @@ class MainWindow(QMainWindow):
         content_layout.addWidget(content_scroll, 1)
         content_layout.addWidget(self.status_bar, 0)
         
-        main_layout.addWidget(sidebar_scroll, 1)  
-        main_layout.addWidget(content_container, 5)  
+        # Add widgets to main layout
+        self.main_layout.addWidget(self.sidebar_scroll, 1)  
+        self.main_layout.addWidget(content_container, 5)  
         
         # Signals
         self.image_classification_widget.classify_clicked.connect(self._classify_all) 
@@ -258,35 +272,50 @@ class MainWindow(QMainWindow):
                     self.update_status_bar("No models available for classification")
             else:
                 self.image_classification_widget.update_result(model_info['type'], "No model")
-
-    """-----------------------Methods that probably won't be used-----------------------"""
-    def _setup_menu(self):
-        menu_bar = self.menuBar()
-        file_menu = menu_bar.addMenu("File")
+                
+    def eventFilter(self, obj, event):
+        """Event filter to handle window resize events"""
         
-        # Export and import actions
-        self.save_action = QAction("Save Model", self)
-        self.load_action = QAction("Load Model", self)
-        file_menu.addAction(self.save_action)
-        file_menu.addAction(self.load_action)
-        self.save_action.triggered.connect(self._save_current_model)
-        self.load_action.triggered.connect(self._load_current_model)
-
-        file_menu.addSeparator()
-        
-        # Quit action
-        self.quit_action = QAction("Quit", self)
-        file_menu.addAction(self.quit_action)  
-        self.quit_action.triggered.connect(self.close)
-
-    def _save_current_model(self):
-        """Saves a model from the currently active tab"""
-        current_tab = self.tab_widget.currentWidget()
-        if current_tab:
-            current_tab.save_model()
+        if obj is self and event.type() == QEvent.Type.Resize:
+            # Delay the adjustment slightly to avoid constant resizing during drag
+            QTimer.singleShot(10, self._adjust_sidebar_width)
             
-    def _load_current_model(self):
-        """Loads a model from the currently active tab"""
-        current_tab = self.tab_widget.currentWidget()
-        if current_tab:
-            current_tab.load_model()
+        return super().eventFilter(obj, event)
+    
+    def _adjust_sidebar_width(self):
+        """Adjust sidebar width based on window width"""
+        window_width = self.width()
+        
+        # Hide sidebar completely if window is too small
+        if window_width < self.SIDEBAR_HIDE_THRESHOLD:
+            self.sidebar_scroll.setVisible(False)
+            
+            # Adjusting the layout to use the full width of the content
+            if self.main_layout.indexOf(self.sidebar_scroll) != -1:
+                # Temporarily disconnect the sidebar from the layout
+                self.main_layout.removeWidget(self.sidebar_scroll)
+        else:
+            # Check if the sidebar is visible, if not, add it back
+            if not self.sidebar_scroll.isVisible():
+                self.sidebar_scroll.setVisible(True)
+                
+                # Add the sidebar back to the layout if it is not there
+                if self.main_layout.indexOf(self.sidebar_scroll) == -1:
+                    content_widget = self.main_layout.itemAt(0).widget()
+                    self.main_layout.removeWidget(content_widget)
+                    self.main_layout.addWidget(self.sidebar_scroll, 1)
+                    self.main_layout.addWidget(content_widget, 5)
+            
+            # Calculate the proportional width within the min/max limits
+            # Window width from 800 to 1600 corresponds to sidebar width from 300 to 400
+            proportion = min(1.0, (window_width - self.SIDEBAR_HIDE_THRESHOLD) / 800)
+            sidebar_width = int(self.MIN_SIDEBAR_WIDTH + proportion * 
+                               (self.MAX_SIDEBAR_WIDTH - self.MIN_SIDEBAR_WIDTH))
+            
+            # Ensures that the width is within the limits
+            sidebar_width = max(self.MIN_SIDEBAR_WIDTH, 
+                               min(self.MAX_SIDEBAR_WIDTH, sidebar_width))
+            
+            # Apply the width
+            self.sidebar_scroll.setMinimumWidth(sidebar_width)
+            self.sidebar_scroll.setMaximumWidth(sidebar_width)
