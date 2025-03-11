@@ -2,8 +2,8 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
                              QSizePolicy, QSpacerItem, QStatusBar, QFrame,
                              QHBoxLayout, QStackedWidget, QPushButton, QLabel,
                              QScrollArea)
-from PyQt6.QtGui import QIcon, QAction
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon, QAction, QPixmap
+from PyQt6.QtCore import Qt, QSize
 import os
 
 from fruitvegnet.model_settings import TabWidget
@@ -161,9 +161,44 @@ class MainWindow(QMainWindow):
         return sidebar
     
     def _create_sidebar_button(self, text, page_index):
-        button = QPushButton(text)
+        button = QPushButton()
         button.setObjectName("sidebar-button")
         button.setCheckable(True)
+        
+        layout = QHBoxLayout(button)
+        layout.setContentsMargins(20, 0, 0, 0) 
+        layout.setSpacing(11)  
+        
+        # Path to assets folder
+        current_file_path = os.path.abspath(__file__)
+        widgets_dir = os.path.dirname(current_file_path)
+        fruitvegnet_dir = os.path.dirname(widgets_dir)
+        project_root = os.path.dirname(fruitvegnet_dir)
+        assets_dir = os.path.join(project_root, "assets")
+        
+        # Create icon label
+        icon_label = QLabel()
+        icon_label.setObjectName("sidebar-icon")
+        icon_label.setFixedSize(18, 18) 
+        
+        # Set icons
+        icon_path = None
+        if text == "Models":
+            icon_path = os.path.join(assets_dir, "model-dark.png")
+        elif text == "Classification":
+            icon_path = os.path.join(assets_dir, "classification-dark.png")
+        elif text == "Settings":
+            icon_path = os.path.join(assets_dir, "settings-dark.png")
+        pixmap = QPixmap(icon_path)
+        icon_label.setPixmap(pixmap.scaled(18, 18, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+
+        # Create label for text
+        text_label = QLabel(text)
+        text_label.setObjectName("sidebar-button-text")
+        
+        layout.addWidget(icon_label)
+        layout.addWidget(text_label)
+        layout.addStretch()  
         
         if page_index == 0:
             button.setChecked(True)
@@ -171,7 +206,7 @@ class MainWindow(QMainWindow):
         button.clicked.connect(lambda: self._switch_page(page_index, button))
         
         return button
-    
+        
     def _switch_page(self, index, clicked_button):
         """Switch between model controls and image classification pages"""
         self.content_stack.setCurrentIndex(index)

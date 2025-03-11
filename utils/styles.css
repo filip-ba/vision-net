@@ -26,16 +26,13 @@ QMainWindow, QWidget {
 }
 
 /*------------------------------------------------- Sidebar button styling -------------------------------------------------*/
-
 #sidebar-button {
     background-color: transparent;
     color: #2d2d2d;
     border: none;
     text-align: left;
     padding: 12px 15px;
-    margin: 2px 5px 2px 5px;
-    font-size: 15px;
-    font-weight: 400;
+    margin: 2px 6px 2px 6px;
 }
 
 #sidebar-button:hover {
@@ -43,13 +40,29 @@ QMainWindow, QWidget {
 }
 
 #sidebar-button:checked {
-    background-color: #d8d8d8;
-    color: #2d2d2d;
+    background-color: rgba(216,216,216,255);
 }
 
 #sidebar-button:checked:pressed {
     background-color: #c7c7c7;
+}
+
+#sidebar-button-text {
+    background-color: transparent;
+    font-size: 15px;
+    font-weight: 400;
+}
+
+#sidebar-button-text {
+    background-color: transparent;
+}
+
+#sidebar-button:checked #sidebar-button-text {
     color: #2d2d2d;
+}
+
+#sidebar-icon {
+    background-color: transparent;
 }
 
 /*------------------------------------------------- Button styling -------------------------------------------------*/
