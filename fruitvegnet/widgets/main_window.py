@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
                              QSizePolicy, QSpacerItem, QStatusBar, QFrame,
                              QHBoxLayout, QStackedWidget, QPushButton, QLabel,
                              QScrollArea)
-from PyQt6.QtGui import QIcon, QAction, QPixmap
+from PyQt6.QtGui import QIcon, QAction, QPixmap, QPainter
 from PyQt6.QtCore import Qt, QSize
 import os
 
@@ -161,13 +161,9 @@ class MainWindow(QMainWindow):
         return sidebar
     
     def _create_sidebar_button(self, text, page_index):
-        button = QPushButton()
+        button = QPushButton(text)
         button.setObjectName("sidebar-button")
         button.setCheckable(True)
-        
-        layout = QHBoxLayout(button)
-        layout.setContentsMargins(20, 0, 0, 0) 
-        layout.setSpacing(11)  
         
         # Path to assets folder
         current_file_path = os.path.abspath(__file__)
@@ -175,11 +171,6 @@ class MainWindow(QMainWindow):
         fruitvegnet_dir = os.path.dirname(widgets_dir)
         project_root = os.path.dirname(fruitvegnet_dir)
         assets_dir = os.path.join(project_root, "assets")
-        
-        # Create icon label
-        icon_label = QLabel()
-        icon_label.setObjectName("sidebar-icon")
-        icon_label.setFixedSize(18, 18) 
         
         # Set icons
         icon_path = None
@@ -189,24 +180,28 @@ class MainWindow(QMainWindow):
             icon_path = os.path.join(assets_dir, "classification-dark.png")
         elif text == "Settings":
             icon_path = os.path.join(assets_dir, "settings-dark.png")
-        pixmap = QPixmap(icon_path)
-        icon_label.setPixmap(pixmap.scaled(18, 18, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        
+        # Create composite icon with an empty space
+        original_icon = QPixmap(icon_path)
+    
+        combined = QPixmap(19 + 9, 19)  # 18px icon + 11px space
+        combined.fill(Qt.GlobalColor.transparent)
+        
+        painter = QPainter(combined)
+        painter.drawPixmap(0, 0, original_icon.scaled(19, 19, Qt.AspectRatioMode.KeepAspectRatio, 
+                                                    Qt.TransformationMode.SmoothTransformation))
+        painter.end()
+        
+        button.setIcon(QIcon(combined))
+        button.setIconSize(QSize(19 + 9, 19))  # Combined icon with empty space
 
-        # Create label for text
-        text_label = QLabel(text)
-        text_label.setObjectName("sidebar-button-text")
-        
-        layout.addWidget(icon_label)
-        layout.addWidget(text_label)
-        layout.addStretch()  
-        
         if page_index == 0:
             button.setChecked(True)
         
         button.clicked.connect(lambda: self._switch_page(page_index, button))
         
         return button
-        
+
     def _switch_page(self, index, clicked_button):
         """Switch between model controls and image classification pages"""
         self.content_stack.setCurrentIndex(index)
