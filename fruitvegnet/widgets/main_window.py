@@ -312,7 +312,7 @@ class MainWindow(QMainWindow):
         self.style_manager.apply_style(self.style_manager.STYLE_LIGHT)
         self._update_sidebar_icons()
         self.update_status_bar("Light theme applied")
-    
+
     def _on_dark_style_clicked(self):
         """Handle dark style button click"""
         if not self.dark_button.isChecked():

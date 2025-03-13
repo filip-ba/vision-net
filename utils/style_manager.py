@@ -1,4 +1,5 @@
 import os
+from PyQt6.QtCore import QSettings
 
 
 class StyleManager:
@@ -9,7 +10,10 @@ class StyleManager:
     
     def __init__(self, app, default_style=STYLE_LIGHT):
         self.app = app
-        self.current_style = default_style
+        self.settings = QSettings("FruitVegNet", "AppSettings")
+        
+        # Load saved style or use the default one
+        self.current_style = self.settings.value("style", default_style)
         self.project_root = self._get_project_root()
         self.apply_style(self.current_style)
     
@@ -29,18 +33,11 @@ class StyleManager:
     def apply_style(self, style_name):
         """Apply the specified style to the application."""
         self.current_style = style_name
-        
-        # Load the global stylesheet
         global_style = self.load_stylesheet("style_global.css")
-        
-        # Load the theme-specific stylesheet
         theme_style = self.load_stylesheet(f"style_{style_name}.css")
-        
-        # Combine stylesheets
         combined_style = global_style + theme_style
-        
-        # Apply to application
         self.app.setStyleSheet(combined_style)
+        self.settings.setValue("style", style_name)
         
     def toggle_style(self):
         """Toggle between light and dark styles."""
