@@ -1,0 +1,189 @@
+/*------------------------------------------------- Light Theme Colors -------------------------------------------------*/
+QMainWindow, QWidget {
+    background-color: #fafafa;
+    color: #2d2d2d;
+}
+
+/*------------------------------------------------- Sidebar styling -------------------------------------------------*/
+#sidebar {
+    background-color: #f2f2f2;
+    border-right-color: #e1e1e1;
+}
+
+#logo-widget {
+    background-color: #f2f2f2;
+}
+
+#app-title {
+    color: #333333;
+    background-color: #f2f2f2;
+}
+ 
+/*------------------------------------------------- Separator styling -------------------------------------------------*/
+QFrame[frameShape="4"] { /* HLine */
+    color: #e3e3e3; 
+    background-color: #f2f2f2;
+}
+
+/*------------------------------------------------- Sidebar button styling -------------------------------------------------*/
+#sidebar-button {
+    background-color: transparent;
+    color: #2d2d2d;
+}
+
+#sidebar-button:hover {
+    background-color: #dedede;
+}
+
+#sidebar-button:checked {
+    background-color: rgba(216,216,216,255);
+}
+
+#sidebar-button:checked:pressed {
+    background-color: #c7c7c7;
+}
+
+/*------------------------------------------------- Light style button styling -------------------------------------------------*/
+#light-style-button {
+    background-color: #d1cfcf;
+    border-color: #e3e3e3;
+}
+
+#light-style-button:checked {
+    border-color: #333333;
+}
+
+#light-style-label {
+    color: #333333;
+}
+
+/*------------------------------------------------- Button styling -------------------------------------------------*/
+QPushButton {
+    background-color: #ebebeb;
+}
+
+QPushButton:hover {
+    background-color: #e0e0e0;
+}
+
+QPushButton:pressed {
+    background-color: #d8d8d8;
+}
+
+QPushButton:disabled {
+    background-color: #bdc3c7;
+    color: #7f8c8d;
+}
+
+QPushButton:checked {
+    background-color: #c2c2c2;
+}
+
+QPushButton:checked:pressed {
+    background-color: #adadad;
+}
+
+/*------------------------------------------------- Tab Widget styling -------------------------------------------------*/
+QTabWidget::pane {
+    background-color: #fafafa;
+    border-top-color: #e3e3e3;
+}
+
+QTabBar::tab {
+    background-color: #fafafa;
+}
+
+QTabBar::tab:selected {
+    background-color: #fafafa;
+    border-bottom-color: #d8d8d8;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #dedede;
+}
+
+/*------------------------------------------------- Group Box styling -------------------------------------------------*/
+QGroupBox {
+    border-color: #e3e3e3;
+    background-color: #ffffff;
+}
+
+/*------------------------------------------------- Label styling -------------------------------------------------*/
+QLabel {
+    background-color: white;
+    color: #2d2d2d;
+}
+
+#image-display {
+    border-color: #dcdcdc;
+    background-color: #fafafa;
+}
+
+#param-label {
+    background-color: #ffffff;
+    border-color: #dee2e6;
+}
+
+#status-label, #time-label, #plot-label {
+    background-color: #fafafa;
+}
+
+/*------------------------------------------------- Progress bar styling -------------------------------------------------*/
+QProgressBar {
+    background-color: #e0e0e0;
+}
+
+QProgressBar::chunk {
+    background-color: #6f8396;
+}
+
+/*------------------------------------------------- Plot Frame styling -------------------------------------------------*/
+#plot-1-2-frame, #plot-3-frame {
+    border-color: #e3e3e3;
+    background-color: white;
+}
+
+/*------------------------------------------------- Slider styling -------------------------------------------------*/
+QSlider {
+    background-color: white;
+}
+
+QSlider::groove:horizontal {
+    background: #e0e0e0;
+}
+
+QSlider::sub-page:horizontal {
+    background: #6f8396;
+}
+
+QSlider::handle:horizontal {
+    background: white;
+    border-color: #e3e3e3;
+}
+
+/*------------------------------------------------- Status bar styling -------------------------------------------------*/
+QStatusBar {
+    background-color: #fafafa;
+    color: #000000;
+}
+
+/*------------------------------------------------- Scroll bar styling -------------------------------------------------*/
+QScrollBar:vertical, QScrollBar:horizontal {
+    background-color: transparent;
+}
+
+QScrollBar:vertical:hover, QScrollBar:horizontal:hover {
+    background-color: rgba(230, 230, 230, 0.7);
+}
+
+QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
+    background-color: #d2d2d2;
+}
+
+QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover {
+    background-color: #9c9c9c;
+}
+
+QScrollBar::handle:vertical:pressed, QScrollBar::handle:horizontal:pressed {
+    background-color: #787878;
+}

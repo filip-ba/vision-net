@@ -1,25 +1,19 @@
 /*------------------------------------------------- Base styling -------------------------------------------------*/
 QMainWindow, QWidget {
-    background-color: #fafafa;
-    color: #2d2d2d;
     font-family: 'Segoe UI', Arial, sans-serif;
 }
 
 /*------------------------------------------------- Sidebar styling -------------------------------------------------*/
 #sidebar {
-    background-color: #f2f2f2;
-    border-right: 1px solid #e1e1e1;
+    border-right: 1px solid;
 }
 
 #logo-widget {
     padding: 10px;
-    background-color: #f2f2f2;
     margin: 10px;
 }
 
 #app-title {
-    color: #333333;
-    background-color: #f2f2f2;
     font-size: 20px;
     font-weight: bold;
     padding: 5px;
@@ -27,8 +21,6 @@ QMainWindow, QWidget {
 
 /*------------------------------------------------- Sidebar button styling -------------------------------------------------*/
 #sidebar-button {
-    background-color: transparent;
-    color: #2d2d2d;
     border: none;
     text-align: left;
     font-weight: 400;
@@ -36,46 +28,28 @@ QMainWindow, QWidget {
     margin: 2px 6px 2px 6px;
 }
 
-#sidebar-button:hover {
-    background-color: #dedede;
+/*------------------------------------------------- Style buttons styling *------------------------------------------------- */
+#light-style-button, #dark-style-button {
+    border-radius: 8px;
+    padding: 5px;
 }
 
-#sidebar-button:checked {
-    background-color: rgba(216,216,216,255);
+#light-style-button:checked, #dark-style-button:checked {
+    padding: 4px;
 }
 
-#sidebar-button:checked:pressed {
-    background-color: #c7c7c7;
+#style-button-label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 5px;
 }
 
 /*------------------------------------------------- Button styling -------------------------------------------------*/
 QPushButton {
-    background-color: #ebebeb;
     border: none;
     padding: 8px 16px;
     border-radius: 6px;
     font-weight: 700;
-}
-
-QPushButton:hover {
-    background-color: #e0e0e0;
-}
-
-QPushButton:pressed {
-    background-color: #d8d8d8;
-}
-
-QPushButton:disabled {
-    background-color: #bdc3c7;
-    color: #7f8c8d;
-}
-
-QPushButton:checked {
-    background-color: #c2c2c2;
-}
-
-QPushButton:checked:pressed {
-    background-color: #adadad;
 }
 
 #conf-matrix {
@@ -116,12 +90,10 @@ QPushButton:checked:pressed {
 
 /*------------------------------------------------- Tab Widget styling -------------------------------------------------*/
 QTabWidget::pane {
-    background-color: #fafafa;
-    border-top: 1px solid  #e3e3e3;;
+    border-top: 1px solid;
 }
 
 QTabBar::tab {
-    background-color: #fafafa;
     min-width: 100px;
     min-height: 20px;
     padding: 8px 12px;
@@ -132,21 +104,15 @@ QTabBar::tab {
 }
 
 QTabBar::tab:selected {
-    background-color: #fafafa;
-    border-bottom: 4px solid #d8d8d8;
+    border-bottom: 4px solid;
     border-radius: 0px;
-}
-
-QTabBar::tab:hover:!selected {
-    background-color: #dedede;
 }
 
 /*------------------------------------------------- Group Box styling -------------------------------------------------*/
 QGroupBox {
     font-weight: 700;
     font-size: 14px;
-    border: 1px solid #e3e3e3;
-    background-color: rgb(255, 255, 255);
+    border: 1px solid;
     border-radius: 12px;
     margin: 20px;
     margin-top: 50px;
@@ -199,8 +165,6 @@ QGroupBox::title {
 /*------------------------------------------------- Label styling -------------------------------------------------*/
 QLabel {
     font-size: 14px;
-    background-color: white;
-    color: #2d2d2d;
 }
 
 QLabel[objectName^="Model"] {
@@ -213,47 +177,27 @@ QLabel[objectName^="Metrics"] {
     padding: 0px;
 }
 
-#plot-label {
-    background-color: white;
-}
-
 #image-display {
-    border: 1px solid #dcdcdc;
+    border: 1px solid;
     border-radius: 0px;
-    background-color: #fafafa;
 }
 
 #param-label {
-    background-color: #ffffff;
     padding: 10px;
     border-radius: 5px;
-    border: 1px solid #dee2e6;
-}
-
-#status-label {
-    background-color: #fafafa;
-}
-
-#time-label {
-    background-color: #fafafa;
+    border: 1px solid;
 }
 
 /*------------------------------------------------- Progress bar styling -------------------------------------------------*/
 QProgressBar {
-    background-color: #e0e0e0;
     text-align: center;
-}
-
-QProgressBar::chunk {
-    background-color: #6f8396;
 }
 
 /*------------------------------------------------- Plot Frame styling -------------------------------------------------*/
 #plot-1-2-frame {
-    border: 1px solid #e3e3e3;
+    border: 1px solid;
     border-radius: 12px;
     padding: 0px;
-    background-color: white;
     margin-left: 10px;
     margin-right: 20px;
     margin-top: 50px;
@@ -261,10 +205,9 @@ QProgressBar::chunk {
 }
 
 #plot-3-frame {
-    border: 1px solid #e3e3e3;
+    border: 1px solid;
     border-radius: 12px;
     padding: 0px;
-    background-color: white;
     margin-left: 20px;
     margin-right: 20px;
     margin-bottom: 0px;
@@ -274,24 +217,20 @@ QProgressBar::chunk {
 /*------------------------------------------------- Slider styling -------------------------------------------------*/
 QSlider {
     min-height: 10px;
-    background-color: white;
 }
 
 QSlider::groove:horizontal {
     border: none;
     height: 4px;
-    background: #e0e0e0;
     border-radius: 2px;
 }
 
 QSlider::sub-page:horizontal {
-    background: #6f8396;
     border-radius: 2px;
 }
 
 QSlider::handle:horizontal {
-    background: white;
-    border: 1px solid #e3e3e3;
+    border: 1px solid;
     width: 14px;
     height: 14px;
     margin: -5px 0;
@@ -300,8 +239,6 @@ QSlider::handle:horizontal {
 
 /*------------------------------------------------- Status bar styling -------------------------------------------------*/
 QStatusBar {
-    background-color: #fafafa;
-    color: #000000;
     min-height: 25px;
 }
 
@@ -312,7 +249,6 @@ QStatusBar::item {
 /*------------------------------------------------- Scroll bar styling -------------------------------------------------*/
 QScrollBar:vertical {
     border: none;
-    background-color: transparent;
     width: 9px;
     border-radius: 4px;
     margin-top: 5px;
@@ -321,49 +257,22 @@ QScrollBar:vertical {
 
 QScrollBar:horizontal {
     border: none;
-    background-color: transparent;
     height: 9px;
     border-radius: 4px;
     margin-left: 5px;
     margin-right: 5px;
 }
 
-QScrollBar:vertical:hover {
-    background-color: rgba(230, 230, 230, 0.7);
-}
-
-QScrollBar:horizontal:hover {
-    background-color: rgba(230, 230, 230, 0.7);
-}
-
 QScrollBar::handle:vertical {
-    background-color: #d2d2d2;
     min-height: 30px;
     border-radius: 4px;
     margin: 0px;
 }
 
 QScrollBar::handle:horizontal {
-    background-color: #d2d2d2;
     min-width: 30px;
     border-radius: 4px;
     margin: 0px;
-}
-
-QScrollBar::handle:vertical:hover {
-    background-color: #9c9c9c;
-}
-
-QScrollBar::handle:horizontal:hover {
-    background-color: #9c9c9c;
-}
-
-QScrollBar::handle:vertical:pressed {
-    background-color: #787878;
-}
-
-QScrollBar::handle:horizontal:pressed {
-    background-color: #787878;
 }
 
 QScrollBar::add-line, QScrollBar::sub-line {
