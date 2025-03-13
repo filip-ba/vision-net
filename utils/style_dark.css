@@ -66,7 +66,7 @@ QPushButton:pressed {
 }
 
 QPushButton:disabled {
-    background-color: #353535;
+    background-color: #404040;
     color: #707070;
 }
 
@@ -118,6 +118,10 @@ QLabel {
 
 #image-display {
     border-color: #161616;
+    background-color: #242424;
+}
+
+#status-label, #time-label {
     background-color: #242424;
 }
 

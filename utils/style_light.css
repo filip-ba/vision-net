@@ -128,6 +128,10 @@ QLabel {
     background-color: #fafafa;
 }
 
+#status-label, #time-label {
+    background-color: #fafafa;
+}
+
 #plot-label {
     background-color: #ffffff;
 }
