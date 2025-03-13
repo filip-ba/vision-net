@@ -195,6 +195,7 @@ class ImageClassification(QWidget):
         self.plot_titles = {}
         for model_type, title in self.model_names.items():
             title_label = QLabel(f"{title} - Class Probabilities")
+            title_label.setObjectName("plot-label")
             title_label.setFont(QFont('Arial', 11, QFont.Weight.Bold))
             title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             title_label.setVisible(False)

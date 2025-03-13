@@ -89,13 +89,14 @@ class TabWidget(QWidget):
 
     def clear_model(self):
         """Calls the reset_model function that resets the loaded model"""   
-        reply = QMessageBox.question(
-            self,
-            'Clear Model',
-            'Are you sure you want to clear the model? This will reset all charts, metrics and parameters.',
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No
-        )
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Clear Model")
+        msg_box.setText("Are you sure you want to clear the model? This will reset all charts, metrics and parameters.")
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        msg_box.setDefaultButton(QMessageBox.StandardButton.No)
+        msg_box.setObjectName("clear-model-message")
+
+        reply = msg_box.exec()
 
         if reply == QMessageBox.StandardButton.Yes:
             self.status_message.emit("Model cleared successfully", 8000)

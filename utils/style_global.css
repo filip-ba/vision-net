@@ -28,7 +28,7 @@ QMainWindow, QWidget {
     margin: 2px 6px 2px 6px;
 }
 
-/*------------------------------------------------- Style buttons styling *------------------------------------------------- */
+/*------------------------------------------------- Style buttons styling ------------------------------------------------- */
 #light-style-button, #dark-style-button {
     border-radius: 8px;
     padding: 5px;

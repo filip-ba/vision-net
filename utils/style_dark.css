@@ -19,9 +19,20 @@ QMainWindow, QWidget {
 }
 
 /*------------------------------------------------- Separator styling -------------------------------------------------*/
-QFrame[frameShape="4"] { /* HLine */
-    color: #3d3d3d; 
-    background-color: #1e1e1e;
+#sidebar-separator {
+    color: #4f4f4f; 
+    background-color: #303030;
+    height: 1px; 
+    margin-left: 10px; 
+    margin-right: 10px;
+}
+
+#main-separator {
+    color: #4f4f4f; 
+    background-color: #363636;
+    height: 1px; 
+    margin-left: 0px; 
+    margin-right: 0px;
 }
 
 /*------------------------------------------------- Sidebar button styling -------------------------------------------------*/
@@ -39,16 +50,6 @@ QFrame[frameShape="4"] { /* HLine */
 
 #sidebar-button:checked:pressed {
     background-color: #575757;
-}
-
-/*------------------------------------------------- Dark style button styling *------------------------------------------------- */
-#dark-style-button {
-    background-color: #2d2d2d;
-    border-color: #3c3c3c;
-}
-
-#dark-style-button:checked {
-    border-color: #ff0000;
 }
 
 /*------------------------------------------------- Button styling -------------------------------------------------*/
@@ -77,6 +78,14 @@ QPushButton:checked:pressed {
     background-color: #868686;
 }
 
+#dark-style-button {
+    background-color: #2d2d2d;
+    border-color: #3c3c3c;
+}
+
+#dark-style-button:checked {
+    border-color: #ff0000;
+}
 /*------------------------------------------------- Tab Widget styling -------------------------------------------------*/
 QTabWidget::pane {
     background-color: #242424;
@@ -112,7 +121,11 @@ QLabel {
     background-color: #242424;
 }
 
-/*------------------------------------------------- Progress bar styling -------------------------------------------------*/
+#plot-label {
+    background-color: #363636;
+}
+
+/*------------------------------------------------- Progress Bar styling -------------------------------------------------*/
 QProgressBar {
     background-color: #3d3d3d;
 }
@@ -129,7 +142,7 @@ QProgressBar::chunk {
 
 /*------------------------------------------------- Slider styling -------------------------------------------------*/
 QSlider {
-    background-color: #383838;
+    background-color: #363636;
 }
 
 QSlider::groove:horizontal {
@@ -145,12 +158,12 @@ QSlider::handle:horizontal {
     border-color: #3d3d3d;
 }
 
-/*------------------------------------------------- Status bar styling -------------------------------------------------*/
+/*------------------------------------------------- Status Bar styling -------------------------------------------------*/
 QStatusBar {
     background-color: #242424;
 }
 
-/*------------------------------------------------- Scroll bar styling -------------------------------------------------*/
+/*------------------------------------------------- Scroll Bar styling -------------------------------------------------*/
 QScrollBar:vertical, QScrollBar:horizontal {
     background-color: transparent;
 }
@@ -169,4 +182,15 @@ QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover {
 
 QScrollBar::handle:vertical:pressed, QScrollBar::handle:horizontal:pressed {
     background-color: #757575;
+}
+
+/*------------------------------------------------- Message Box styling -------------------------------------------------*/
+QMessageBox#clear-model-message {
+    background-color: #242424;
+    color: white;
+}
+
+QMessageBox#clear-model-message QLabel {
+    background-color: #242424;
+    color: white;
 }
