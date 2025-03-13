@@ -78,14 +78,28 @@ QPushButton:checked:pressed {
     background-color: #868686;
 }
 
-#dark-style-button {
-    background-color: #2d2d2d;
-    border-color: #3c3c3c;
+#light-style-button {
+    background-color: #363636;
+}
+
+#light-style-button:hover {
+    background-color: #3e3e3e;
 }
 
 #dark-style-button:checked {
-    border-color: #ff0000;
+    border-width: 5px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #454545;
+    border-radius: 8px;
+    padding: 3px;
+    background-color: #242424;
 }
+
+#dark-style-button:checked:pressed {
+    border-color: #868686;
+}
+
 /*------------------------------------------------- Tab Widget styling -------------------------------------------------*/
 QTabWidget::pane {
     background-color: #242424;

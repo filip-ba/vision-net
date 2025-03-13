@@ -79,17 +79,26 @@ QPushButton:checked:pressed {
     background-color: #adadad;
 }
 
-#light-style-button {
-    background-color: #d1cfcf;
-    border-color: #e3e3e3;
+#dark-style-button {
+    background-color: #ffffff;
+}
+
+#dark-style-button:hover {
+    background-color: #e0e0e0;
 }
 
 #light-style-button:checked {
-    border-color: #333333;
+    border-width: 5px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #c2c2c2;
+    border-radius: 8px;
+    padding: 3px;
+    background-color: #fafafa;
 }
 
-#light-style-label {
-    color: #333333;
+#light-style-button:checked:pressed {
+    border-color: #adadad;
 }
 
 /*------------------------------------------------- Tab Widget styling -------------------------------------------------*/
