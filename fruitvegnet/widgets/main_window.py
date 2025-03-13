@@ -226,7 +226,7 @@ class MainWindow(QMainWindow):
         sidebar_layout.addWidget(separator)
 
         # Add empty space under the separator 
-        spacer = QSpacerItem(20, 30, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        spacer = QSpacerItem(5, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         sidebar_layout.addItem(spacer)
         
         # Add navigation buttons
@@ -238,7 +238,7 @@ class MainWindow(QMainWindow):
         
         # Add stretch to push the settings button to the bottom
         sidebar_layout.addStretch()
-        
+
         # Add separator above settings button
         bottom_separator = QFrame()
         bottom_separator.setFrameShape(QFrame.Shape.HLine)
@@ -246,9 +246,13 @@ class MainWindow(QMainWindow):
         bottom_separator.setObjectName("sidebar-separator")
         sidebar_layout.addWidget(bottom_separator)
         
+        sidebar_layout.addItem(spacer)
+
         # Add Settings button at the bottom
         settings_btn = self._create_sidebar_button("Settings", 2)
         sidebar_layout.addWidget(settings_btn)
+
+        sidebar_layout.addItem(spacer)
         
         return sidebar
     
