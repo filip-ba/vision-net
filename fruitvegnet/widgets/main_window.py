@@ -141,27 +141,27 @@ class MainWindow(QMainWindow):
         self.light_button = QPushButton()
         self.light_button.setObjectName("light-style-button")
         self.light_button.setCheckable(True)
-        self.light_button.setFixedSize(180, 120)
+        self.light_button.setFixedSize(200, 130)
         
         # Set light theme preview image
         light_preview_path = os.path.join(assets_dir, "light-theme-preview.png")
         if os.path.exists(light_preview_path):
             light_preview = QPixmap(light_preview_path)
             self.light_button.setIcon(QIcon(light_preview))
-            self.light_button.setIconSize(QSize(170, 110))
+            self.light_button.setIconSize(QSize(180, 120))
         
         # Dark theme button
         self.dark_button = QPushButton()
         self.dark_button.setObjectName("dark-style-button")
         self.dark_button.setCheckable(True)
-        self.dark_button.setFixedSize(180, 120)
+        self.dark_button.setFixedSize(200, 130)
         
         # Set dark theme preview image
         dark_preview_path = os.path.join(assets_dir, "dark-theme-preview.png")
         if os.path.exists(dark_preview_path):
             dark_preview = QPixmap(dark_preview_path)
             self.dark_button.setIcon(QIcon(dark_preview))
-            self.dark_button.setIconSize(QSize(170, 110))
+            self.dark_button.setIconSize(QSize(180, 120))
         
         # Set the initially checked button based on current style
         if self.style_manager.get_current_style() == self.style_manager.STYLE_LIGHT:

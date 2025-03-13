@@ -88,17 +88,10 @@ QPushButton:checked:pressed {
 }
 
 #light-style-button:checked {
-    border-width: 5px;
-    border-width: 4px;
+    border-width: 3px;
     border-style: solid;
-    border-color: #c2c2c2;
-    border-radius: 8px;
-    padding: 3px;
+    border-color: #6f8396;
     background-color: #fafafa;
-}
-
-#light-style-button:checked:pressed {
-    border-color: #adadad;
 }
 
 /*------------------------------------------------- Tab Widget styling -------------------------------------------------*/

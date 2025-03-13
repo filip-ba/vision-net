@@ -30,18 +30,7 @@ QMainWindow, QWidget {
 
 /*------------------------------------------------- Style buttons styling ------------------------------------------------- */
 #light-style-button, #dark-style-button {
-    border-radius: 8px;
-    padding: 5px;
-}
-
-#light-style-button:checked, #dark-style-button:checked {
-    padding: 4px;
-}
-
-#style-button-label {
-    font-size: 14px;
-    font-weight: 600;
-    margin-top: 5px;
+    border-radius: 12px;
 }
 
 /*------------------------------------------------- Button styling -------------------------------------------------*/
