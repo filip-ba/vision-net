@@ -19,14 +19,13 @@ class StyleManager:
     
     def _get_project_root(self):
         """Get the project root directory."""
-        # Assuming this file is in the utils folder
         current_file_path = os.path.abspath(__file__)
         utils_dir = os.path.dirname(current_file_path)
         return os.path.dirname(utils_dir)
     
     def load_stylesheet(self, filename):
         """Load a stylesheet from a file."""
-        path = os.path.join(self.project_root, "utils", filename)
+        path = os.path.join(self.project_root, "utils", "css_styles", filename)
         with open(path, "r") as f:
             return f.read()
     

@@ -5,9 +5,9 @@ from PyQt6.QtCore import pyqtSignal
 import os
 import torch
 
-from fruitvegnet.widgets.progress_dialog import ProgressDialog
+from fruitvegnet.dialogs.progress_dialog import ProgressDialog
 from fruitvegnet.widgets.plot_widget import PlotWidget
-from fruitvegnet.widgets.parameters_dialog import ParametersDialog
+from fruitvegnet.dialogs.parameters_dialog import ParametersDialog
 from fruitvegnet.widgets.parameters_widget import ParametersWidget
 from fruitvegnet.widgets.metrics_widget import MetricsWidget
 from fruitvegnet.widgets.model_info_widget import ModelInfoWidget

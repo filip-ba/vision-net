@@ -2,7 +2,7 @@ import sys
 from PyQt6.QtWidgets import QApplication
 
 from utils.style_manager import StyleManager
-from fruitvegnet.widgets.main_window import MainWindow
+from fruitvegnet.main_window import MainWindow
 
 def main():
     app = QApplication(sys.argv)

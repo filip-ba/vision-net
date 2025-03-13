@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QFrame
+from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
 
 from utils.custom_separator import create_separator
 

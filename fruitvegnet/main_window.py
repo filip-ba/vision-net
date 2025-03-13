@@ -6,7 +6,7 @@ from PyQt6.QtGui import QIcon, QPixmap, QPainter
 from PyQt6.QtCore import Qt, QSize, QTimer, QEvent
 import os
 
-from fruitvegnet.model_settings import TabWidget
+from fruitvegnet.neural_network_tab import TabWidget
 from fruitvegnet.image_classification import ImageClassification
 from models.simple_cnn_model import SimpleCnnModel
 from models.resnet_model import ResNetModel
@@ -369,8 +369,7 @@ class MainWindow(QMainWindow):
 
     def _return_project_root_folder(self):
         current_file_path = os.path.abspath(__file__)
-        widgets_dir = os.path.dirname(current_file_path)
-        fruitvegnet_dir = os.path.dirname(widgets_dir)
+        fruitvegnet_dir  = os.path.dirname(current_file_path)
         project_root = os.path.dirname(fruitvegnet_dir)
         return project_root
 
