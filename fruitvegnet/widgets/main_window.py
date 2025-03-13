@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
                              QSizePolicy, QSpacerItem, QStatusBar, QFrame,
                              QHBoxLayout, QStackedWidget, QPushButton, QLabel,
-                             QScrollArea)
+                             QScrollArea, QGroupBox, QGridLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QPainter
 from PyQt6.QtCore import Qt, QSize, QTimer, QEvent
 import os
@@ -16,8 +16,11 @@ from models.vgg16_model import VGG16Model
 
 class MainWindow(QMainWindow):
     
-    def __init__(self):
+    def __init__(self, style_manager):
         super().__init__()
+        
+        # Store the style manager
+        self.style_manager = style_manager
         
         # Add responsive sidebar settings
         self.MIN_SIDEBAR_WIDTH = 190
@@ -89,11 +92,7 @@ class MainWindow(QMainWindow):
         self.image_classification_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         # Create settings page (third page)
-        self.settings_widget = QWidget() 
-        settings_layout = QVBoxLayout(self.settings_widget)
-        settings_label = QLabel("Settings Page")
-        settings_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        settings_layout.addWidget(settings_label)
+        self.settings_widget = self._create_settings_page()
         self.settings_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         self.content_stack.addWidget(self.tab_widget)
@@ -117,6 +116,151 @@ class MainWindow(QMainWindow):
         self.image_classification_widget.classify_clicked.connect(self._classify_all) 
         self.image_classification_widget.image_loaded.connect(self.update_status_bar) 
         self._connect_tab_status_signals()
+        
+        # Update sidebar icons based on current style
+        self._update_sidebar_icons()
+
+    def _create_settings_page(self):
+        """Create the settings page with style selection options"""
+        settings_widget = QWidget()
+        settings_layout = QVBoxLayout(settings_widget)
+        
+        style_group = QGroupBox("Style")
+        style_group.setObjectName("style-group")
+        style_layout = QVBoxLayout(style_group)
+        
+        buttons_layout = QGridLayout()
+        buttons_layout.setSpacing(20)
+
+        # Path to assets folder
+        current_file_path = os.path.abspath(__file__)
+        widgets_dir = os.path.dirname(current_file_path)
+        fruitvegnet_dir = os.path.dirname(widgets_dir)
+        project_root = os.path.dirname(fruitvegnet_dir)
+        assets_dir = os.path.join(project_root, "assets")
+        
+        # Light theme button
+        self.light_button = QPushButton()
+        self.light_button.setObjectName("light-style-button")
+        self.light_button.setCheckable(True)
+        self.light_button.setFixedSize(180, 120)
+        
+        # Set light theme preview image
+        light_preview_path = os.path.join(assets_dir, "light-theme-preview.png")
+        if os.path.exists(light_preview_path):
+            light_preview = QPixmap(light_preview_path)
+            self.light_button.setIcon(QIcon(light_preview))
+            self.light_button.setIconSize(QSize(170, 110))
+        
+        # Dark theme button
+        self.dark_button = QPushButton()
+        self.dark_button.setObjectName("dark-style-button")
+        self.dark_button.setCheckable(True)
+        self.dark_button.setFixedSize(180, 120)
+        
+        # Set dark theme preview image
+        dark_preview_path = os.path.join(assets_dir, "dark-theme-preview.png")
+        if os.path.exists(dark_preview_path):
+            dark_preview = QPixmap(dark_preview_path)
+            self.dark_button.setIcon(QIcon(dark_preview))
+            self.dark_button.setIconSize(QSize(170, 110))
+        
+        # Set the initially checked button based on current style
+        if self.style_manager.get_current_style() == self.style_manager.STYLE_LIGHT:
+            self.light_button.setChecked(True)
+        else:
+            self.dark_button.setChecked(True)
+        
+        # Add labels under the buttons
+        light_label = QLabel("Light")
+        light_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        light_label.setObjectName("style-button-label")
+        
+        dark_label = QLabel("Dark")
+        dark_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        dark_label.setObjectName("style-button-label")
+        
+        # Add buttons and labels to the grid layout
+        buttons_layout.addWidget(self.light_button, 0, 0, Qt.AlignmentFlag.AlignCenter)
+        buttons_layout.addWidget(light_label, 1, 0, Qt.AlignmentFlag.AlignCenter)
+        buttons_layout.addWidget(self.dark_button, 0, 1, Qt.AlignmentFlag.AlignCenter) 
+        buttons_layout.addWidget(dark_label, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        
+        # Connect button signals
+        self.light_button.clicked.connect(self._on_light_style_clicked)
+        self.dark_button.clicked.connect(self._on_dark_style_clicked)
+        
+        style_layout.addLayout(buttons_layout)
+        settings_layout.addWidget(style_group)
+        
+        # Add a spacer to push everything to the top
+        settings_layout.addStretch()
+        
+        return settings_widget
+    
+    def _on_light_style_clicked(self):
+        """Handle light style button click"""
+        if not self.light_button.isChecked():
+            self.light_button.setChecked(True)
+            return
+            
+        self.dark_button.setChecked(False)
+        self.style_manager.apply_style(self.style_manager.STYLE_LIGHT)
+        self._update_sidebar_icons()
+        self.update_status_bar("Light theme applied")
+    
+    def _on_dark_style_clicked(self):
+        """Handle dark style button click"""
+        if not self.dark_button.isChecked():
+            self.dark_button.setChecked(True)
+            return
+            
+        self.light_button.setChecked(False)
+        self.style_manager.apply_style(self.style_manager.STYLE_DARK)
+        self._update_sidebar_icons()
+        self.update_status_bar("Dark theme applied")
+    
+    def _update_sidebar_icons(self):
+        """Update sidebar icons based on current theme"""
+
+        # Path to assets folder
+        current_file_path = os.path.abspath(__file__)
+        widgets_dir = os.path.dirname(current_file_path)
+        fruitvegnet_dir = os.path.dirname(widgets_dir)
+        project_root = os.path.dirname(fruitvegnet_dir)
+        assets_dir = os.path.join(project_root, "assets")
+
+        # Get the current theme suffix
+        theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
+        
+        # Update icons for all sidebar buttons
+        for i in range(self.sidebar.layout().count()):
+            item = self.sidebar.layout().itemAt(i)
+            if item and item.widget() and isinstance(item.widget(), QPushButton):
+                button = item.widget()
+                button_text = button.text()
+                
+                # Set the appropriate icon based on button text and theme
+                icon_path = None
+                if button_text == "Models":
+                    icon_path = os.path.join(assets_dir, f"model-{theme_suffix}.png")
+                elif button_text == "Classification":
+                    icon_path = os.path.join(assets_dir, f"classification-{theme_suffix}.png")
+                elif button_text == "Settings":
+                    icon_path = os.path.join(assets_dir, f"settings-{theme_suffix}.png")
+                if icon_path and os.path.exists(icon_path):
+                    # Create composite icon with an empty space
+                    original_icon = QPixmap(icon_path)
+                
+                    combined = QPixmap(19 + 9, 19)  # 19px icon + 9px space
+                    combined.fill(Qt.GlobalColor.transparent)
+                    
+                    painter = QPainter(combined)
+                    painter.drawPixmap(0, 0, original_icon.scaled(19, 19, Qt.AspectRatioMode.KeepAspectRatio, 
+                                                                Qt.TransformationMode.SmoothTransformation))
+                    painter.end()
+                    
+                    button.setIcon(QIcon(combined))
 
     def _create_sidebar(self):
         sidebar = QWidget()
@@ -186,19 +330,20 @@ class MainWindow(QMainWindow):
         project_root = os.path.dirname(fruitvegnet_dir)
         assets_dir = os.path.join(project_root, "assets")
         
-        # Set icons
+        # Set icons based on current theme
+        theme_suffix = "dark"  
         icon_path = None
         if text == "Models":
-            icon_path = os.path.join(assets_dir, "model-dark.png")
+            icon_path = os.path.join(assets_dir, f"model-{theme_suffix}.png")
         elif text == "Classification":
-            icon_path = os.path.join(assets_dir, "classification-dark.png")
+            icon_path = os.path.join(assets_dir, f"classification-{theme_suffix}.png")
         elif text == "Settings":
-            icon_path = os.path.join(assets_dir, "settings-dark.png")
+            icon_path = os.path.join(assets_dir, f"settings-{theme_suffix}.png")
         
         # Create composite icon with an empty space
         original_icon = QPixmap(icon_path)
     
-        combined = QPixmap(19 + 9, 19)  # 18px icon + 11px space
+        combined = QPixmap(19 + 9, 19)  # 19px icon + 9px space
         combined.fill(Qt.GlobalColor.transparent)
         
         painter = QPainter(combined)

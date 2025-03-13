@@ -1,17 +1,15 @@
 import sys
 from PyQt6.QtWidgets import QApplication
 
+from utils.style_manager import StyleManager
 from fruitvegnet.widgets.main_window import MainWindow
-
-def load_stylesheet(path):
-    with open(path, "r") as f:
-        return f.read()
 
 def main():
     app = QApplication(sys.argv)
-    app.setStyleSheet(load_stylesheet("utils/styles.css"))
-    window = MainWindow()
+    style_manager = StyleManager(app)
+    window = MainWindow(style_manager)
     window.show()
+    
     sys.exit(app.exec())
 
 if __name__ == "__main__":
