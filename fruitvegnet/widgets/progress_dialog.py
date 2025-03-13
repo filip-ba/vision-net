@@ -87,26 +87,26 @@ class ProgressDialog(QDialog):
                 f"Momentum: {self.momentum}"
             )
             params_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-            params_label.setObjectName("param-label")
+            params_label.setObjectName("training-dialog-parameters")
             layout.addWidget(params_label)
 
         # Status label
         self.status_label = QLabel(f"{self.operation_type} in progress...")
-        self.status_label.setObjectName("status-label")
+        self.status_label.setObjectName("dialog-status-label")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.status_label)
+
+        # Time estimate label
+        self.time_label = QLabel("Estimated time remaining: calculating...")
+        self.time_label.setObjectName("dialog-time-label")
+        self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.time_label)
 
         # Progress bar
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(0)
         layout.addWidget(self.progress_bar)
-
-        # Time estimate label
-        self.time_label = QLabel("Estimated time remaining: calculating...")
-        self.time_label.setObjectName("time-label")
-        self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.time_label)
 
         # Cancel button
         self.cancel_button = QPushButton("Cancel")

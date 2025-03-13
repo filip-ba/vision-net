@@ -22,6 +22,11 @@ class PlotWidget(QWidget):
         self.title_label.setFont(QFont('Arial', 11, QFont.Weight.Bold))
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(self.title_label)
+        spacer = QWidget()
+        spacer.setFixedHeight(9)
+        spacer.setObjectName("spacer")
+        main_layout.addWidget(spacer)
+        main_layout.addSpacing(0)
         
         # Figure
         self.figure = Figure(figsize=(5, 4), dpi=100)

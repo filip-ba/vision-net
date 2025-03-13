@@ -68,7 +68,7 @@ class ParametersDialog(QDialog):
         
         # Parameters group
         params_group = QGroupBox("")
-        params_group.setObjectName("params-group")
+        params_group.setObjectName("dialog-params-group")
         params_layout = QVBoxLayout()
         
         # Create parameter widgets

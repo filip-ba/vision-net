@@ -137,12 +137,17 @@ QLabel {
     background-color: #fafafa;
 }
 
-#status-label, #time-label {
+#dialog-status-label, #dialog-time-label {
     background-color: #fafafa;
 }
 
 #plot-label {
     background-color: #ffffff;
+}
+
+#training-dialog-parameters{
+    background-color: white;
+    border-color: #e3e3e3;
 }
 
 /*------------------------------------------------- Progress Bar styling -------------------------------------------------*/
@@ -214,4 +219,9 @@ QMessageBox#clear-model-message {
 QMessageBox#clear-model-message QLabel {
     background-color: #fafafa;
     color: #2d2d2d;
+}
+
+/*------------------------------------------------- Spacer styling -------------------------------------------------*/
+#spacer {
+    background-color: #ffffff;
 }

@@ -461,7 +461,7 @@ class TabWidget(QWidget):
         self.plot_frame.setObjectName("plot-1-2-frame")
 
         frame_layout = QVBoxLayout(self.plot_frame)
-        frame_layout.setSpacing(0)
+        frame_layout.setSpacing(9)
         
         # QStackedWidget for switching between charts
         self.plot_stack = QStackedWidget()

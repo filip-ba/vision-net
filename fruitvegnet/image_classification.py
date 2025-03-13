@@ -219,7 +219,7 @@ class ImageClassification(QWidget):
             self.init_plot(model_type)
         
         frame_layout.addWidget(self.plot_stack)
-        frame_layout.setSpacing(0)
+        frame_layout.setSpacing(9)
 
         # Plot selection buttons
         buttons_layout = QHBoxLayout()

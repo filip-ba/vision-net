@@ -158,7 +158,7 @@ QGroupBox::title {
     margin-top: 20px; 
 }
 
-#params-group {
+#dialog-params-group {
     margin-top: 20px;
 }
 
@@ -182,9 +182,9 @@ QLabel[objectName^="Metrics"] {
     border-radius: 0px;
 }
 
-#param-label {
+#training-dialog-parameters {
     padding: 10px;
-    border-radius: 5px;
+    border-radius: 12px;
     border: 1px solid;
 }
 
