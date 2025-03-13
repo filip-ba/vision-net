@@ -19,7 +19,7 @@ class ModelInfoWidget(QWidget):
         self.model_status_label.setObjectName("ModelStatus")
         layout.addWidget(self.model_status_label)
 
-        layout.addWidget(create_separator())
+        layout.addWidget(create_separator("horizontal"))
 
         # Model file label
         self.model_file_label = QLabel("Model File: None")

@@ -152,7 +152,7 @@ class ImageClassification(QWidget):
             
             # Add separator after each label except the last one
             if model_id != list(self.model_names.keys())[-1]:
-                left_column.addWidget(create_separator())
+                left_column.addWidget(create_separator("horizontal"))
 
         # Create result labels
         self.result_labels = {}
@@ -168,11 +168,11 @@ class ImageClassification(QWidget):
             
             # Add separator after each except the last one
             if model_id != list(self.model_names.keys())[-1]:
-                right_column.addWidget(create_separator())
+                right_column.addWidget(create_separator("horizontal"))
         
         # Assemble results layout
         results_columns_layout.addLayout(left_column)
-        results_columns_layout.addWidget(vertical_separator)
+        results_columns_layout.addWidget(create_separator("vertical"))
         results_columns_layout.addLayout(right_column)
         results_main_layout.addLayout(results_columns_layout)
         

@@ -1,5 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QFrame
 
+from utils.custom_separator import create_separator
+
 
 class MetricsWidget(QWidget):
 
@@ -15,26 +17,12 @@ class MetricsWidget(QWidget):
         self.recall_label = QLabel("Recall: -")
 
         layout.addWidget(self.accuracy_label)
-        layout.addWidget(self.create_separator())
+        layout.addWidget(create_separator("vertical"))
         layout.addWidget(self.precision_label)
-        layout.addWidget(self.create_separator())
+        layout.addWidget(create_separator("vertical"))
         layout.addWidget(self.recall_label)
 
         self.setLayout(layout)
-
-    def create_separator(self):
-        separator = QFrame()
-        separator.setFrameShape(QFrame.Shape.VLine)
-        separator.setFrameShadow(QFrame.Shadow.Plain)
-        separator.setLineWidth(0)
-        separator.setMidLineWidth(0)
-        separator.setStyleSheet(
-            "color: #e3e3e3; "
-            "height: 1px; "
-            "margin: 0px; "
-            "padding: 0px;"
-        )
-        return separator
 
     def reset_metrics(self):
         self.accuracy_label.setText("Accuracy: -")

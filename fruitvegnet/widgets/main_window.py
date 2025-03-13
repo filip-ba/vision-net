@@ -221,7 +221,7 @@ class MainWindow(QMainWindow):
         separator = QFrame()
         separator.setFrameShape(QFrame.Shape.HLine)
         separator.setFrameShadow(QFrame.Shadow.Plain)
-        separator.setStyleSheet("color: #e3e3e3; background-color: #f2f2f2; height: 1px; margin-left: 10px; margin-right: 10px;")
+        separator.setObjectName("sidebar-separator")
 
         sidebar_layout.addWidget(separator)
 
@@ -243,7 +243,7 @@ class MainWindow(QMainWindow):
         bottom_separator = QFrame()
         bottom_separator.setFrameShape(QFrame.Shape.HLine)
         bottom_separator.setFrameShadow(QFrame.Shadow.Plain)
-        bottom_separator.setStyleSheet("color: #e3e3e3; background-color: #f2f2f2; height: 1px; margin-left: 10px; margin-right: 10px;")
+        bottom_separator.setObjectName("sidebar-separator")
         sidebar_layout.addWidget(bottom_separator)
         
         # Add Settings button at the bottom

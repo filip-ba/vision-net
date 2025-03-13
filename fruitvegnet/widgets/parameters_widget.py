@@ -1,5 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
 
 from utils.custom_separator import create_separator
 
@@ -23,11 +22,11 @@ class ParametersWidget(QWidget):
         self.momentum_label.setObjectName("ModelMomentumLabel")
         
         layout.addWidget(self.time_label)
-        layout.addWidget(create_separator())
+        layout.addWidget(create_separator("horizontal"))
         layout.addWidget(self.epochs_label)
-        layout.addWidget(create_separator())
+        layout.addWidget(create_separator("horizontal"))
         layout.addWidget(self.lr_label)
-        layout.addWidget(create_separator())
+        layout.addWidget(create_separator("horizontal"))
         layout.addWidget(self.momentum_label)
   
     def update_parameters(self, params):
