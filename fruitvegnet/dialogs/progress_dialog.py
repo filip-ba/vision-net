@@ -71,6 +71,7 @@ class ProgressDialog(QDialog):
         
     def setup_ui(self):
         """UI component initialization"""
+        self.setWindowTitle("Training...")
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(20)
