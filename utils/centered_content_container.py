@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout
 
 class CenteredContentContainer(QWidget):
     """
-    A container widget that centers its content and limits maximum width.
+    A ontainer widget that centers its content and limits maximum width.
     The content will not expand beyond the max_width and will stay centered
     when the window is resized.
     """
