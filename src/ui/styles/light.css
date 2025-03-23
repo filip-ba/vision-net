@@ -4,7 +4,7 @@ QMainWindow, QWidget {
     color: #2d2d2d;
 }
 
-/*------------------------------------------------- Sidebar styling -------------------------------------------------*/
+/*------------------------------------------------- Sidebar -------------------------------------------------*/
 #sidebar {
     background-color: #f2f2f2;
     border-right-color: #e1e1e1;
@@ -19,7 +19,7 @@ QMainWindow, QWidget {
     background-color: #f2f2f2;
 }
  
-/*------------------------------------------------- Separator styling -------------------------------------------------*/
+/*------------------------------------------------- Separator -------------------------------------------------*/
 #sidebar-separator {
     color: #e3e3e3; 
     background-color: #f2f2f2; 
@@ -35,25 +35,7 @@ QMainWindow, QWidget {
     margin-right: 0px;
 }
 
-/*------------------------------------------------- Sidebar button styling -------------------------------------------------*/
-#sidebar-button {
-    background-color: transparent;
-    color: #2d2d2d;
-}
-
-#sidebar-button:hover {
-    background-color: #dedede;
-}
-
-#sidebar-button:checked {
-    background-color: rgba(216,216,216,255);
-}
-
-#sidebar-button:checked:pressed {
-    background-color: #c7c7c7;
-}
-
-/*------------------------------------------------- Button styling -------------------------------------------------*/
+/*------------------------------------------------- Button -------------------------------------------------*/
 QPushButton {
     background-color: #ebebeb;
 }
@@ -94,7 +76,24 @@ QPushButton:checked:pressed {
     background-color: #fafafa;
 }
 
-/*------------------------------------------------- Tab Widget styling -------------------------------------------------*/
+#sidebar-button {
+    background-color: transparent;
+    color: #2d2d2d;
+}
+
+#sidebar-button:hover {
+    background-color: #dedede;
+}
+
+#sidebar-button:checked {
+    background-color: rgba(216,216,216,255);
+}
+
+#sidebar-button:checked:pressed {
+    background-color: #c7c7c7;
+}
+
+/*------------------------------------------------- Tab Widget -------------------------------------------------*/
 QTabWidget::pane {
     background-color: #fafafa;
     border-top-color: #e3e3e3;
@@ -113,13 +112,13 @@ QTabBar::tab:hover:!selected {
     background-color: #dedede;
 }
 
-/*------------------------------------------------- Group Box styling -------------------------------------------------*/
+/*------------------------------------------------- Group Box -------------------------------------------------*/
 QGroupBox {
     border-color: #e3e3e3;
     background-color: #ffffff;
 }
 
-/*------------------------------------------------- Label styling -------------------------------------------------*/
+/*------------------------------------------------- Label -------------------------------------------------*/
 QLabel {
     background-color: white;
     color: #2d2d2d;
@@ -143,7 +142,7 @@ QLabel {
     border-color: #e3e3e3;
 }
 
-/*------------------------------------------------- Progress Bar styling -------------------------------------------------*/
+/*------------------------------------------------- Progress Bar -------------------------------------------------*/
 QProgressBar {
     background-color: #e0e0e0;
 }
@@ -152,13 +151,13 @@ QProgressBar::chunk {
     background-color: #6f8396;
 }
 
-/*------------------------------------------------- Plot Frame styling -------------------------------------------------*/
+/*------------------------------------------------- Plot Frame -------------------------------------------------*/
 #plot-1-2-frame, #plot-3-frame {
     border-color: #e3e3e3;
     background-color: white;
 }
 
-/*------------------------------------------------- Slider styling -------------------------------------------------*/
+/*------------------------------------------------- Slider -------------------------------------------------*/
 QSlider {
     background-color: white;
 }
@@ -176,13 +175,13 @@ QSlider::handle:horizontal {
     border-color: #e3e3e3;
 }
 
-/*------------------------------------------------- Status Bar styling -------------------------------------------------*/
+/*------------------------------------------------- Status Bar -------------------------------------------------*/
 QStatusBar {
     background-color: #fafafa;
     color: #000000;
 }
 
-/*------------------------------------------------- Scroll Bar styling -------------------------------------------------*/
+/*------------------------------------------------- Scroll Bar -------------------------------------------------*/
 QScrollBar:vertical, QScrollBar:horizontal {
     background-color: transparent;
 }
@@ -203,7 +202,7 @@ QScrollBar::handle:vertical:pressed, QScrollBar::handle:horizontal:pressed {
     background-color: #787878;
 }
 
-/*------------------------------------------------- Message Box styling -------------------------------------------------*/
+/*------------------------------------------------- Message Box -------------------------------------------------*/
 QMessageBox#clear-model-message {
     background-color: #fafafa;
     color: #2d2d2d;
@@ -214,7 +213,7 @@ QMessageBox#clear-model-message QLabel {
     color: #2d2d2d;
 }
 
-/*------------------------------------------------- Spacer styling -------------------------------------------------*/
+/*------------------------------------------------- Spacer -------------------------------------------------*/
 #spacer {
     background-color: #ffffff;
 }

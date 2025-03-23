@@ -17,7 +17,6 @@ class StyleManager:
         self.apply_style(self.current_style)
     
     def load_stylesheet(self, filename):
-        """Load a stylesheet from a file."""
         current_file_path = os.path.abspath(__file__)
         styles_dir = os.path.dirname(current_file_path)
         path = os.path.join(styles_dir, filename)
@@ -25,7 +24,6 @@ class StyleManager:
             return f.read()
     
     def apply_style(self, style_name):
-        """Apply the specified style to the application."""
         self.current_style = style_name
         global_style = self.load_stylesheet("global.css")
         theme_style = self.load_stylesheet(f"{style_name}.css")
@@ -34,12 +32,10 @@ class StyleManager:
         self.settings.setValue("style", style_name)
         
     def toggle_style(self):
-        """Toggle between light and dark styles."""
         if self.current_style == self.STYLE_LIGHT:
             self.apply_style(self.STYLE_DARK)
         else:
             self.apply_style(self.STYLE_LIGHT)
     
     def get_current_style(self):
-        """Get the name of the current style."""
         return self.current_style

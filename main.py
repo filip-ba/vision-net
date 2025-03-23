@@ -8,8 +8,7 @@ def main():
     app = QApplication(sys.argv)
     style_manager = StyleManager(app)
     window = MainWindow(style_manager)
-    window.show()
-    
+    window.show() 
     sys.exit(app.exec())
 
 if __name__ == "__main__":
