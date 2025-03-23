@@ -177,6 +177,10 @@ QLabel[objectName^="Metrics"] {
     border: 1px solid;
 }
 
+#plot-label {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
 /*------------------------------------------------- Progress bar styling -------------------------------------------------*/
 QProgressBar {
     text-align: center;

@@ -5,16 +5,16 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QPixmap, QImageReader, QFont
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 from matplotlib.figure import Figure
-import os, random
 from matplotlib import pyplot as plt
+import os, random
 
 from src.utils.custom_canvas import ScrollableFigureCanvas
 from src.utils.custom_separator import create_separator
 
 
 class ImageClassification(QWidget):
-    image_loaded = pyqtSignal(str, int)  # Signal for image load events
-    classify_clicked = pyqtSignal()  # Signal for classify button clicks
+    image_loaded = pyqtSignal(str, int)  
+    classify_clicked = pyqtSignal()  
 
     def __init__(self):
         super().__init__()
@@ -40,7 +40,6 @@ class ImageClassification(QWidget):
         top_layout = self._create_top_layout()
         bottom_layout = self._create_bottom_layout()
         
-        # Add layouts to main layout with proportions
         main_layout.addLayout(top_layout, 4)
         main_layout.addLayout(bottom_layout, 6)
         
@@ -55,32 +54,26 @@ class ImageClassification(QWidget):
         self.switch_plot('simple_cnn')
         
     def _create_top_layout(self):
-        # Top section for image, buttons and results
+        # Top section for classification and results group boxes 
         top_layout = QHBoxLayout()
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(0)
 
-        # Image classification section
-        image_layout_group = self._create_image_section()
+        image_layout_group = self._create_classification_groupbox()
+        results_group = self._create_results_groupbox()
         
-        # Results section
-        results_group = self._create_results_section()
-        
-        # Add widgets to top layout
         top_layout.addWidget(image_layout_group, 2)
         top_layout.addWidget(results_group, 3)
         
         return top_layout
         
-    def _create_image_section(self):
-        # Create image and buttons group
+    def _create_classification_groupbox(self):
         image_layout_group = QGroupBox("Image Classification")
         image_layout_group.setObjectName("classification-group")
         image_layout = QVBoxLayout()
         image_layout.setContentsMargins(15, 15, 15, 15)
         image_layout.setSpacing(15)
         
-        # Image display
         self.image_display = QLabel()
         self.image_display.setObjectName("image-display")
         self.image_display.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -88,14 +81,11 @@ class ImageClassification(QWidget):
         self.image_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
         image_layout.addWidget(self.image_display)
         
-        # Action buttons
         button_layout = QHBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)
         button_layout.setSpacing(5)
-        
         self.load_btn = QPushButton("Load")
         self.classify_btn = QPushButton("Classify")
-        
         button_layout.addWidget(self.load_btn)
         button_layout.addWidget(self.classify_btn)
         
@@ -104,38 +94,26 @@ class ImageClassification(QWidget):
         
         return image_layout_group
         
-    def _create_results_section(self):
-        # Results section with model names and predictions
+    def _create_results_groupbox(self):
         results_group = QGroupBox("Results")
         results_group.setObjectName("results-group")
+        results_group.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        results_group.setMinimumWidth(100)
+
         results_main_layout = QVBoxLayout(results_group)
         results_main_layout.setContentsMargins(0, 18, 0, 18)
         
         results_columns_layout = QHBoxLayout()
         results_columns_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Left column - model names
         left_column = QVBoxLayout()
         left_column.setSpacing(18)
         left_column.setContentsMargins(0, 0, 0, 0)
 
-        # Right column - results
         right_column = QVBoxLayout()
         right_column.setSpacing(18)
         right_column.setContentsMargins(0, 0, 0, 0)
 
-        # Vertical separator between columns
-        vertical_separator = QFrame()
-        vertical_separator.setFrameShape(QFrame.Shape.VLine)
-        vertical_separator.setFrameShadow(QFrame.Shadow.Plain)
-        vertical_separator.setStyleSheet(
-            "color: #e3e3e3; "
-            "width: 1px; "
-            "margin: 0px; "
-            "padding: 0px;"
-        )
-
-        # Create model name labels and result labels
         model_labels = {
             'simple_cnn': QLabel("Simple CNN"),
             'resnet': QLabel("ResNet"),
@@ -143,7 +121,7 @@ class ImageClassification(QWidget):
             'vgg16': QLabel("VGG 16")
         }
         
-        # Configure model name labels
+        # Add model labels to the left column
         for model_id, label in model_labels.items():
             label.setObjectName(f"Model{model_id.title().replace('_', '')}")
             label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
@@ -170,25 +148,21 @@ class ImageClassification(QWidget):
             if model_id != list(self.model_names.keys())[-1]:
                 right_column.addWidget(create_separator("horizontal"))
         
-        # Assemble results layout
         results_columns_layout.addLayout(left_column)
         results_columns_layout.addWidget(create_separator("vertical"))
         results_columns_layout.addLayout(right_column)
+
         results_main_layout.addLayout(results_columns_layout)
-        
-        results_group.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
-        results_group.setMinimumWidth(100)
 
         return results_group
     
     def _create_bottom_layout(self):
-        # Bottom section with plots
         bottom_layout = QVBoxLayout()
         
-        # Create plot frame
         self.plot_frame = QFrame()
         self.plot_frame.setObjectName("plot-3-frame")
         self.plot_frame.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
         frame_layout = QVBoxLayout(self.plot_frame)
         
         # Plot title labels
@@ -221,7 +195,6 @@ class ImageClassification(QWidget):
         frame_layout.addWidget(self.plot_stack)
         frame_layout.setSpacing(9)
 
-        # Plot selection buttons
         buttons_layout = QHBoxLayout()
         buttons_layout.setContentsMargins(0, 0, 0, 0)
         buttons_layout.setSpacing(0)
@@ -271,15 +244,14 @@ class ImageClassification(QWidget):
             figure = self.plot_widgets[model]['figure']
             figure.clear()
             ax = figure.add_subplot(111)
-            
-            ax.set_title("")
+            ax.set_title('')
             ax.set_xlabel('')
             ax.set_ylabel('Probability', fontsize=9, labelpad=15)
             ax.tick_params(axis='both', labelsize=8)
             ax.set_ylim(0, 1)
-            
             figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)
             figure.tight_layout()
+
             self.plot_widgets[model]['canvas'].draw()
 
     def update_plot(self, model_type, classes, probabilities):
@@ -299,31 +271,20 @@ class ImageClassification(QWidget):
                 f'{height:.0%}',
                 ha="center", va="bottom")
 
-        ax.set_title("")
+        ax.set_title('')
         ax.set_xlabel('')
         ax.set_ylabel('Probability', fontsize=9, labelpad=15)
         ax.tick_params(axis='both', labelsize=9)
-        
-        # Dynamic y-axis limit based on data
-        max_prob = max(probabilities)
-
-        if model_type == 'simple_cnn':
-            # Dynamic y-limit with padding for Simple CNN
-            y_max = min(1.0, max_prob * 1.2)
-            ax.set_ylim(0, max(y_max, 0.5))
-        else:
-            # Consistent scale for more accurate models
-            ax.set_ylim(0, 1.2)
-        
+        ax.set_ylim(0, 1.1)
         plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
-        
         figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)
         figure.tight_layout()
+
         self.plot_widgets[model_type]['canvas'].draw()
 
     def load_random_test_image(self):
-        """Load a random image from the test dataset"""
         dataset_path = "./dataset/fruit_dataset/test"
+
         if os.path.exists(dataset_path):
             class_dirs = [d for d in os.listdir(dataset_path) 
                         if os.path.isdir(os.path.join(dataset_path, d))]
@@ -347,7 +308,6 @@ class ImageClassification(QWidget):
         self.current_image_path = None
             
     def load_image(self):
-        """Load image from file system"""
         supported_formats = [f"*.{fmt.data().decode()}" for fmt in QImageReader.supportedImageFormats()]
         filter_string = "Image Files ({})".format(" ".join(supported_formats))
         file_path, _ = QFileDialog.getOpenFileName(
@@ -395,7 +355,7 @@ class ImageClassification(QWidget):
         self.image_display.setPixmap(scaled_pixmap)
         
     def resizeEvent(self, event):
-        """Handle resize events"""
+        """Scale the image in image display on window resize event"""
         super().resizeEvent(event)
         self.scale_image()
                 
@@ -405,7 +365,7 @@ class ImageClassification(QWidget):
             self.result_labels[model_type].setText(result)
 
     def showEvent(self, event):
-        """Handle the widget being shown for the first time"""
+        """Scale the image in image display properly after the start of the application"""
         super().showEvent(event)
         # Scale the image after the widget is visible and has proper dimensions
         QTimer.singleShot(50, self.scale_image)
