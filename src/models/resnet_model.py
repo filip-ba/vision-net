@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import models, transforms
 
-from models.base_model import BaseModel
+from src.models.base_model import BaseModel
 
 
 class ResNetModel(BaseModel):

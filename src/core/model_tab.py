@@ -5,16 +5,16 @@ from PyQt6.QtCore import pyqtSignal
 import os
 import torch
 
-from fruitvegnet.dialogs.progress_dialog import ProgressDialog
-from fruitvegnet.widgets.plot_widget import PlotWidget
-from fruitvegnet.dialogs.parameters_dialog import ParametersDialog
-from fruitvegnet.widgets.parameters_widget import ParametersWidget
-from fruitvegnet.widgets.metrics_widget import MetricsWidget
-from fruitvegnet.widgets.model_info_widget import ModelInfoWidget
-from models.simple_cnn_model import SimpleCnnModel
-from models.resnet_model import ResNetModel
-from models.efficientnet_model import EfficientNetModel
-from models.vgg16_model import VGG16Model
+from src.ui.dialogs.progress_dialog import ProgressDialog
+from src.ui.widgets.plot_widget import PlotWidget
+from src.ui.dialogs.parameters_dialog import ParametersDialog
+from src.ui.widgets.parameters_widget import ParametersWidget
+from src.ui.widgets.metrics_widget import MetricsWidget
+from src.ui.widgets.model_info_widget import ModelInfoWidget
+from src.models.simple_cnn_model import SimpleCnnModel
+from src.models.resnet_model import ResNetModel
+from src.models.efficientnet_model import EfficientNetModel
+from src.models.vgg16_model import VGG16Model
 
 
 class TabWidget(QWidget):
@@ -148,16 +148,16 @@ class TabWidget(QWidget):
         """Attempts to load the default model on startup"""
         # Determine the correct default model path based on model class
         if self.model_class == SimpleCnnModel:
-            default_model_path = "./models/trained_models/simple_cnn_default_model.pth"
+            default_model_path = "./saved_models/simple_cnn_default_model.pth"
             self.model_name = "Simple CNN"
         elif self.model_class == ResNetModel:
-            default_model_path = "./models/trained_models/resnet_default_model.pth"
+            default_model_path = "./saved_models/resnet_default_model.pth"
             self.model_name = "ResNet"
         elif self.model_class == EfficientNetModel:
-            default_model_path = "./models/trained_models/efficientnet_default_model.pth"
+            default_model_path = "./saved_models/efficientnet_default_model.pth"
             self.model_name = "EfficientNet"
         elif self.model_class == VGG16Model:
-            default_model_path = "./models/trained_models/vgg16_default_model.pth"
+            default_model_path = "./saved_models/vgg16_default_model.pth"
             self.model_name = "VGG16"
         else:
             default_model_path = None

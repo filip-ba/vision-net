@@ -8,8 +8,8 @@ from matplotlib.figure import Figure
 import os, random
 from matplotlib import pyplot as plt
 
-from utils.scrollable_figure_canvas import ScrollableFigureCanvas
-from utils.custom_separator import create_separator
+from src.utils.custom_canvas import ScrollableFigureCanvas
+from src.utils.custom_separator import create_separator
 
 
 class ImageClassification(QWidget):

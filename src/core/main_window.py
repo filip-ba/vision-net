@@ -6,12 +6,12 @@ from PyQt6.QtGui import QIcon, QPixmap, QPainter
 from PyQt6.QtCore import Qt, QSize, QTimer, QEvent
 import os
 
-from fruitvegnet.neural_network_tab import TabWidget
-from fruitvegnet.image_classification import ImageClassification
-from models.simple_cnn_model import SimpleCnnModel
-from models.resnet_model import ResNetModel
-from models.efficientnet_model import EfficientNetModel
-from models.vgg16_model import VGG16Model
+from src.core.model_tab import TabWidget
+from src.core.classification_tab import ImageClassification
+from src.models.simple_cnn_model import SimpleCnnModel
+from src.models.resnet_model import ResNetModel
+from src.models.efficientnet_model import EfficientNetModel
+from src.models.vgg16_model import VGG16Model
 
 
 class MainWindow(QMainWindow):
@@ -369,8 +369,9 @@ class MainWindow(QMainWindow):
 
     def _return_project_root_folder(self):
         current_file_path = os.path.abspath(__file__)
-        fruitvegnet_dir  = os.path.dirname(current_file_path)
-        project_root = os.path.dirname(fruitvegnet_dir)
+        core_dir  = os.path.dirname(current_file_path)
+        src_dir = os.path.dirname(core_dir)
+        project_root = os.path.dirname(src_dir)
         return project_root
 
     def _connect_tab_status_signals(self):

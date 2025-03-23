@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
 
-from utils.custom_separator import create_separator
+from src.utils.custom_separator import create_separator
 
 
 class ModelInfoWidget(QWidget):

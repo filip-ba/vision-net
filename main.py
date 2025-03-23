@@ -1,8 +1,8 @@
 import sys
 from PyQt6.QtWidgets import QApplication
 
-from utils.style_manager import StyleManager
-from fruitvegnet.main_window import MainWindow
+from src.ui.styles.style_manager import StyleManager
+from src.core.main_window import MainWindow
 
 def main():
     app = QApplication(sys.argv)
