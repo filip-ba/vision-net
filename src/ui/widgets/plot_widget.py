@@ -1,9 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont
-import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
+import numpy as np
 
 from src.utils.custom_canvas import ScrollableFigureCanvas
 
@@ -15,30 +14,28 @@ class PlotWidget(QWidget):
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(0)
         main_layout.setContentsMargins(0, 0, 0, 0)
-        
-        # Title
+
         self.title_label = QLabel(title)
         self.title_label.setObjectName("plot-label")
-        self.title_label.setFont(QFont('Arial', 11, QFont.Weight.Bold))
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        main_layout.addWidget(self.title_label)
+
         spacer = QWidget()
         spacer.setFixedHeight(9)
         spacer.setObjectName("spacer")
-        main_layout.addWidget(spacer)
-        main_layout.addSpacing(0)
-        
-        # Figure
+
         self.figure = Figure(figsize=(5, 4), dpi=100)
         self.canvas = ScrollableFigureCanvas(self.figure)
         self.canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
+        main_layout.addWidget(self.title_label)
+        main_layout.addWidget(spacer)
         main_layout.addWidget(self.canvas)
 
     def plot_confusion_matrix(self, plot_widget, conf_mat = None, classes = None):
-        """Plots confusion matrix"""
         plot_widget.figure.clear()
         plot_widget.figure.subplots_adjust(left=0.25, right=0.85, bottom=0.35, top=0.85)
         plot_widget.figure.tight_layout()
+        
         ax = plot_widget.figure.add_subplot(111)
         ax.set_xlabel('Predicted', labelpad=15)
         ax.set_ylabel('True', labelpad=15)
@@ -65,7 +62,6 @@ class PlotWidget(QWidget):
         plot_widget.canvas.draw()
 
     def plot_loss_history(self, plot_widget, epochs=None, train_loss_history=None, val_loss_history=None):
-        """Plots loss history"""
         plot_widget.figure.clear()
         ax = plot_widget.figure.add_subplot(111)
         plot_widget.figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)

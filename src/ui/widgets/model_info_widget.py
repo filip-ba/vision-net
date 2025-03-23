@@ -14,16 +14,14 @@ class ModelInfoWidget(QWidget):
         layout.setSpacing(18)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        # Model status label
         self.model_status_label = QLabel("No model loaded")
         self.model_status_label.setObjectName("ModelStatus")
-        layout.addWidget(self.model_status_label)
 
-        layout.addWidget(create_separator("horizontal"))
-
-        # Model file label
         self.model_file_label = QLabel("Model File: None")
         self.model_file_label.setObjectName("ModelFileLabel")
+
+        layout.addWidget(self.model_status_label)
+        layout.addWidget(create_separator("horizontal"))
         layout.addWidget(self.model_file_label)
 
     def set_model_status(self, status, color="red"):
