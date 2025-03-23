@@ -34,8 +34,8 @@ class MainWindow(QMainWindow):
         
     def _create_ui(self):
         project_root = self._return_project_root_folder()
-        assets_dir = os.path.join(project_root, "assets")
-        icon_path = os.path.join(assets_dir, "icon.png")
+        icons_dir = os.path.join(project_root, "assets/icons")
+        icon_path = os.path.join(icons_dir, "app_icon.png")
         
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
@@ -135,7 +135,7 @@ class MainWindow(QMainWindow):
 
         # Path to assets folder
         project_root = self._return_project_root_folder()
-        assets_dir = os.path.join(project_root, "assets")
+        themes_dir = os.path.join(project_root, "assets/themes")
         
         # Light theme button
         self.light_button = QPushButton()
@@ -144,7 +144,7 @@ class MainWindow(QMainWindow):
         self.light_button.setFixedSize(200, 130)
         
         # Set light theme preview image
-        light_preview_path = os.path.join(assets_dir, "light-theme-preview.png")
+        light_preview_path = os.path.join(themes_dir, "light-theme-preview.png")
         if os.path.exists(light_preview_path):
             light_preview = QPixmap(light_preview_path)
             self.light_button.setIcon(QIcon(light_preview))
@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
         self.dark_button.setFixedSize(200, 130)
         
         # Set dark theme preview image
-        dark_preview_path = os.path.join(assets_dir, "dark-theme-preview.png")
+        dark_preview_path = os.path.join(themes_dir, "dark-theme-preview.png")
         if os.path.exists(dark_preview_path):
             dark_preview = QPixmap(dark_preview_path)
             self.dark_button.setIcon(QIcon(dark_preview))
@@ -263,17 +263,17 @@ class MainWindow(QMainWindow):
         
         # Path to assets folder
         project_root = self._return_project_root_folder()
-        assets_dir = os.path.join(project_root, "assets")
+        icons_dir = os.path.join(project_root, "assets/icons")
         
         # Set icons based on current theme
         theme_suffix = "dark"  
         icon_path = None
         if text == "Models":
-            icon_path = os.path.join(assets_dir, f"model-{theme_suffix}.png")
+            icon_path = os.path.join(icons_dir, f"model-{theme_suffix}.png")
         elif text == "Classification":
-            icon_path = os.path.join(assets_dir, f"classification-{theme_suffix}.png")
+            icon_path = os.path.join(icons_dir, f"classification-{theme_suffix}.png")
         elif text == "Settings":
-            icon_path = os.path.join(assets_dir, f"settings-{theme_suffix}.png")
+            icon_path = os.path.join(icons_dir, f"settings-{theme_suffix}.png")
         
         # Create composite icon with an empty space
         original_icon = QPixmap(icon_path)
@@ -333,7 +333,7 @@ class MainWindow(QMainWindow):
 
         # Path to assets folder
         project_root = self._return_project_root_folder()
-        assets_dir = os.path.join(project_root, "assets")
+        icons_dir = os.path.join(project_root, "assets/icons")
 
         # Get the current theme suffix
         theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
@@ -348,11 +348,11 @@ class MainWindow(QMainWindow):
                 # Set the appropriate icon based on button text and theme
                 icon_path = None
                 if button_text == "Models":
-                    icon_path = os.path.join(assets_dir, f"model-{theme_suffix}.png")
+                    icon_path = os.path.join(icons_dir, f"model-{theme_suffix}.png")
                 elif button_text == "Classification":
-                    icon_path = os.path.join(assets_dir, f"classification-{theme_suffix}.png")
+                    icon_path = os.path.join(icons_dir, f"classification-{theme_suffix}.png")
                 elif button_text == "Settings":
-                    icon_path = os.path.join(assets_dir, f"settings-{theme_suffix}.png")
+                    icon_path = os.path.join(icons_dir, f"settings-{theme_suffix}.png")
                 if icon_path and os.path.exists(icon_path):
                     # Create composite icon with an empty space
                     original_icon = QPixmap(icon_path)
