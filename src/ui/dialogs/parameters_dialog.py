@@ -4,6 +4,7 @@ from PyQt6.QtCore import Qt
 
 
 class ParametersWidget(QWidget):
+    """Widget for the parameters dialog"""
 
     def __init__(self, label, min_val, max_val, default_val, decimals=0, parent=None):
         super().__init__(parent)
@@ -57,7 +58,7 @@ class ParametersWidget(QWidget):
 
 
 class ParametersDialog(QDialog):
-    """Creates dialog with parameters for training"""
+    """Creates dialog with the parameters widget"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -66,27 +67,22 @@ class ParametersDialog(QDialog):
         
         main_layout = QVBoxLayout(self)
         
-        # Parameters group
+        params_layout = QVBoxLayout()
+        params_layout.setContentsMargins(10, 10, 10, 10)
+
         params_group = QGroupBox("")
         params_group.setObjectName("dialog-params-group")
-        params_layout = QVBoxLayout()
-        
-        # Create parameter widgets
+        params_group.setLayout(params_layout)
+ 
         self.epochs_widget = ParametersWidget("Epochs:", 1, 100, 10)
         self.learning_rate_widget = ParametersWidget("Learning Rate:", 0.000001, 1.0, 0.001, 6)
         self.momentum_widget = ParametersWidget("Momentum:", 0.0, 1.0, 0.9, 6)
         
-        # Add parameter widgets to layout
         for widget in [self.epochs_widget, self.learning_rate_widget, self.momentum_widget]:
             params_layout.addWidget(widget)
         
-        params_group.setLayout(params_layout)
-        params_layout.setContentsMargins(10, 10, 10, 10)
-
-        # Add the group box to the main layout
         main_layout.addWidget(params_group)
         
-        # Dialog buttons
         button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)

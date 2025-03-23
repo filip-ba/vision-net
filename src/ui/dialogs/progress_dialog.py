@@ -4,9 +4,9 @@ import time
 
 
 class TrainingThread(QThread):
-    """Class for model training in a separate thread"""
+    """Class for model training (and testing) in a separate thread"""
     progress_updated = pyqtSignal(float, float)  # (progress, loss)
-    finished = pyqtSignal(tuple)  # (train_loss_history, val_loss_history)
+    training_finished = pyqtSignal(tuple)  # (train_loss_history, val_loss_history)
     testing_finished = pyqtSignal(dict)  # metrics dictionary
     error = pyqtSignal(str)
 
@@ -36,10 +36,10 @@ class TrainingThread(QThread):
             if self._is_canceled:
                 return
                 
-            # Signal training is finished
-            self.finished.emit(result)
+            # Emit signal when training is finished
+            self.training_finished.emit(result)
             
-            # Continue with testing in the same thread
+            # Start testing
             if not self._is_canceled:
                 try:
                     metrics = self.model.test()
@@ -67,18 +67,17 @@ class ProgressDialog(QDialog):
         self.momentum = momentum
         self.training_result = None
         self.testing_result = None
-        self.setup_ui()
+        self._create_ui()
         
-    def setup_ui(self):
-        """UI component initialization"""
+    def _create_ui(self):
         self.setWindowTitle("Training...")
-        layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(20)
         self.resize(400, 300)
         self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMinimizeButtonHint)
 
-        # Add training parameters if available
+        layout = QVBoxLayout()
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(20)
+
         if self.operation_type == "Training" and all(param is not None for param in 
             [self.epochs, self.learning_rate, self.momentum]):
             params_label = QLabel(
@@ -91,35 +90,30 @@ class ProgressDialog(QDialog):
             params_label.setObjectName("training-dialog-parameters")
             layout.addWidget(params_label)
 
-        # Status label
         self.status_label = QLabel(f"{self.operation_type} in progress...")
         self.status_label.setObjectName("dialog-status-label")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.status_label)
 
-        # Time estimate label
         self.time_label = QLabel("Estimated time remaining: calculating...")
         self.time_label.setObjectName("dialog-time-label")
         self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.time_label)
 
-        # Progress bar
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(0)
         layout.addWidget(self.progress_bar)
 
-        # Cancel button
         self.cancel_button = QPushButton("Cancel")
         self.cancel_button.clicked.connect(self.cancel)
         layout.addWidget(self.cancel_button)
         self.setLayout(layout)
 
     def start_training(self, model, epochs, learning_rate, momentum):
-        """Starts training in new thread"""
         self.thread = TrainingThread(model, epochs, learning_rate, momentum)
         self.thread.progress_updated.connect(self.update_progress)
-        self.thread.finished.connect(self.on_training_finished)
+        self.thread.training_finished.connect(self.on_training_finished)
         self.thread.testing_finished.connect(self.on_testing_finished)
         self.thread.error.connect(self.on_error)
         self.start_time = time.time()
@@ -132,7 +126,6 @@ class ProgressDialog(QDialog):
         progress_percent = int(progress * 100)
         self.progress_bar.setValue(progress_percent)
 
-        # Calculating the remaining time
         if self.start_time and progress > 0:
             elapsed_time = time.time() - self.start_time
             estimated_total_time = elapsed_time / progress
@@ -148,13 +141,11 @@ class ProgressDialog(QDialog):
             self.time_label.setText(f"Estimated time remaining: {time_str}")
 
     def cancel(self):
-        """Cancels the operation"""
         if self.thread:
             self.thread.cancel()
         self.reject()
 
     def on_training_finished(self, result):
-        """Training finished callback"""
         self.training_result = result
         self.status_label.setText("Training completed. Starting testing...")
         self.progress_bar.setValue(0)
@@ -162,7 +153,6 @@ class ProgressDialog(QDialog):
         self.time_label.setText("Testing in progress...")
 
     def on_testing_finished(self, metrics):
-        """Testing finished callback"""
         self.testing_result = metrics
         self.status_label.setText("Testing completed.")
         self.progress_bar.setMaximum(100)
@@ -171,7 +161,6 @@ class ProgressDialog(QDialog):
         self.accept()
 
     def on_error(self, error_message):
-        """Error callback"""
         self.training_result = None
         self.testing_result = None
         self.error_message = error_message
