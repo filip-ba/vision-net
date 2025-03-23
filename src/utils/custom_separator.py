@@ -4,8 +4,7 @@ def create_separator(orientation):
     separator = QFrame()
 
     if orientation == "horizontal":
-        frame_shape = QFrame.Shape.HLine
-        
+        frame_shape = QFrame.Shape.HLine    
     else:
         frame_shape = QFrame.Shape.VLine
 
@@ -14,4 +13,5 @@ def create_separator(orientation):
     separator.setFrameShadow(QFrame.Shadow.Plain)
     separator.setLineWidth(0)
     separator.setMidLineWidth(0)
+
     return separator

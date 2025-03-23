@@ -5,6 +5,7 @@ import time
 
 class TrainingThread(QThread):
     """Class for model training (and testing) in a separate thread"""
+    
     progress_updated = pyqtSignal(float, float)  # (progress, loss)
     training_finished = pyqtSignal(tuple)  # (train_loss_history, val_loss_history)
     testing_finished = pyqtSignal(dict)  # metrics dictionary
