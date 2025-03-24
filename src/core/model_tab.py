@@ -1,11 +1,10 @@
 from PyQt6.QtWidgets import ( 
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox,
-    QFileDialog, QStackedWidget, QMessageBox, QFrame, QDialog, QSizePolicy )
+    QFileDialog, QStackedWidget, QMessageBox, QFrame, QDialog )
 from PyQt6.QtCore import pyqtSignal
 import os
 import torch
 
-from src.utils.centered_content_container import CenteredContentContainer
 from src.ui.dialogs.progress_dialog import ProgressDialog
 from src.ui.widgets.plot_widget import PlotWidget
 from src.ui.dialogs.parameters_dialog import ParametersDialog
@@ -36,7 +35,7 @@ class TabWidget(QWidget):
         self.model_info_widget.set_model_status("No model loaded") 
 
         # Try to load the dataset and default model on startup
-        #self._load_dataset()
+        self._load_dataset()
         self._load_default_model()
 
         # Connect signals
@@ -375,8 +374,8 @@ class TabWidget(QWidget):
             self.status_message.emit(f"Testing error: {str(e)}", 8000)    
 
     def _create_ui(self):
-        container = CenteredContentContainer(min_width=770)
-        main_layout = QHBoxLayout(container.get_content_widget())
+        # Main layout
+        main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(0)
 
@@ -387,10 +386,6 @@ class TabWidget(QWidget):
         # Right panel (plots)
         right_panel = self._create_right_panel()
         main_layout.addWidget(right_panel)
-
-        self.setLayout(QVBoxLayout())
-        self.layout().setContentsMargins(0, 0, 0, 0)
-        self.layout().addWidget(container)
 
     def _create_left_panel(self):
         left_panel = QWidget()

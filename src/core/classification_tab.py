@@ -35,27 +35,14 @@ class ImageClassification(QWidget):
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(10, 10, 10, 0)
         main_layout.setSpacing(0)
-        
-        centered_container = QWidget()
-        centered_layout = QHBoxLayout(centered_container)
-        centered_layout.setContentsMargins(0, 0, 0, 0)
-        
-        content_container = QWidget()
-        content_container.setMaximumWidth(1200)  
-        content_layout = QVBoxLayout(content_container)
-        content_layout.setContentsMargins(0, 0, 0, 0)
-        
+
+        # Create top and bottom layouts
         top_layout = self._create_top_layout()
         bottom_layout = self._create_bottom_layout()
         
-        content_layout.addLayout(top_layout, 4)
-        content_layout.addLayout(bottom_layout, 6)
+        main_layout.addLayout(top_layout, 4)
+        main_layout.addLayout(bottom_layout, 6)
         
-        centered_layout.addStretch(1)
-        centered_layout.addWidget(content_container, 0)
-        centered_layout.addStretch(1)
-        
-        main_layout.addWidget(centered_container)
         self.setLayout(main_layout)
         
         # Connect signals
