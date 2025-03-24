@@ -8,7 +8,7 @@ class CenteredContentContainer(QWidget):
     when the window is resized.
     """
 
-    def __init__(self, max_width=1200, parent=None):
+    def __init__(self, max_width=900, min_width=600, parent=None):
         super().__init__(parent)
         
         self.main_layout = QHBoxLayout(self)
@@ -17,7 +17,7 @@ class CenteredContentContainer(QWidget):
         
         self.content = QWidget()
         self.content.setMaximumWidth(max_width)
-        self.content.setMinimumWidth(400)  
+        self.content.setMinimumWidth(min_width)  
         
         self.main_layout.addStretch(1)
         self.main_layout.addWidget(self.content)
