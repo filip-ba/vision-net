@@ -6,7 +6,7 @@ import os
 import torch
 
 from src.ui.dialogs.progress_dialog import ProgressDialog
-from src.ui.widgets.plot_widget import PlotWidget
+from src.ui.widgets.training_plot_widget import TrainingPlotWidget
 from src.ui.dialogs.parameters_dialog import ParametersDialog
 from src.ui.widgets.parameters_widget import ParametersWidget
 from src.ui.widgets.metrics_widget import MetricsWidget
@@ -17,7 +17,7 @@ from src.models.efficientnet_model import EfficientNetModel
 from src.models.vgg16_model import VGG16Model
 
 
-class TabWidget(QWidget):
+class ModelTab(QWidget):
     # Signal to emit status messages to the main window
     status_message = pyqtSignal(str, int)
 
@@ -465,8 +465,8 @@ class TabWidget(QWidget):
         
         # QStackedWidget for switching between charts
         self.plot_stack = QStackedWidget()
-        self.plot_widget1 = PlotWidget("Loss History")
-        self.plot_widget2 = PlotWidget("Confusion Matrix")
+        self.plot_widget1 = TrainingPlotWidget("Loss History")
+        self.plot_widget2 = TrainingPlotWidget("Confusion Matrix")
         
         # Initialize empty plots
         self.plot_widget1.plot_loss_history(self.plot_widget1)

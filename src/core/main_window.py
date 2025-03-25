@@ -6,8 +6,8 @@ from PyQt6.QtGui import QIcon, QPixmap, QPainter
 from PyQt6.QtCore import Qt, QSize, QTimer, QEvent
 import os
 
-from src.core.model_tab import TabWidget
-from src.core.classification_tab import ImageClassification
+from src.core.model_tab import ModelTab
+from src.core.classification_tab import ClassificationTab
 from src.models.simple_cnn_model import SimpleCnnModel
 from src.models.resnet_model import ResNetModel
 from src.models.efficientnet_model import EfficientNetModel
@@ -237,10 +237,10 @@ class MainWindow(QMainWindow):
         # Create model settings (first page - tab widget)
         self.tab_widget = QTabWidget()
         self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  
-        self.simple_cnn_tab = TabWidget(model_class=SimpleCnnModel)
-        self.resnet_tab = TabWidget(model_class=ResNetModel)
-        self.efficientnet_tab = TabWidget(model_class=EfficientNetModel)
-        self.vgg16_tab = TabWidget(model_class=VGG16Model)
+        self.simple_cnn_tab = ModelTab(model_class=SimpleCnnModel)
+        self.resnet_tab = ModelTab(model_class=ResNetModel)
+        self.efficientnet_tab = ModelTab(model_class=EfficientNetModel)
+        self.vgg16_tab = ModelTab(model_class=VGG16Model)
         
         self.tab_widget.addTab(self.simple_cnn_tab, "Simple CNN")
         self.tab_widget.addTab(self.resnet_tab, "ResNet")
@@ -248,7 +248,7 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.vgg16_tab, "VGG16")
         
         # Create image classification (second page)
-        self.image_classification_widget = ImageClassification()
+        self.image_classification_widget = ClassificationTab()
         self.image_classification_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         # Create settings page (third page)

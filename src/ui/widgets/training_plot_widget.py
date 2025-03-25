@@ -7,7 +7,7 @@ import numpy as np
 from src.utils.custom_canvas import ScrollableFigureCanvas
 
 
-class PlotWidget(QWidget):
+class TrainingPlotWidget(QWidget):
 
     def __init__(self, title, parent=None):
         super().__init__(parent)
@@ -83,4 +83,4 @@ class PlotWidget(QWidget):
                 ax.plot(x, val_loss_history, 'r-', label='Validation Loss')
             ax.legend()
             
-        plot_widget.canvas.draw()
+        plot_widget.canvas.draw() 

@@ -8,7 +8,7 @@ from src.ui.widgets.results_widget import ResultsWidget
 from src.ui.widgets.plot_probability_widget import PlotProbabilityWidget
 
 
-class ImageClassification(QWidget):
+class ClassificationTab(QWidget):
     image_loaded = pyqtSignal(str, int)  
     classify_clicked = pyqtSignal()  
 
