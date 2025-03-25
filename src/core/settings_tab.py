@@ -24,7 +24,6 @@ class SettingsTab(QWidget):
         buttons_layout = QGridLayout()
         buttons_layout.setSpacing(20)
 
-        # Path to assets folder
         project_root = self._return_project_root_folder()
         themes_dir = os.path.join(project_root, "assets/themes")
         
@@ -34,7 +33,10 @@ class SettingsTab(QWidget):
         self.light_button.setCheckable(True)
         self.light_button.setFixedSize(200, 130)
         
-        # Set light theme preview image
+        light_label = QLabel("Light")
+        light_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        light_label.setObjectName("style-button-label")
+
         light_preview_path = os.path.join(themes_dir, "light-theme-preview.png")
         if os.path.exists(light_preview_path):
             light_preview = QPixmap(light_preview_path)
@@ -46,8 +48,11 @@ class SettingsTab(QWidget):
         self.dark_button.setObjectName("dark-style-button")
         self.dark_button.setCheckable(True)
         self.dark_button.setFixedSize(200, 130)
+
+        dark_label = QLabel("Dark")
+        dark_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        dark_label.setObjectName("style-button-label")
         
-        # Set dark theme preview image
         dark_preview_path = os.path.join(themes_dir, "dark-theme-preview.png")
         if os.path.exists(dark_preview_path):
             dark_preview = QPixmap(dark_preview_path)
@@ -59,15 +64,6 @@ class SettingsTab(QWidget):
             self.light_button.setChecked(True)
         else:
             self.dark_button.setChecked(True)
-        
-        # Add labels under the buttons
-        light_label = QLabel("Light")
-        light_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        light_label.setObjectName("style-button-label")
-        
-        dark_label = QLabel("Dark")
-        dark_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        dark_label.setObjectName("style-button-label")
         
         # Add buttons and labels to the grid layout
         buttons_layout.addWidget(self.light_button, 0, 0, Qt.AlignmentFlag.AlignCenter)

@@ -196,7 +196,6 @@ class MainWindow(QMainWindow):
         self.sidebar = self._create_sidebar()
         self.sidebar_scroll.setWidget(self.sidebar)
         
-        # Set fixed minimum width to start
         self.sidebar_scroll.setMinimumWidth(self.MIN_SIDEBAR_WIDTH)
         self.sidebar_scroll.setMaximumWidth(self.MIN_SIDEBAR_WIDTH)
         
@@ -214,7 +213,7 @@ class MainWindow(QMainWindow):
         # Create stacked widget for switching between settings and classification
         self.content_stack = QStackedWidget()
         
-        # Create model settings (first page - tab widget)
+        # Create model settings (first page)
         self.tab_widget = QTabWidget()
         self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  
         self.simple_cnn_tab = ModelTab(model_class=SimpleCnnModel)
@@ -236,6 +235,7 @@ class MainWindow(QMainWindow):
         self.settings_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.settings_widget.style_changed.connect(self._update_sidebar_icons)
 
+        # Add widgets to the content stack
         self.content_stack.addWidget(self.tab_widget)
         self.content_stack.addWidget(self.image_classification_widget)
         self.content_stack.addWidget(self.settings_widget) 
@@ -249,11 +249,9 @@ class MainWindow(QMainWindow):
         content_layout.addWidget(content_scroll, 1)
         content_layout.addWidget(self.status_bar, 0)
         
-        # Add widgets to main layout
         self.main_layout.addWidget(self.sidebar_scroll, 1)  
         self.main_layout.addWidget(content_container, 5)  
         
-        # Signals
         self.image_classification_widget.classify_clicked.connect(self._classify_all) 
         self.image_classification_widget.image_loaded.connect(self.update_status_bar) 
         self._connect_tab_status_signals()
