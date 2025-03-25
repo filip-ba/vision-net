@@ -1,13 +1,13 @@
-from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget,
-                             QSizePolicy, QSpacerItem, QStatusBar, QFrame,
-                             QHBoxLayout, QStackedWidget, QPushButton, QLabel,
-                             QScrollArea, QGroupBox, QGridLayout)
+from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget, QSizePolicy, 
+                             QSpacerItem, QStatusBar, QFrame, QHBoxLayout, QStackedWidget, 
+                             QPushButton, QLabel, QScrollArea)
 from PyQt6.QtGui import QIcon, QPixmap, QPainter
 from PyQt6.QtCore import Qt, QSize, QTimer, QEvent
 import os
 
 from src.core.model_tab import ModelTab
 from src.core.classification_tab import ClassificationTab
+from src.core.settings_tab import SettingsTab
 from src.models.simple_cnn_model import SimpleCnnModel
 from src.models.resnet_model import ResNetModel
 from src.models.efficientnet_model import EfficientNetModel
@@ -33,7 +33,7 @@ class MainWindow(QMainWindow):
 
     def _connect_tab_status_signals(self):
         """Connect signals from each tab to the main status bar"""
-        tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
+        tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab, self.settings_widget]
         for tab in tabs:
             tab.status_message.connect(self.update_status_bar)
 
@@ -163,26 +163,6 @@ class MainWindow(QMainWindow):
             self.sidebar_scroll.setMinimumWidth(sidebar_width)
             self.sidebar_scroll.setMaximumWidth(sidebar_width)
 
-    def _on_light_style_clicked(self):
-        if not self.light_button.isChecked():
-            self.light_button.setChecked(True)
-            return
-            
-        self.dark_button.setChecked(False)
-        self.style_manager.apply_style(self.style_manager.STYLE_LIGHT)
-        self._update_sidebar_icons()
-        self.update_status_bar("Light theme applied")
-
-    def _on_dark_style_clicked(self):
-        if not self.dark_button.isChecked():
-            self.dark_button.setChecked(True)
-            return
-            
-        self.light_button.setChecked(False)
-        self.style_manager.apply_style(self.style_manager.STYLE_DARK)
-        self._update_sidebar_icons()
-        self.update_status_bar("Dark theme applied")
-
     def eventFilter(self, obj, event):
         """Handle window resize events with event filter"""   
         if obj is self and event.type() == QEvent.Type.Resize:
@@ -252,8 +232,9 @@ class MainWindow(QMainWindow):
         self.image_classification_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         # Create settings page (third page)
-        self.settings_widget = self._create_settings_page()
+        self.settings_widget = SettingsTab(self.style_manager)
         self.settings_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.settings_widget.style_changed.connect(self._update_sidebar_icons)
 
         self.content_stack.addWidget(self.tab_widget)
         self.content_stack.addWidget(self.image_classification_widget)
@@ -279,81 +260,6 @@ class MainWindow(QMainWindow):
         
         # Update sidebar icons based on current style
         self._update_sidebar_icons()
-
-    def _create_settings_page(self):
-        """Create the settings page"""
-        settings_widget = QWidget()
-        settings_layout = QVBoxLayout(settings_widget)
-        
-        style_group = QGroupBox("Style")
-        style_group.setObjectName("style-group")
-        style_layout = QVBoxLayout(style_group)
-        
-        buttons_layout = QGridLayout()
-        buttons_layout.setSpacing(20)
-
-        # Path to assets folder
-        project_root = self._return_project_root_folder()
-        themes_dir = os.path.join(project_root, "assets/themes")
-        
-        # Light theme button
-        self.light_button = QPushButton()
-        self.light_button.setObjectName("light-style-button")
-        self.light_button.setCheckable(True)
-        self.light_button.setFixedSize(200, 130)
-        
-        # Set light theme preview image
-        light_preview_path = os.path.join(themes_dir, "light-theme-preview.png")
-        if os.path.exists(light_preview_path):
-            light_preview = QPixmap(light_preview_path)
-            self.light_button.setIcon(QIcon(light_preview))
-            self.light_button.setIconSize(QSize(180, 120))
-        
-        # Dark theme button
-        self.dark_button = QPushButton()
-        self.dark_button.setObjectName("dark-style-button")
-        self.dark_button.setCheckable(True)
-        self.dark_button.setFixedSize(200, 130)
-        
-        # Set dark theme preview image
-        dark_preview_path = os.path.join(themes_dir, "dark-theme-preview.png")
-        if os.path.exists(dark_preview_path):
-            dark_preview = QPixmap(dark_preview_path)
-            self.dark_button.setIcon(QIcon(dark_preview))
-            self.dark_button.setIconSize(QSize(180, 120))
-        
-        # Set the initially checked button based on current style
-        if self.style_manager.get_current_style() == self.style_manager.STYLE_LIGHT:
-            self.light_button.setChecked(True)
-        else:
-            self.dark_button.setChecked(True)
-        
-        # Add labels under the buttons
-        light_label = QLabel("Light")
-        light_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        light_label.setObjectName("style-button-label")
-        
-        dark_label = QLabel("Dark")
-        dark_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        dark_label.setObjectName("style-button-label")
-        
-        # Add buttons and labels to the grid layout
-        buttons_layout.addWidget(self.light_button, 0, 0, Qt.AlignmentFlag.AlignCenter)
-        buttons_layout.addWidget(light_label, 1, 0, Qt.AlignmentFlag.AlignCenter)
-        buttons_layout.addWidget(self.dark_button, 0, 1, Qt.AlignmentFlag.AlignCenter) 
-        buttons_layout.addWidget(dark_label, 1, 1, Qt.AlignmentFlag.AlignCenter)
-        
-        # Connect button signals
-        self.light_button.clicked.connect(self._on_light_style_clicked)
-        self.dark_button.clicked.connect(self._on_dark_style_clicked)
-        
-        style_layout.addLayout(buttons_layout)
-        settings_layout.addWidget(style_group)
-        
-        # Add a spacer to push everything to the top
-        settings_layout.addStretch()
-        
-        return settings_widget
 
     def _create_sidebar(self):
         sidebar = QWidget()
