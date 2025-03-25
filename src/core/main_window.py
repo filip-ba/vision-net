@@ -19,19 +19,178 @@ class MainWindow(QMainWindow):
     def __init__(self, style_manager):
         super().__init__()
         
-        # Store the style manager
         self.style_manager = style_manager
         
-        # Add responsive sidebar settings
+        # Sidebar width settings
         self.MIN_SIDEBAR_WIDTH = 190
         self.MAX_SIDEBAR_WIDTH = 260
         self.SIDEBAR_HIDE_THRESHOLD = 800
         
-        # Install event filter for window resize
+        # Event filter for window resize
         self.installEventFilter(self)
         
         self._create_ui()
+
+    def _connect_tab_status_signals(self):
+        """Connecting signals from each tab to the main status bar"""
+        tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
+        for tab in tabs:
+            tab.status_message.connect(self.update_status_bar)
+
+    def update_status_bar(self, message, timeout=8000):
+        self.status_bar.showMessage(message, timeout)
+             
+    def _return_project_root_folder(self):
+        current_file_path = os.path.abspath(__file__)
+        core_dir  = os.path.dirname(current_file_path)
+        src_dir = os.path.dirname(core_dir)
+        project_root = os.path.dirname(src_dir)
+        return project_root
+
+    def _classify_all(self):
+        """Classification of the loaded image"""
+        if not self.image_classification_widget.current_image_path:
+            self.update_status_bar("No image loaded for classification")
+            return
+            
+        model_map = {
+            self.simple_cnn_tab: {'type': 'simple_cnn', 'name': 'Simple CNN'},
+            self.resnet_tab: {'type': 'resnet', 'name': 'ResNet'},
+            self.efficientnet_tab: {'type': 'efficientnet', 'name': 'EfficientNet'},
+            self.vgg16_tab: {'type': 'vgg16', 'name': 'VGG16'}
+        }
         
+        results = []
+        for tab, model_info in model_map.items():
+            if tab.model_loaded:
+                try:
+                    # Get image prediction
+                    result = tab.model.predict_image(self.image_classification_widget.current_image_path)
+                    predicted_class = result['class']
+                    probabilities = result['probabilities']
+                    
+                    self.image_classification_widget.update_result(model_info['type'], predicted_class)
+                    self.image_classification_widget.update_plot(model_info['type'], tab.model.classes, probabilities)
+                    
+                    results.append(f"{model_info['name']}: {predicted_class}")
+
+                    self.update_status_bar("Classification complete")
+                except Exception as e:
+                    self.image_classification_widget.update_result(model_info['type'], "Error")
+                    print(f"Error in {model_info['name']} classification: {str(e)}")
+                    self.update_status_bar("No models available for classification")
+            else:
+                self.image_classification_widget.update_result(model_info['type'], "No model")
+
+    def _switch_page(self, index, clicked_button):
+        """Switch between sidebar pages"""
+        self.content_stack.setCurrentIndex(index)
+        
+        # Update button state - find all buttons and uncheck them except the clicked one
+        for i in range(self.sidebar.layout().count()):
+            item = self.sidebar.layout().itemAt(i)
+            if item and item.widget() and isinstance(item.widget(), QPushButton):
+                item.widget().setChecked(item.widget() == clicked_button)
+    
+    def _update_sidebar_icons(self):
+        """Update sidebar icons based on current theme"""
+
+        project_root = self._return_project_root_folder()
+        icons_dir = os.path.join(project_root, "assets/icons")
+
+        theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
+        
+        for i in range(self.sidebar.layout().count()):
+            item = self.sidebar.layout().itemAt(i)
+            if item and item.widget() and isinstance(item.widget(), QPushButton):
+                button = item.widget()
+                button_text = button.text()
+                
+                icon_path = None
+                if button_text == "Models":
+                    icon_path = os.path.join(icons_dir, f"model-{theme_suffix}.png")
+                elif button_text == "Classification":
+                    icon_path = os.path.join(icons_dir, f"classification-{theme_suffix}.png")
+                elif button_text == "Settings":
+                    icon_path = os.path.join(icons_dir, f"settings-{theme_suffix}.png")
+                if icon_path and os.path.exists(icon_path):
+
+                    # Create composite icon with an empty space
+                    original_icon = QPixmap(icon_path)
+                
+                    combined = QPixmap(19 + 9, 19)  # 19px icon + 9px space
+                    combined.fill(Qt.GlobalColor.transparent)
+                    
+                    painter = QPainter(combined)
+                    painter.drawPixmap(0, 0, original_icon.scaled(19, 19, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                    painter.end()
+                    
+                    button.setIcon(QIcon(combined))
+
+    def _adjust_sidebar_width(self):
+        """Adjust sidebar width based on window width"""
+        window_width = self.width()
+        
+        # Hide sidebar completely if window is too small
+        if window_width < self.SIDEBAR_HIDE_THRESHOLD:
+            self.sidebar_scroll.setVisible(False)
+            
+            # Adjusting the layout to use the full width of the content
+            if self.main_layout.indexOf(self.sidebar_scroll) != -1:
+                # Temporarily disconnect the sidebar from the layout
+                self.main_layout.removeWidget(self.sidebar_scroll)
+        else:
+            # Check if the sidebar is visible, if not, add it back
+            if not self.sidebar_scroll.isVisible():
+                self.sidebar_scroll.setVisible(True)
+                
+                # Add the sidebar back to the layout if it is not there
+                if self.main_layout.indexOf(self.sidebar_scroll) == -1:
+                    content_widget = self.main_layout.itemAt(0).widget()
+                    self.main_layout.removeWidget(content_widget)
+                    self.main_layout.addWidget(self.sidebar_scroll, 1)
+                    self.main_layout.addWidget(content_widget, 5)
+            
+            # Calculate the proportional width within the min/max limits
+            # Window width from 800 to 1600 corresponds to sidebar width from 300 to 400
+            proportion = min(1.0, (window_width - self.SIDEBAR_HIDE_THRESHOLD) / 800)
+            sidebar_width = int(self.MIN_SIDEBAR_WIDTH + proportion * 
+                               (self.MAX_SIDEBAR_WIDTH - self.MIN_SIDEBAR_WIDTH))
+            
+            # Ensures that the width is within the limits
+            sidebar_width = max(self.MIN_SIDEBAR_WIDTH, min(self.MAX_SIDEBAR_WIDTH, sidebar_width))
+            
+            self.sidebar_scroll.setMinimumWidth(sidebar_width)
+            self.sidebar_scroll.setMaximumWidth(sidebar_width)
+
+    def _on_light_style_clicked(self):
+        if not self.light_button.isChecked():
+            self.light_button.setChecked(True)
+            return
+            
+        self.dark_button.setChecked(False)
+        self.style_manager.apply_style(self.style_manager.STYLE_LIGHT)
+        self._update_sidebar_icons()
+        self.update_status_bar("Light theme applied")
+
+    def _on_dark_style_clicked(self):
+        if not self.dark_button.isChecked():
+            self.dark_button.setChecked(True)
+            return
+            
+        self.light_button.setChecked(False)
+        self.style_manager.apply_style(self.style_manager.STYLE_DARK)
+        self._update_sidebar_icons()
+        self.update_status_bar("Dark theme applied")
+
+    def eventFilter(self, obj, event):
+        """Event filter to handle window resize events"""   
+        if obj is self and event.type() == QEvent.Type.Resize:
+            # Delay the adjustment slightly to avoid constant resizing during drag
+            QTimer.singleShot(10, self._adjust_sidebar_width)
+            
+        return super().eventFilter(obj, event)
+    
     def _create_ui(self):
         project_root = self._return_project_root_folder()
         icons_dir = os.path.join(project_root, "assets/icons")
@@ -295,175 +454,3 @@ class MainWindow(QMainWindow):
         button.clicked.connect(lambda: self._switch_page(page_index, button))
         
         return button
-
-    def _switch_page(self, index, clicked_button):
-        """Switch between model controls and image classification pages"""
-        self.content_stack.setCurrentIndex(index)
-        
-        # Update button state - find all buttons and uncheck them except the clicked one
-        for i in range(self.sidebar.layout().count()):
-            item = self.sidebar.layout().itemAt(i)
-            if item and item.widget() and isinstance(item.widget(), QPushButton):
-                item.widget().setChecked(item.widget() == clicked_button)
-        
-    def _on_light_style_clicked(self):
-        """Handle light style button click"""
-        if not self.light_button.isChecked():
-            self.light_button.setChecked(True)
-            return
-            
-        self.dark_button.setChecked(False)
-        self.style_manager.apply_style(self.style_manager.STYLE_LIGHT)
-        self._update_sidebar_icons()
-        self.update_status_bar("Light theme applied")
-
-    def _on_dark_style_clicked(self):
-        """Handle dark style button click"""
-        if not self.dark_button.isChecked():
-            self.dark_button.setChecked(True)
-            return
-            
-        self.light_button.setChecked(False)
-        self.style_manager.apply_style(self.style_manager.STYLE_DARK)
-        self._update_sidebar_icons()
-        self.update_status_bar("Dark theme applied")
-    
-    def _update_sidebar_icons(self):
-        """Update sidebar icons based on current theme"""
-
-        # Path to assets folder
-        project_root = self._return_project_root_folder()
-        icons_dir = os.path.join(project_root, "assets/icons")
-
-        # Get the current theme suffix
-        theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
-        
-        # Update icons for all sidebar buttons
-        for i in range(self.sidebar.layout().count()):
-            item = self.sidebar.layout().itemAt(i)
-            if item and item.widget() and isinstance(item.widget(), QPushButton):
-                button = item.widget()
-                button_text = button.text()
-                
-                # Set the appropriate icon based on button text and theme
-                icon_path = None
-                if button_text == "Models":
-                    icon_path = os.path.join(icons_dir, f"model-{theme_suffix}.png")
-                elif button_text == "Classification":
-                    icon_path = os.path.join(icons_dir, f"classification-{theme_suffix}.png")
-                elif button_text == "Settings":
-                    icon_path = os.path.join(icons_dir, f"settings-{theme_suffix}.png")
-                if icon_path and os.path.exists(icon_path):
-                    # Create composite icon with an empty space
-                    original_icon = QPixmap(icon_path)
-                
-                    combined = QPixmap(19 + 9, 19)  # 19px icon + 9px space
-                    combined.fill(Qt.GlobalColor.transparent)
-                    
-                    painter = QPainter(combined)
-                    painter.drawPixmap(0, 0, original_icon.scaled(19, 19, Qt.AspectRatioMode.KeepAspectRatio, 
-                                                                Qt.TransformationMode.SmoothTransformation))
-                    painter.end()
-                    
-                    button.setIcon(QIcon(combined))
-
-    def _return_project_root_folder(self):
-        current_file_path = os.path.abspath(__file__)
-        core_dir  = os.path.dirname(current_file_path)
-        src_dir = os.path.dirname(core_dir)
-        project_root = os.path.dirname(src_dir)
-        return project_root
-
-    def _connect_tab_status_signals(self):
-        """Connecting signals from each tab to the main status bar"""
-        tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
-        for tab in tabs:
-            tab.status_message.connect(self.update_status_bar)
-
-    def update_status_bar(self, message, timeout=8000):
-        self.status_bar.showMessage(message, timeout)
-             
-    def _classify_all(self):
-        """Classification of the loaded image using all loaded models"""
-        if not self.image_classification_widget.current_image_path:
-            self.update_status_bar("No image loaded for classification")
-            return
-            
-        model_map = {
-            self.simple_cnn_tab: {'type': 'simple_cnn', 'name': 'Simple CNN'},
-            self.resnet_tab: {'type': 'resnet', 'name': 'ResNet'},
-            self.efficientnet_tab: {'type': 'efficientnet', 'name': 'EfficientNet'},
-            self.vgg16_tab: {'type': 'vgg16', 'name': 'VGG16'}
-        }
-        
-        results = []
-        for tab, model_info in model_map.items():
-            if tab.model_loaded:
-                try:
-                    # Get image prediction
-                    result = tab.model.predict_image(self.image_classification_widget.current_image_path)
-                    predicted_class = result['class']
-                    probabilities = result['probabilities']
-                    
-                    # Update result
-                    self.image_classification_widget.update_result(model_info['type'], predicted_class)
-                    
-                    # Update plot
-                    self.image_classification_widget.update_plot(model_info['type'], tab.model.classes, probabilities)
-                    
-                    results.append(f"{model_info['name']}: {predicted_class}")
-
-                    self.update_status_bar("Classification complete")
-                except Exception as e:
-                    self.image_classification_widget.update_result(model_info['type'], "Error")
-                    print(f"Error in {model_info['name']} classification: {str(e)}")
-                    self.update_status_bar("No models available for classification")
-            else:
-                self.image_classification_widget.update_result(model_info['type'], "No model")
-                
-    def eventFilter(self, obj, event):
-        """Event filter to handle window resize events"""
-        
-        if obj is self and event.type() == QEvent.Type.Resize:
-            # Delay the adjustment slightly to avoid constant resizing during drag
-            QTimer.singleShot(10, self._adjust_sidebar_width)
-            
-        return super().eventFilter(obj, event)
-    
-    def _adjust_sidebar_width(self):
-        """Adjust sidebar width based on window width"""
-        window_width = self.width()
-        
-        # Hide sidebar completely if window is too small
-        if window_width < self.SIDEBAR_HIDE_THRESHOLD:
-            self.sidebar_scroll.setVisible(False)
-            
-            # Adjusting the layout to use the full width of the content
-            if self.main_layout.indexOf(self.sidebar_scroll) != -1:
-                # Temporarily disconnect the sidebar from the layout
-                self.main_layout.removeWidget(self.sidebar_scroll)
-        else:
-            # Check if the sidebar is visible, if not, add it back
-            if not self.sidebar_scroll.isVisible():
-                self.sidebar_scroll.setVisible(True)
-                
-                # Add the sidebar back to the layout if it is not there
-                if self.main_layout.indexOf(self.sidebar_scroll) == -1:
-                    content_widget = self.main_layout.itemAt(0).widget()
-                    self.main_layout.removeWidget(content_widget)
-                    self.main_layout.addWidget(self.sidebar_scroll, 1)
-                    self.main_layout.addWidget(content_widget, 5)
-            
-            # Calculate the proportional width within the min/max limits
-            # Window width from 800 to 1600 corresponds to sidebar width from 300 to 400
-            proportion = min(1.0, (window_width - self.SIDEBAR_HIDE_THRESHOLD) / 800)
-            sidebar_width = int(self.MIN_SIDEBAR_WIDTH + proportion * 
-                               (self.MAX_SIDEBAR_WIDTH - self.MIN_SIDEBAR_WIDTH))
-            
-            # Ensures that the width is within the limits
-            sidebar_width = max(self.MIN_SIDEBAR_WIDTH, 
-                               min(self.MAX_SIDEBAR_WIDTH, sidebar_width))
-            
-            # Apply the width
-            self.sidebar_scroll.setMinimumWidth(sidebar_width)
-            self.sidebar_scroll.setMaximumWidth(sidebar_width)
