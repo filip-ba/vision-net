@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QFileDialog 
 from PyQt6.QtGui import QPixmap, QImageReader
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal, QTimer
 import os, random
 
 from src.ui.widgets.image_classification_widget import ImageClassificationWidget
@@ -88,6 +88,12 @@ class ClassificationTab(QWidget):
     def switch_plot(self, model_type):
         """Switch to the specified plot"""
         self.plot_widget.switch_plot(model_type)
+
+    def showEvent(self, event):
+        """Scale the image in image display properly after the start of the application"""
+        super().showEvent(event)
+        # Scale the image after the widget is visible and has proper dimensions
+        QTimer.singleShot(50, self.image_widget.scale_image)
 
     def _create_ui(self):
         main_layout = QVBoxLayout()
