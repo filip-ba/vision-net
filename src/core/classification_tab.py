@@ -21,7 +21,6 @@ class ImageClassification(QWidget):
         self.current_image_path = None
         self.active_plot_button = None
         
-        # Model names mapping
         self.model_names = {
             'simple_cnn': 'Simple CNN',
             'resnet': 'ResNet',
@@ -30,6 +29,159 @@ class ImageClassification(QWidget):
         }
         
         self._create_ui()    
+        
+    def switch_plot(self, model_type):
+        """Switch to the specified plot and update button states"""
+        self.plot_stack.setCurrentWidget(self.plot_widgets[model_type]['canvas'])
+        
+        # Update title visibility
+        for plot_type, title in self.plot_titles.items():
+            title.setVisible(plot_type == model_type)
+        
+        # Update button states
+        for btn_type, btn in self.plot_buttons.items():
+            if btn_type == model_type:
+                btn.setChecked(True)
+                self.active_plot_button = btn
+            else:
+                btn.setChecked(False)
+        
+    def init_plot(self, model_type=None):
+        """Initialize empty probability plot"""
+        if model_type:
+            models = [model_type]
+        else:
+            models = self.plot_widgets.keys()
+            
+        for model in models:
+            figure = self.plot_widgets[model]['figure']
+            figure.clear()
+            ax = figure.add_subplot(111)
+            ax.set_title('')
+            ax.set_xlabel('')
+            ax.set_ylabel('Probability', fontsize=9, labelpad=15)
+            ax.tick_params(axis='both', labelsize=8)
+            ax.set_ylim(0, 1)
+            figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)
+            figure.tight_layout()
+
+            self.plot_widgets[model]['canvas'].draw()
+
+    def update_plot(self, model_type, classes, probabilities):
+        """Update probability plot for a specific model"""
+        if model_type not in self.plot_widgets:
+            return
+            
+        figure = self.plot_widgets[model_type]['figure']
+        figure.clear()
+        ax = figure.add_subplot(111)
+        bars = ax.bar(classes, probabilities)
+
+        # Add value labels on bars
+        for bar in bars:
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height,
+                f'{height:.0%}',
+                ha="center", va="bottom")
+
+        ax.set_title('')
+        ax.set_xlabel('')
+        ax.set_ylabel('Probability', fontsize=9, labelpad=15)
+        ax.tick_params(axis='both', labelsize=9)
+        ax.set_ylim(0, 1.1)
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+        figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)
+        figure.tight_layout()
+
+        self.plot_widgets[model_type]['canvas'].draw()
+
+    def load_random_test_image(self):
+        dataset_path = "./dataset/fruit_dataset/test"
+
+        if os.path.exists(dataset_path):
+            class_dirs = [d for d in os.listdir(dataset_path) 
+                        if os.path.isdir(os.path.join(dataset_path, d))]
+            
+            if class_dirs:
+                random_class = random.choice(class_dirs)
+                class_path = os.path.join(dataset_path, random_class)
+                
+                images = [f for f in os.listdir(class_path) 
+                         if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+                
+                if images:
+                    random_image = random.choice(images)
+                    image_path = os.path.join(class_path, random_image)
+                    
+                    self.current_image_path = image_path
+                    self.update_image_display(image_path)
+                    return
+                    
+        self.image_display.setText("No image")
+        self.current_image_path = None
+            
+    def load_image(self):
+        supported_formats = [f"*.{fmt.data().decode()}" for fmt in QImageReader.supportedImageFormats()]
+        filter_string = "Image Files ({})".format(" ".join(supported_formats))
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select Image",
+            "",
+            filter_string
+        )
+        
+        if file_path:
+            pixmap = QPixmap(file_path)
+            if not pixmap.isNull():
+                self.current_image_path = file_path
+                self.update_image_display(file_path)
+                self.image_loaded.emit("Image loaded", 8000)
+            else:
+                self.image_display.setText("Failed to load image")
+                self.image_loaded.emit("Failed to load image", 8000)
+                self.current_image_path = None
+                
+    def update_image_display(self, image_path):
+        """Update the image display with the specified image"""
+        if not image_path:
+            return
+            
+        pixmap = QPixmap(image_path)
+        if pixmap.isNull():
+            return
+            
+        self.original_pixmap = pixmap
+        self.scale_image()
+        
+    def scale_image(self):
+        """Scale image to fit display while preserving aspect ratio"""
+        if not hasattr(self, 'original_pixmap') or self.original_pixmap.isNull():
+            return
+            
+        display_size = self.image_display.size()
+        scaled_pixmap = self.original_pixmap.scaled(
+            display_size.width(), 
+            display_size.height(),
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        self.image_display.setPixmap(scaled_pixmap)
+        
+    def resizeEvent(self, event):
+        """Scale the image in image display on window resize event"""
+        super().resizeEvent(event)
+        self.scale_image()
+                
+    def update_result(self, model_type, result):
+        """Update the classification result for a specific model"""
+        if model_type in self.result_labels:
+            self.result_labels[model_type].setText(result)
+
+    def showEvent(self, event):
+        """Scale the image in image display properly after the start of the application"""
+        super().showEvent(event)
+        # Scale the image after the widget is visible and has proper dimensions
+        QTimer.singleShot(50, self.scale_image)
 
     def _create_ui(self):
         main_layout = QVBoxLayout()
@@ -216,156 +368,3 @@ class ImageClassification(QWidget):
         bottom_layout.addWidget(self.plot_frame)
         
         return bottom_layout
-        
-    def switch_plot(self, model_type):
-        """Switch to the specified plot and update button states"""
-        self.plot_stack.setCurrentWidget(self.plot_widgets[model_type]['canvas'])
-        
-        # Update title visibility
-        for plot_type, title in self.plot_titles.items():
-            title.setVisible(plot_type == model_type)
-        
-        # Update button states
-        for btn_type, btn in self.plot_buttons.items():
-            if btn_type == model_type:
-                btn.setChecked(True)
-                self.active_plot_button = btn
-            else:
-                btn.setChecked(False)
-        
-    def init_plot(self, model_type=None):
-        """Initialize empty probability plot"""
-        if model_type:
-            models = [model_type]
-        else:
-            models = self.plot_widgets.keys()
-            
-        for model in models:
-            figure = self.plot_widgets[model]['figure']
-            figure.clear()
-            ax = figure.add_subplot(111)
-            ax.set_title('')
-            ax.set_xlabel('')
-            ax.set_ylabel('Probability', fontsize=9, labelpad=15)
-            ax.tick_params(axis='both', labelsize=8)
-            ax.set_ylim(0, 1)
-            figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)
-            figure.tight_layout()
-
-            self.plot_widgets[model]['canvas'].draw()
-
-    def update_plot(self, model_type, classes, probabilities):
-        """Update probability plot for a specific model"""
-        if model_type not in self.plot_widgets:
-            return
-            
-        figure = self.plot_widgets[model_type]['figure']
-        figure.clear()
-        ax = figure.add_subplot(111)
-        bars = ax.bar(classes, probabilities)
-
-        # Add value labels on bars
-        for bar in bars:
-            height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height,
-                f'{height:.0%}',
-                ha="center", va="bottom")
-
-        ax.set_title('')
-        ax.set_xlabel('')
-        ax.set_ylabel('Probability', fontsize=9, labelpad=15)
-        ax.tick_params(axis='both', labelsize=9)
-        ax.set_ylim(0, 1.1)
-        plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
-        figure.subplots_adjust(left=0.15, right=0.95, bottom=0.25, top=0.9)
-        figure.tight_layout()
-
-        self.plot_widgets[model_type]['canvas'].draw()
-
-    def load_random_test_image(self):
-        dataset_path = "./dataset/fruit_dataset/test"
-
-        if os.path.exists(dataset_path):
-            class_dirs = [d for d in os.listdir(dataset_path) 
-                        if os.path.isdir(os.path.join(dataset_path, d))]
-            
-            if class_dirs:
-                random_class = random.choice(class_dirs)
-                class_path = os.path.join(dataset_path, random_class)
-                
-                images = [f for f in os.listdir(class_path) 
-                         if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-                
-                if images:
-                    random_image = random.choice(images)
-                    image_path = os.path.join(class_path, random_image)
-                    
-                    self.current_image_path = image_path
-                    self.update_image_display(image_path)
-                    return
-                    
-        self.image_display.setText("No image")
-        self.current_image_path = None
-            
-    def load_image(self):
-        supported_formats = [f"*.{fmt.data().decode()}" for fmt in QImageReader.supportedImageFormats()]
-        filter_string = "Image Files ({})".format(" ".join(supported_formats))
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Select Image",
-            "",
-            filter_string
-        )
-        
-        if file_path:
-            pixmap = QPixmap(file_path)
-            if not pixmap.isNull():
-                self.current_image_path = file_path
-                self.update_image_display(file_path)
-                self.image_loaded.emit("Image loaded", 8000)
-            else:
-                self.image_display.setText("Failed to load image")
-                self.image_loaded.emit("Failed to load image", 8000)
-                self.current_image_path = None
-                
-    def update_image_display(self, image_path):
-        """Update the image display with the specified image"""
-        if not image_path:
-            return
-            
-        pixmap = QPixmap(image_path)
-        if pixmap.isNull():
-            return
-            
-        self.original_pixmap = pixmap
-        self.scale_image()
-        
-    def scale_image(self):
-        """Scale image to fit display while preserving aspect ratio"""
-        if not hasattr(self, 'original_pixmap') or self.original_pixmap.isNull():
-            return
-            
-        display_size = self.image_display.size()
-        scaled_pixmap = self.original_pixmap.scaled(
-            display_size.width(), 
-            display_size.height(),
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation
-        )
-        self.image_display.setPixmap(scaled_pixmap)
-        
-    def resizeEvent(self, event):
-        """Scale the image in image display on window resize event"""
-        super().resizeEvent(event)
-        self.scale_image()
-                
-    def update_result(self, model_type, result):
-        """Update the classification result for a specific model"""
-        if model_type in self.result_labels:
-            self.result_labels[model_type].setText(result)
-
-    def showEvent(self, event):
-        """Scale the image in image display properly after the start of the application"""
-        super().showEvent(event)
-        # Scale the image after the widget is visible and has proper dimensions
-        QTimer.singleShot(50, self.scale_image)

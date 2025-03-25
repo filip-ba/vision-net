@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
         self._create_ui()
 
     def _connect_tab_status_signals(self):
-        """Connecting signals from each tab to the main status bar"""
+        """Connect signals from each tab to the main status bar"""
         tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
         for tab in tabs:
             tab.status_message.connect(self.update_status_bar)
@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         return project_root
 
     def _classify_all(self):
-        """Classification of the loaded image"""
+        """Classify the loaded image"""
         if not self.image_classification_widget.current_image_path:
             self.update_status_bar("No image loaded for classification")
             return
@@ -184,7 +184,7 @@ class MainWindow(QMainWindow):
         self.update_status_bar("Dark theme applied")
 
     def eventFilter(self, obj, event):
-        """Event filter to handle window resize events"""   
+        """Handle window resize events with event filter"""   
         if obj is self and event.type() == QEvent.Type.Resize:
             # Delay the adjustment slightly to avoid constant resizing during drag
             QTimer.singleShot(10, self._adjust_sidebar_width)
@@ -281,7 +281,7 @@ class MainWindow(QMainWindow):
         self._update_sidebar_icons()
 
     def _create_settings_page(self):
-        """Create the settings page with style selection options"""
+        """Create the settings page"""
         settings_widget = QWidget()
         settings_layout = QVBoxLayout(settings_widget)
         
