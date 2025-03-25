@@ -74,6 +74,8 @@ class ProgressDialog(QDialog):
         self.setWindowTitle("Training...")
         self.resize(400, 300)
         self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMinimizeButtonHint)
+        # Make dialog non-modal
+        self.setModal(False)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)
@@ -119,7 +121,7 @@ class ProgressDialog(QDialog):
         self.thread.error.connect(self.on_error)
         self.start_time = time.time()
         self.thread.start()
-        self.exec()  
+        self.show()
         return self.training_result, self.testing_result
 
     def update_progress(self, progress, current_loss):
@@ -144,7 +146,7 @@ class ProgressDialog(QDialog):
     def cancel(self):
         if self.thread:
             self.thread.cancel()
-        self.reject()
+        self.close()
 
     def on_training_finished(self, result):
         self.training_result = result
@@ -159,10 +161,10 @@ class ProgressDialog(QDialog):
         self.progress_bar.setMaximum(100)
         self.progress_bar.setValue(100)
         self.time_label.setText("Done!")
-        self.accept()
+        self.close()
 
     def on_error(self, error_message):
         self.training_result = None
         self.testing_result = None
         self.error_message = error_message
-        self.reject()
+        self.close()
