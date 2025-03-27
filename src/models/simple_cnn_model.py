@@ -27,15 +27,17 @@ class SimpleCnnModel(BaseModel):
 
     def initialize_model(self):
         """Initializes the model"""
+        num_classes = len(self.classes) if self.classes is not None else 6
+        
         class Net(nn.Module):
-            def __init__(self):
+            def __init__(self, num_classes):
                 super(Net, self).__init__()
                 self.conv1 = nn.Conv2d(3, 6, 5)
                 self.pool = nn.MaxPool2d(2, 2)
                 self.conv2 = nn.Conv2d(6, 16, 5)
                 self.fc1 = nn.Linear(16 * 5 * 5, 120)
                 self.fc2 = nn.Linear(120, 84)
-                self.fc3 = nn.Linear(84, 5)
+                self.fc3 = nn.Linear(84, num_classes)
 
             def forward(self, x):
                 x = self.pool(F.relu(self.conv1(x)))
@@ -46,5 +48,5 @@ class SimpleCnnModel(BaseModel):
                 x = self.fc3(x)
                 return x
             
-        self.net = Net().to(self.device)
+        self.net = Net(num_classes).to(self.device)
         self.optimizer = optim.SGD(self.net.parameters(), lr=0.001, momentum=0.9)

@@ -35,7 +35,10 @@ class ResNetModel(BaseModel):
 
         # Replace the final fully connected layer
         num_features = self.net.fc.in_features
-        self.net.fc = nn.Linear(num_features, 5)
+        
+        # Determine number of classes dynamically if dataset is loaded
+        num_classes = len(self.classes) if self.classes is not None else 6
+        self.net.fc = nn.Linear(num_features, num_classes)
 
         # Move to device
         self.net = self.net.to(self.device)

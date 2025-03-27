@@ -32,7 +32,10 @@ class EfficientNetModel(BaseModel):
             if "features.7" not in name and "classifier" not in name:
                 param.requires_grad = False    
         num_ftrs = self.net.classifier[1].in_features
-        self.net.classifier[1] = nn.Linear(num_ftrs, 5)
+        
+        num_classes = len(self.classes) if self.classes is not None else 6
+        self.net.classifier[1] = nn.Linear(num_ftrs, num_classes)
+        
         self.net = self.net.to(self.device)
         trainable_params = [p for p in self.net.parameters() if p.requires_grad]
         self.optimizer = optim.SGD(trainable_params, lr=0.001, momentum=0.9)
