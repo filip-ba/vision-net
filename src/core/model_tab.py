@@ -109,9 +109,10 @@ class ModelTab(QWidget):
         valloader = self.model.valloader
         testloader = self.model.testloader
         old_classes = self.model.classes 
+        
+        # Create a new model instance
         self.model = self.model_class()
-        self.model.initialize_model()
-
+        
         # Restore dataset if it was loaded
         if dataset_loaded:
             self.model.dataset_loaded = dataset_loaded
@@ -119,6 +120,9 @@ class ModelTab(QWidget):
             self.model.valloader = valloader
             self.model.testloader = testloader
             self.model.classes = old_classes
+            
+        # Initialize the model after setting the classes
+        self.model.initialize_model()
         self.model_loaded = False
 
         # Reset UI elements
@@ -141,8 +145,11 @@ class ModelTab(QWidget):
         """Loads the dataset on startup"""
         try:
             train_size, val_size, test_size = self.model.load_data("./dataset/fruit_dataset")
+            self.status_message.emit(f"Dataset loaded successfully: {len(self.model.classes)} classes detected", 8000)
         except Exception as e:
-            print("--------------------------------------Error loading dataset: {str(e)}. ")
+            error_msg = f"Error loading dataset: {str(e)}"
+            print(f"--------------------------------------{error_msg}")
+            self.status_message.emit(error_msg, 8000)
   
     def _load_default_model(self):
         """Attempts to load the default model on startup"""
@@ -164,9 +171,7 @@ class ModelTab(QWidget):
             self.model_info_widget.set_model_status("No model loaded", "red")
             return
 
-        # Set the group box title and loaded model file name
         self.metrics_group.setTitle(f"{self.model_name} Stats")
-        self.model_info_widget.set_model_file(default_model_path.split("/")[-1]) 
 
         # Attempt to load default model
         try:
@@ -177,6 +182,7 @@ class ModelTab(QWidget):
 
                     # Update UI with loaded data
                     self._update_ui_from_model_data()
+                    self.model_info_widget.set_model_file(default_model_path.split("/")[-1]) 
                     self.model_loaded = True
                     self.model_info_widget.set_model_status("Model loaded successfully", "green")
                     self.save_model_btn.setEnabled(True)
@@ -290,6 +296,16 @@ class ModelTab(QWidget):
         momentum = params['momentum']
 
         try:
+            # Check if dataset is loaded
+            if not self.model.is_data_loaded():
+                self.status_message.emit("Dataset not loaded. Please load the dataset first.", 8000)
+                return
+                
+            # Verify correct class count
+            if self.model.classes is None or len(self.model.classes) <= 0:
+                self.status_message.emit("Error: No classes found in the dataset", 8000)
+                return
+                
             # Model Initialization
             self.model.initialize_model()
 
@@ -298,7 +314,7 @@ class ModelTab(QWidget):
             self.parameters_widget.reset_parameters()
 
             # Update model status
-            self.model_info_widget.set_model_status("No model loaded")
+            self.model_info_widget.set_model_status("Training in progress...", "blue")
             self.model_info_widget.set_model_file("")
 
             # Reset confusion matrix plot
@@ -312,7 +328,8 @@ class ModelTab(QWidget):
                 momentum=momentum
             )
 
-            training_result, testing_result = dialog.start_training(self.model, epochs, learning_rate, momentum)    
+            self.status_message.emit("Training started...", 8000)
+            training_result, testing_result = dialog.start_training(self.model, epochs, learning_rate, momentum)
             
             if training_result is not None:
                 train_loss_history, val_loss_history = training_result
@@ -344,10 +361,12 @@ class ModelTab(QWidget):
                 else:
                     self.status_message.emit("Training completed but testing failed", 8000)
             else:
-                self.status_message.emit("Training canceled, model was reset", 8000)       
+                self.status_message.emit("Training canceled or failed, model was reset", 8000)       
                 self.reset_model()
         except Exception as e:
-            self.status_message.emit(f"Error: {str(e)}", 8000)  
+            error_message = f"Error: {str(e)}"
+            print(f"Training error: {error_message}")
+            self.status_message.emit(error_message, 8000)  
             self.reset_model()
 
     def test_model(self):
