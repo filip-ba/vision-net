@@ -26,7 +26,7 @@ class TrainingThread(QThread):
                     raise InterruptedError("Training canceled by user")
                 self.progress_updated.emit(progress, loss)
 
-            # Start training
+            # Start training 
             result = self.model.train(
                 self.epochs,
                 self.learning_rate,
@@ -40,7 +40,7 @@ class TrainingThread(QThread):
             # Emit signal when training is finished
             self.training_finished.emit(result)
             
-            # Start testing
+            # Start testing automatically after training
             if not self._is_canceled:
                 try:
                     metrics = self.model.test()
@@ -56,11 +56,12 @@ class TrainingThread(QThread):
 
 
 class ProgressDialog(QDialog):
+    complete = pyqtSignal(tuple, dict)  # signals to emit results to the main window (training_result, testing_result)
+    error_occurred = pyqtSignal(str)
 
-    def __init__(self, parent=None, operation_type="Training", epochs=None, 
+    def __init__(self, parent=None, epochs=None, 
                  learning_rate=None, momentum=None):
         super().__init__(parent)
-        self.operation_type = operation_type
         self.start_time = None
         self.thread = None
         self.epochs = epochs
@@ -73,13 +74,18 @@ class ProgressDialog(QDialog):
     def _create_ui(self):
         self.setWindowTitle("Training...")
         self.resize(400, 300)
-        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMinimizeButtonHint)
+        # Set window flags to allow minimization and make it stay on top
+        self.setWindowFlags(Qt.WindowType.Window | 
+                           Qt.WindowType.WindowMinimizeButtonHint | 
+                           Qt.WindowType.WindowTitleHint |
+                           Qt.WindowType.CustomizeWindowHint |
+                           Qt.WindowType.WindowStaysOnTopHint )
 
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(20)
 
-        if self.operation_type == "Training" and all(param is not None for param in 
+        if all(param is not None for param in 
             [self.epochs, self.learning_rate, self.momentum]):
             params_label = QLabel(
                 f"Training Parameters:\n"
@@ -91,7 +97,7 @@ class ProgressDialog(QDialog):
             params_label.setObjectName("training-dialog-parameters")
             layout.addWidget(params_label)
 
-        self.status_label = QLabel(f"{self.operation_type} in progress...")
+        self.status_label = QLabel("Training in progress...")
         self.status_label.setObjectName("dialog-status-label")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.status_label)
@@ -119,8 +125,7 @@ class ProgressDialog(QDialog):
         self.thread.error.connect(self.on_error)
         self.start_time = time.time()
         self.thread.start()
-        self.exec()  
-        return self.training_result, self.testing_result
+        self.show()
 
     def update_progress(self, progress, current_loss):
         """Updates progress bar and time estimate"""
@@ -134,7 +139,7 @@ class ProgressDialog(QDialog):
             minutes = int(remaining_time // 60)
             seconds = int(remaining_time % 60)
             time_str = f"{minutes}m {seconds}s"
-            status_text = f"{self.operation_type} in progress... "
+            status_text = "Training in progress... "
             
             if current_loss is not None:
                 status_text += f"(Loss: {current_loss:.4f})"
@@ -144,25 +149,30 @@ class ProgressDialog(QDialog):
     def cancel(self):
         if self.thread:
             self.thread.cancel()
-        self.reject()
+        self.close()
+        self.error_occurred.emit("Training canceled by user")
 
     def on_training_finished(self, result):
+        """Changes design of the dialog when training is finished and saves the training result"""
         self.training_result = result
         self.status_label.setText("Training completed. Starting testing...")
         self.progress_bar.setValue(0)
-        self.progress_bar.setMaximum(0)  # Switch to indeterminate mode for testing
+        self.progress_bar.setMaximum(0)
         self.time_label.setText("Testing in progress...")
 
-    def on_testing_finished(self, metrics):
+    def on_testing_finished(self, metrics): 
+        """Saves the testing result and emits it with training result to the main window"""
         self.testing_result = metrics
         self.status_label.setText("Testing completed.")
         self.progress_bar.setMaximum(100)
         self.progress_bar.setValue(100)
         self.time_label.setText("Done!")
-        self.accept()
+        self.complete.emit(self.training_result, self.testing_result)
+        self.close()
 
     def on_error(self, error_message):
         self.training_result = None
         self.testing_result = None
         self.error_message = error_message
-        self.reject()
+        self.error_occurred.emit(error_message)
+        self.close()

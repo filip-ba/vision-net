@@ -271,7 +271,6 @@ class ModelTab(QWidget):
                 self.status_message.emit(f"Error saving model: {str(e)}", 8000)
 
     def train_model(self):
-        """Trains the neural network"""
         param_dialog = ParametersDialog(self)
         
         # If we have model parameters, set them in the dialog
@@ -282,10 +281,8 @@ class ModelTab(QWidget):
                 momentum=self.model.training_params['momentum']
             )
         
-        # Show dialog and wait for user response
         result = param_dialog.exec()
         
-        # If user clicked Cancel, do nothing
         if result != QDialog.DialogCode.Accepted:
             return
             
@@ -294,7 +291,7 @@ class ModelTab(QWidget):
         epochs = params['epochs']
         learning_rate = params['learning_rate']
         momentum = params['momentum']
-
+        
         try:
             # Check if dataset is loaded
             if not self.model.is_data_loaded():
@@ -317,80 +314,70 @@ class ModelTab(QWidget):
             self.model_info_widget.set_model_status("Training in progress...", "blue")
             self.model_info_widget.set_model_file("")
 
+            # Reset plots
+            self.plot_widget1.plot_loss_history(self.plot_widget1)
             # Reset confusion matrix plot
             self.plot_widget2.plot_confusion_matrix(self.plot_widget2)  
 
             dialog = ProgressDialog(
                 self, 
-                "Training",
                 epochs=epochs,
                 learning_rate=learning_rate,
                 momentum=momentum
             )
+            
+            # Connect signals for asynchronous results
+            dialog.complete.connect(self.handle_training_and_testing_complete)
+            dialog.error_occurred.connect(self.handle_training_and_testing_error)
 
             self.status_message.emit("Training started...", 8000)
-            training_result, testing_result = dialog.start_training(self.model, epochs, learning_rate, momentum)
+            dialog.start_training(self.model, epochs, learning_rate, momentum)
             
-            if training_result is not None:
-                train_loss_history, val_loss_history = training_result
-
-                # Plotting loss history
-                self.plot_widget1.plot_loss_history(
-                    self.plot_widget1, 
-                    epochs, 
-                    train_loss_history, 
-                    val_loss_history
-                )
-
-                self.model_loaded = True
-                self.save_model_btn.setEnabled(True)
-                self.clear_model_btn.setEnabled(True)
-                self.model_info_widget.set_model_status("Model trained successfully", "green")
-                self.parameters_widget.update_parameters(self.model.training_params)
-                
-                # Update UI with testing results
-                if testing_result is not None:
-                    self.metrics_widget.update_metrics(testing_result)
-                    
-                    # Confusion matrix
-                    conf_mat = testing_result['confusion_matrix']
-                    classes = self.model.classes
-                    self.plot_widget2.plot_confusion_matrix(self.plot_widget2, conf_mat, classes)
-                    
-                    self.status_message.emit("Training and testing completed", 8000)
-                else:
-                    self.status_message.emit("Training completed but testing failed", 8000)
-            else:
-                self.status_message.emit("Training canceled or failed, model was reset", 8000)       
-                self.reset_model()
         except Exception as e:
             error_message = f"Error: {str(e)}"
             print(f"Training error: {error_message}")
             self.status_message.emit(error_message, 8000)  
             self.reset_model()
+            
+    def handle_training_and_testing_complete(self, training_result, testing_result):
+        """Handle training completion from the progress dialog"""
+        if training_result is not None:
+            train_loss_history, val_loss_history = training_result
 
-    def test_model(self):
-        """Test the neural network model"""
-        if not self.model_loaded:
-            self.status_message.emit("No model loaded", 8000)
-            return
-        try:
-            dialog = ProgressDialog(self, "Testing")
-            metrics = dialog.start_testing(self.model)
-            if metrics is not None:
-                self.metrics_widget.update_metrics(metrics)
+            # Plotting loss history
+            self.plot_widget1.plot_loss_history(
+                self.plot_widget1, 
+                self.model.training_params['epochs'],  # Use the epochs from model parameters
+                train_loss_history, 
+                val_loss_history
+            )
 
-                # Confusion matrix 
-                conf_mat = metrics['confusion_matrix']
+            self.model_loaded = True
+            self.save_model_btn.setEnabled(True)
+            self.clear_model_btn.setEnabled(True)
+            self.model_info_widget.set_model_status("Model trained successfully", "green")
+            self.parameters_widget.update_parameters(self.model.training_params)
+            
+            # Update UI with testing results
+            if testing_result is not None:
+                self.metrics_widget.update_metrics(testing_result)
+                
+                # Confusion matrix
+                conf_mat = testing_result['confusion_matrix']
                 classes = self.model.classes
                 self.plot_widget2.plot_confusion_matrix(self.plot_widget2, conf_mat, classes)
+                
+                self.status_message.emit("Training and testing completed", 8000)
             else:
-                self.status_message.emit(
-                    f"Testing error: {getattr(dialog, 'error_message', 'Unknown error')}",
-                    8000
-                ) 
-        except Exception as e:
-            self.status_message.emit(f"Testing error: {str(e)}", 8000)    
+                self.status_message.emit("Training completed but testing failed", 8000)
+        else:
+            self.status_message.emit("Training canceled or failed, model was reset", 8000)       
+            self.reset_model()
+            
+    def handle_training_and_testing_error(self, error_message):
+        print(f"Training and testing error: {error_message}")
+        self.status_message.emit(f"Error: {error_message}", 8000)  
+        self.reset_model()
 
     def _create_ui(self):
         # Main layout
