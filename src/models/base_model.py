@@ -99,9 +99,7 @@ class BaseModel(ABC):
             'training_time': None 
         }
         
-        print(f"Starting training with {epochs} epochs, learning rate {learning_rate}, momentum {momentum}")
         print(f"Number of classes: {len(self.classes)}, Classes: {self.classes}")
-        print(f"Training on device: {self.device}")
         
         # Measure time
         start_time = time.time()
@@ -141,9 +139,7 @@ class BaseModel(ABC):
             epoch_val_loss = val_loss / len(self.valloader)
             train_loss_history.append(epoch_train_loss)
             val_loss_history.append(epoch_val_loss)
-            
-            print(f"Epoch {epoch+1}/{epochs} - Train Loss: {epoch_train_loss:.4f}, Val Loss: {epoch_val_loss:.4f}")
-            
+                        
         # End measuring
         end_time = time.time()
         training_time = end_time - start_time
@@ -161,9 +157,7 @@ class BaseModel(ABC):
             raise ValueError("Model is not initialized")
         if not self.dataset_loaded:
             raise ValueError("Dataset not loaded. Call load_data first.")
-            
-        print(f"Starting model testing with {len(self.classes)} classes: {self.classes}")
-            
+                        
         self.net.eval()
         y_pred = []
         y_true = []
@@ -181,9 +175,7 @@ class BaseModel(ABC):
             y_true, y_pred, average='macro', zero_division=0
         )
         accuracy = (np.array(y_pred) == np.array(y_true)).mean()
-        
-        print(f"Testing completed - Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}")
-        
+                
         self.metrics = {
             'accuracy': accuracy,
             'precision': precision,
