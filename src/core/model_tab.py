@@ -298,11 +298,6 @@ class ModelTab(QWidget):
                 self.status_message.emit("Dataset not loaded. Please load the dataset first.", 8000)
                 return
                 
-            # Verify correct class count
-            if self.model.classes is None or len(self.model.classes) <= 0:
-                self.status_message.emit("Error: No classes found in the dataset", 8000)
-                return
-                
             # Model Initialization
             self.model.initialize_model()
 
@@ -316,7 +311,6 @@ class ModelTab(QWidget):
 
             # Reset plots
             self.plot_widget1.plot_loss_history(self.plot_widget1)
-            # Reset confusion matrix plot
             self.plot_widget2.plot_confusion_matrix(self.plot_widget2)  
 
             dialog = ProgressDialog(
@@ -326,11 +320,13 @@ class ModelTab(QWidget):
                 momentum=momentum
             )
             
-            # Connect signals for asynchronous results
+            # Connect signals when training and testing are finished
             dialog.complete.connect(self.handle_training_and_testing_complete)
+            # Handle errors
             dialog.error_occurred.connect(self.handle_training_and_testing_error)
 
             self.status_message.emit("Training started...", 8000)
+
             dialog.start_training(self.model, epochs, learning_rate, momentum)
             
         except Exception as e:
@@ -347,7 +343,7 @@ class ModelTab(QWidget):
             # Plotting loss history
             self.plot_widget1.plot_loss_history(
                 self.plot_widget1, 
-                self.model.training_params['epochs'],  # Use the epochs from model parameters
+                self.model.training_params['epochs'], 
                 train_loss_history, 
                 val_loss_history
             )
@@ -413,8 +409,6 @@ class ModelTab(QWidget):
         self.clear_model_btn = QPushButton("Clear")
         self.save_model_btn.setEnabled(False)
         self.clear_model_btn.setEnabled(False)
-
-        # Add buttons to layout
         for btn in [self.train_model_btn, self.load_model_btn, self.save_model_btn, self.clear_model_btn]:
             buttons_layout.addWidget(btn)
         model_layout.addLayout(buttons_layout)
@@ -462,14 +456,13 @@ class ModelTab(QWidget):
         right_layout.setSpacing(0)
         right_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Create StyledFrame
+        # Plots
         self.plot_frame = QFrame()
         self.plot_frame.setObjectName("plot-1-2-frame")
 
         frame_layout = QVBoxLayout(self.plot_frame)
         frame_layout.setSpacing(9)
-        
-        # QStackedWidget for switching between charts
+
         self.plot_stack = QStackedWidget()
         self.plot_widget1 = TrainingPlotWidget("Loss History")
         self.plot_widget2 = TrainingPlotWidget("Confusion Matrix")
@@ -478,7 +471,6 @@ class ModelTab(QWidget):
         self.plot_widget1.plot_loss_history(self.plot_widget1)
         self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
         
-        # Add plots to QStackedWidget
         self.plot_stack.addWidget(self.plot_widget2)  
         self.plot_stack.addWidget(self.plot_widget1) 
         frame_layout.addWidget(self.plot_stack)
@@ -498,14 +490,11 @@ class ModelTab(QWidget):
         self.btn_confusion_matrix.clicked.connect(lambda: self._switch_plot(0))  
         self.btn_loss_history.clicked.connect(lambda: self._switch_plot(1)) 
         
-        # Add buttons to the layout 
         buttons_layout.addWidget(self.btn_confusion_matrix)  
         buttons_layout.addWidget(self.btn_loss_history)
         
-        # Add buttons to the frame layout
         frame_layout.addLayout(buttons_layout)
-        
-        # Add frame to the right_layout
+
         right_layout.addWidget(self.plot_frame)
         right_layout.addStretch()
         
