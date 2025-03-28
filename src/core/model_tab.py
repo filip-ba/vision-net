@@ -144,7 +144,7 @@ class ModelTab(QWidget):
     def _load_dataset(self):
         """Loads the dataset on startup"""
         try:
-            train_size, val_size, test_size = self.model.load_data("./dataset/fruit_dataset")
+            train_size, val_size, test_size = self.model.load_data("./dataset/fruitveg-dataset")
             self.status_message.emit(f"Dataset loaded successfully: {len(self.model.classes)} classes detected", 8000)
         except Exception as e:
             error_msg = f"Error loading dataset: {str(e)}"

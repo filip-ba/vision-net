@@ -46,10 +46,7 @@ class TrainingPlotWidget(QWidget):
             cbar.ax.tick_params(labelsize=8)
             ax.set_xticks(np.arange(len(classes)))
             ax.set_yticks(np.arange(len(classes)))
-            
-            # Create shortened class names for x-axis (first 4 letters)
-            shortened_classes = [cls[:4] for cls in classes]
-            ax.set_xticklabels(shortened_classes, fontsize=9)
+            ax.set_xticklabels(classes, fontsize=9)
             ax.set_yticklabels(classes, fontsize=9)
             
             plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")

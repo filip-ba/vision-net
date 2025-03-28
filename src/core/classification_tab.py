@@ -29,7 +29,7 @@ class ClassificationTab(QWidget):
         self.load_random_test_image()
         
     def load_random_test_image(self):
-        dataset_path = "./dataset/fruit_dataset/test"
+        dataset_path = "./dataset/fruitveg-dataset/test"
 
         if os.path.exists(dataset_path):
             class_dirs = [d for d in os.listdir(dataset_path) 
