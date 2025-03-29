@@ -99,8 +99,6 @@ class BaseModel(ABC):
             'training_time': None 
         }
         
-        print(f"Number of classes: {len(self.classes)}, Classes: {self.classes}")
-        
         # Measure time
         start_time = time.time()
 
