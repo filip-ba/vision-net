@@ -44,4 +44,4 @@ class ResNetModel(BaseModel):
         self.net = self.net.to(self.device)
         
         # Only optimize the final layer parameters
-        self.optimizer = optim.SGD(self.net.fc.parameters(), lr=0.001, momentum=0.9)
+        self.optimizer = optim.SGD(self.net.fc.parameters(), lr=0.001, momentum=0.9) # Default values used for initialization
