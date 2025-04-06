@@ -6,7 +6,7 @@ from PyQt6.QtCore import Qt
 class ParametersWidget(QWidget):
     """Widget for the parameters dialog"""
 
-    def __init__(self, label, min_val, max_val, default_val, decimals=0, parent=None):
+    def __init__(self, label, min_val, max_val, default_val, decimals=0, step_size=1.0, parent=None):
         super().__init__(parent)
         layout = QHBoxLayout()
         self.setLayout(layout)
@@ -17,9 +17,11 @@ class ParametersWidget(QWidget):
         # SpinBox setup
         if decimals == 0:
             self.spinbox = QSpinBox()
+            self.spinbox.setSingleStep(int(step_size))
         else:
             self.spinbox = QDoubleSpinBox()
             self.spinbox.setDecimals(decimals)
+            self.spinbox.setSingleStep(step_size)
         self.spinbox.setRange(min_val, max_val)
         self.spinbox.setValue(default_val)
         self.spinbox.setFixedWidth(100)
@@ -74,9 +76,9 @@ class ParametersDialog(QDialog):
         params_group.setObjectName("dialog-params-group")
         params_group.setLayout(params_layout)
  
-        self.epochs_widget = ParametersWidget("Epochs:", 1, 100, 10)
-        self.learning_rate_widget = ParametersWidget("Learning Rate:", 0.000001, 1.0, 0.001, 6)
-        self.momentum_widget = ParametersWidget("Momentum:", 0.0, 1.0, 0.9, 6)
+        self.epochs_widget = ParametersWidget("Epochs:", 1, 100, 10, step_size=1.0)
+        self.learning_rate_widget = ParametersWidget("Learning Rate:", 0.000001, 1.0, 0.001, 6, step_size=0.01)
+        self.momentum_widget = ParametersWidget("Momentum:", 0.0, 1.0, 0.9, 6, step_size=0.01)
         
         for widget in [self.epochs_widget, self.learning_rate_widget, self.momentum_widget]:
             params_layout.addWidget(widget)
