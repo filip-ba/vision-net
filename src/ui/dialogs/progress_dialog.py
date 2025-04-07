@@ -66,19 +66,23 @@ class ProgressDialog(QDialog):
     error_occurred = pyqtSignal(str)
 
     def __init__(self, parent=None, epochs=None, 
-                 learning_rate=None, momentum=None):
+                 learning_rate=None, momentum=None, model_name=None):
         super().__init__(parent)
-        self.start_time = None
         self.thread = None
+        self.start_time = None
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.momentum = momentum
+        self.model_name = model_name
         self.training_result = None
         self.testing_result = None
         self._create_ui()
         
     def _create_ui(self):
-        self.setWindowTitle("Training...")
+        title = "Training..."
+        if self.model_name:
+            title = f"Training {self.model_name}"
+        self.setWindowTitle(title)
         self.resize(400, 300)
         # Set window flags to allow minimization and make it stay on top
         self.setWindowFlags(Qt.WindowType.Window | 

@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import ( 
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox,
     QFileDialog, QStackedWidget, QFrame, QDialog, QSpinBox, QLabel, QMessageBox )
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal, Qt
 import os
 import torch
 
@@ -90,12 +90,18 @@ class ModelTab(QWidget):
             
         # Update cross-validation results if they exist
         if self.model.cv_metrics['k'] is not None:
-            result_text = f"K-fold Cross-validation Results (k={self.model.cv_metrics['k']}):\n"
-            result_text += f"Average Accuracy: {self.model.cv_metrics['avg_accuracy']:.2%}\n"
-            result_text += f"Standard Deviation: {self.model.cv_metrics['std_accuracy']:.2%}\n\n"
-            result_text += "Individual Fold Accuracies:\n"
+            # Update the spinbox value to match the k value from cross-validation
+            self.k_spinbox.setValue(self.model.cv_metrics['k'])
+            
+            # Use HTML formatting to increase line spacing
+            result_text = "<html><body style='line-height:140%;'>"
+            result_text += f"K-fold Cross-validation Results (k={self.model.cv_metrics['k']}):<br>"
+            result_text += f"Average Accuracy: {self.model.cv_metrics['avg_accuracy']:.2%}<br>"
+            result_text += f"Standard Deviation: {self.model.cv_metrics['std_accuracy']:.2%}<br><br>"
+            result_text += "Individual Fold Accuracies:<br>"
             for i, acc in enumerate(self.model.cv_metrics['fold_accuracies']):
-                result_text += f"Fold {i + 1}: {acc:.2%}\n"
+                result_text += f"Fold {i + 1}: {acc:.2%}<br>"
+            result_text += "</body></html>"
             self.kfold_result_label.setText(result_text)
         else:
             self.kfold_result_label.setText("No cross-validation performed yet")
@@ -303,7 +309,8 @@ class ModelTab(QWidget):
                 self, 
                 epochs=epochs,
                 learning_rate=learning_rate,
-                momentum=momentum
+                momentum=momentum,
+                model_name=self.model_name
             )
             
             # Connect signals when training and testing are finished
@@ -433,7 +440,8 @@ class ModelTab(QWidget):
                     self, 
                     epochs=epochs,
                     learning_rate=learning_rate,
-                    momentum=momentum
+                    momentum=momentum,
+                    model_name=self.model_name
                 )
                 
                 # Connect signals
@@ -497,12 +505,18 @@ class ModelTab(QWidget):
                     'fold_accuracies': self.accuracies.copy()
                 }
                 
-                result_text = f"K-fold Cross-validation Results (k={k}):\n"
-                result_text += f"Average Accuracy: {avg_accuracy:.2%}\n"
-                result_text += f"Standard Deviation: {std_accuracy:.2%}\n\n"
-                result_text += "Individual Fold Accuracies:\n"
+                # Make sure the spinbox reflects the current k value
+                self.k_spinbox.setValue(k)
+                
+                # Use HTML formatting to increase line spacing
+                result_text = "<html><body style='line-height:140%;'>"
+                result_text += f"K-fold Cross-validation Results (k={k}):<br>"
+                result_text += f"Average Accuracy: {avg_accuracy:.2%}<br>"
+                result_text += f"Standard Deviation: {std_accuracy:.2%}<br><br>"
+                result_text += "Individual Fold Accuracies:<br>"
                 for i, acc in enumerate(self.accuracies):
-                    result_text += f"Fold {i + 1}: {acc:.2%}\n"
+                    result_text += f"Fold {i + 1}: {acc:.2%}<br>"
+                result_text += "</body></html>"
                 
                 self.kfold_result_label.setText(result_text)
                 self.status_message.emit(f"K-fold cross-validation completed. Average accuracy: {avg_accuracy:.2%}", 8000)
@@ -549,11 +563,13 @@ class ModelTab(QWidget):
     def _create_left_panel(self):
         left_panel = QWidget()
         left_layout = QVBoxLayout(left_panel)
+        left_layout.setSpacing(20)
         left_layout.setContentsMargins(0, 0, 0, 0)
-
-        # Model Controls
-        model_group = QGroupBox("Model Controls")
+        
+        # Dataset, model and training
+        model_group = QGroupBox("Model")
         model_group.setObjectName("model-controls")
+        
         model_layout = QVBoxLayout()
         model_layout.setContentsMargins(0, 0, 0, 0)
         model_group.setLayout(model_layout)
@@ -580,14 +596,15 @@ class ModelTab(QWidget):
         # K-fold controls
         kfold_controls_layout = QHBoxLayout()
         self.kfold_train_btn = QPushButton("Train")
+        k_label = QLabel("k:")
+        k_label.setFixedWidth(20)
         self.k_spinbox = QSpinBox()
         self.k_spinbox.setRange(2, 10)
         self.k_spinbox.setValue(5)
         self.k_spinbox.setFixedWidth(60)
-        k_label = QLabel("k:")
-        k_label.setFixedWidth(20)
         
         kfold_controls_layout.addWidget(self.kfold_train_btn)
+        kfold_controls_layout.addSpacing(5)
         kfold_controls_layout.addWidget(k_label)
         kfold_controls_layout.addWidget(self.k_spinbox)
         kfold_controls_layout.addStretch()
@@ -595,8 +612,10 @@ class ModelTab(QWidget):
         # K-fold results
         self.kfold_result_label = QLabel("No cross-validation performed yet")
         self.kfold_result_label.setWordWrap(True)
+        self.kfold_result_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
         
         kfold_layout.addLayout(kfold_controls_layout)
+        kfold_layout.addSpacing(10)
         kfold_layout.addWidget(self.kfold_result_label)
 
         # Metrics group box
@@ -629,11 +648,12 @@ class ModelTab(QWidget):
         self.model_info_group.setLayout(model_info_layout)
         self.model_info_group.setContentsMargins(0, 0, 0, 0)
 
-        # Add all components to left panel
-        for widget in [model_group, self.metrics_group, self.parameters_group, kfold_group, self.model_info_group]:
+        # Create widget containers for the left panel
+        for widget in [model_group, self.metrics_group, self.parameters_group, kfold_group]:
             left_layout.addWidget(widget)
+            
         left_layout.addStretch()
-
+        
         return left_panel
 
     def _create_right_panel(self):
@@ -682,6 +702,10 @@ class ModelTab(QWidget):
         frame_layout.addLayout(buttons_layout)
 
         right_layout.addWidget(self.plot_frame)
+        
+        # Add model info group below the plot frame
+        right_layout.addWidget(self.model_info_group)
+        
         right_layout.addStretch()
         
         return right_panel

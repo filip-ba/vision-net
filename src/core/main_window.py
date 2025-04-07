@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
         # Sidebar width settings
         self.MIN_SIDEBAR_WIDTH = 190
         self.MAX_SIDEBAR_WIDTH = 260
-        self.SIDEBAR_HIDE_THRESHOLD = 800
+        self.SIDEBAR_HIDE_THRESHOLD = 900
         
         # Event filter for window resize
         self.installEventFilter(self)
@@ -178,7 +178,7 @@ class MainWindow(QMainWindow):
         
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(50, 50, 1200, 700)
+        self.setGeometry(50, 50, 1200, 900)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -222,7 +222,7 @@ class MainWindow(QMainWindow):
         self.vgg16_tab = ModelTab(model_class=VGG16Model)
         
         self.tab_widget.addTab(self.simple_cnn_tab, "Simple CNN")
-        self.tab_widget.addTab(self.resnet_tab, "ResNet")
+        self.tab_widget.addTab(self.resnet_tab, "ResNet18")
         self.tab_widget.addTab(self.efficientnet_tab, "EfficientNet-B0")
         self.tab_widget.addTab(self.vgg16_tab, "VGG16")
         
