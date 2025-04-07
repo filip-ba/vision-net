@@ -670,6 +670,7 @@ class ModelTab(QWidget):
         frame_layout.setSpacing(9)
 
         self.plot_stack = QStackedWidget()
+        self.plot_stack.setMinimumWidth(400)
         self.plot_widget1 = TrainingPlotWidget("Loss History")
         self.plot_widget2 = TrainingPlotWidget("Confusion Matrix")
         

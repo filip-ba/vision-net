@@ -125,7 +125,7 @@ QGroupBox::title {
 
 #model-parameters {
     margin-top: 0px;
-    margin-bottom: 0px;
+    margin-bottom: 5px;
 }
 
 #model-info {
