@@ -2,9 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import datasets
-from torch.utils.data import DataLoader
-
-import numpy as np
+from torch.utils.data import DataLoader, Subset
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 from PIL import Image
 from abc import ABC, abstractmethod
@@ -43,6 +41,12 @@ class BaseModel(ABC):
             'train_loss': None,
             'val_loss': None
         }
+        self.cv_metrics = {
+            'k': None,
+            'avg_accuracy': None,
+            'std_accuracy': None,
+            'fold_accuracies': None
+        }
 
     @abstractmethod
     def get_transforms(self):
@@ -62,27 +66,67 @@ class BaseModel(ABC):
             'recall': None,
             'confusion_matrix': None
         }
+        # Also reset cross-validation metrics
+        self.cv_metrics = {
+            'k': None,
+            'avg_accuracy': None,
+            'std_accuracy': None,
+            'fold_accuracies': None
+        }
 
     def is_data_loaded(self):
         """Check if dataset is loaded"""
         return self.dataset_loaded
 
-    def load_data(self, data_dir):
-        """Loads and prepares dataset"""
+    def load_data(self, data_dir, k=None, current_fold=None):
+        """Loads and prepares dataset. If k and current_fold are provided, performs K-fold cross-validation split."""
         train_transform, test_transform = self.get_transforms()
         
-        train_dataset = datasets.ImageFolder(root=f"{data_dir}/train", transform=train_transform)
-        val_dataset = datasets.ImageFolder(root=f"{data_dir}/valid", transform=train_transform)
-        test_dataset = datasets.ImageFolder(root=f"{data_dir}/test", transform=test_transform)
+        if k is not None and current_fold is not None:
+            # Load all training data
+            full_train_dataset = datasets.ImageFolder(root=f"{data_dir}/train", transform=train_transform)
+            
+            # Calculate fold size
+            fold_size = len(full_train_dataset) // k
+            
+            # Create indices for the current fold
+            start_idx = current_fold * fold_size
+            end_idx = start_idx + fold_size if current_fold < k - 1 else len(full_train_dataset)
+            
+            # Split indices into train and validation
+            all_indices = list(range(len(full_train_dataset)))
+            val_indices = all_indices[start_idx:end_idx]
+            train_indices = [i for i in all_indices if i not in val_indices]
+            
+            # Create subset datasets
+            train_dataset = Subset(full_train_dataset, train_indices)
+            val_dataset = Subset(full_train_dataset, val_indices)
+            
+            # Create data loaders
+            self.trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+            self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=False)
+            
+            # Load test data normally
+            test_dataset = datasets.ImageFolder(root=f"{data_dir}/test", transform=test_transform)
+            self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+            
+            # Store classes from the full dataset
+            self.classes = full_train_dataset.classes
+        else:
+            # Original loading logic
+            train_dataset = datasets.ImageFolder(root=f"{data_dir}/train", transform=train_transform)
+            val_dataset = datasets.ImageFolder(root=f"{data_dir}/valid", transform=train_transform)
+            test_dataset = datasets.ImageFolder(root=f"{data_dir}/test", transform=test_transform)
+            
+            self.trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+            self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=False)
+            self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+            
+            self.classes = train_dataset.classes
         
-        self.trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-        self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=False)
-        self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
-        
-        self.classes = train_dataset.classes
         self.dataset_loaded = True
         
-        return len(train_dataset), len(val_dataset), len(test_dataset)
+        return len(self.trainloader.dataset), len(self.valloader.dataset), len(self.testloader.dataset)
 
     def train(self, epochs, learning_rate, momentum, progress_callback=None):
         """Trains the model and returns the loss history"""
@@ -150,36 +194,43 @@ class BaseModel(ABC):
         return train_loss_history, val_loss_history
 
     def test(self):
-        """Tests the model and returns metrics"""
+        """Tests the model on the test set and returns metrics"""
         if self.net is None:
             raise ValueError("Model is not initialized")
         if not self.dataset_loaded:
             raise ValueError("Dataset not loaded. Call load_data first.")
-                        
+            
         self.net.eval()
-        y_pred = []
-        y_true = []
+        correct = 0
+        total = 0
+        all_preds = []
+        all_labels = []
         
         with torch.no_grad():
-            for images, labels in self.testloader:     
-                images, labels = images.to(self.device), labels.to(self.device)
+            for data in self.testloader:
+                images, labels = data[0].to(self.device), data[1].to(self.device)
                 outputs = self.net(images)
-                _, predicted = torch.max(outputs, 1)
-                y_pred.extend(predicted.cpu().numpy())
-                y_true.extend(labels.cpu().numpy())
-                
-        conf_mat = confusion_matrix(y_true, y_pred)
-        precision, recall, _, _ = precision_recall_fscore_support(
-            y_true, y_pred, average='macro', zero_division=0
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+                all_preds.extend(predicted.cpu().numpy())
+                all_labels.extend(labels.cpu().numpy())
+        
+        accuracy = correct / total if total > 0 else 0.0
+        
+        precision, recall, f1, _ = precision_recall_fscore_support(
+            all_labels, all_preds, average='weighted', zero_division=0
         )
-        accuracy = (np.array(y_pred) == np.array(y_true)).mean()
-                
+        
+        conf_matrix = confusion_matrix(all_labels, all_preds)
+        
         self.metrics = {
             'accuracy': accuracy,
             'precision': precision,
             'recall': recall,
-            'confusion_matrix': conf_mat
+            'confusion_matrix': conf_matrix
         }
+        
         return self.metrics
 
     def predict_image(self, image_path):
@@ -217,6 +268,7 @@ class BaseModel(ABC):
             'training_params': self.training_params,
             'metrics': self.metrics,
             'history': self.history,
+            'cv_metrics': self.cv_metrics,
         }
         torch.save(save_dict, path)
 
@@ -234,8 +286,20 @@ class BaseModel(ABC):
         self.metrics = save_dict['metrics']
         self.history = save_dict['history']
         
+        # Load cross-validation metrics if they exist in the saved model
+        if 'cv_metrics' in save_dict:
+            self.cv_metrics = save_dict['cv_metrics']
+        else:
+            self.cv_metrics = {
+                'k': None,
+                'avg_accuracy': None,
+                'std_accuracy': None,
+                'fold_accuracies': None
+            }
+        
         return {
             'training_params': self.training_params,
             'metrics': self.metrics,
-            'history': self.history
+            'history': self.history,
+            'cv_metrics': self.cv_metrics
         }

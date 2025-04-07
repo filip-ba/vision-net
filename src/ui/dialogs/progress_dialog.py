@@ -44,12 +44,18 @@ class TrainingThread(QThread):
             if not self._is_canceled:
                 try:
                     metrics = self.model.test()
+                    if metrics is None:
+                        raise ValueError("Testing returned no results")
+                    if 'accuracy' not in metrics:
+                        raise ValueError("Testing results do not contain accuracy metric")
                     self.testing_finished.emit(metrics)
                 except Exception as e:
                     self.error.emit(f"Testing error: {str(e)}")
                     
-        except Exception as e:
+        except InterruptedError as e:
             self.error.emit(str(e))
+        except Exception as e:
+            self.error.emit(f"Training error: {str(e)}")
 
     def cancel(self):
         self._is_canceled = True

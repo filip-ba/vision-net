@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import ( 
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox,
-    QFileDialog, QStackedWidget, QMessageBox, QFrame, QDialog )
+    QFileDialog, QStackedWidget, QFrame, QDialog, QSpinBox, QLabel )
 from PyQt6.QtCore import pyqtSignal
 import os
 import torch
@@ -46,6 +46,7 @@ class ModelTab(QWidget):
         self.save_model_btn.clicked.connect(self.save_model)
         self.train_model_btn.clicked.connect(self.train_model)
         self.clear_model_btn.clicked.connect(self.clear_model)
+        self.kfold_train_btn.clicked.connect(self.train_kfold)
 
     def update_metrics_display(self, metrics):
         """Method to update the metrics"""
@@ -86,60 +87,58 @@ class ModelTab(QWidget):
             )
         else:
             self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
+            
+        # Update cross-validation results if they exist
+        if self.model.cv_metrics['k'] is not None:
+            result_text = f"K-fold Cross-validation Results (k={self.model.cv_metrics['k']}):\n"
+            result_text += f"Average Accuracy: {self.model.cv_metrics['avg_accuracy']:.2%}\n"
+            result_text += f"Standard Deviation: {self.model.cv_metrics['std_accuracy']:.2%}\n\n"
+            result_text += "Individual Fold Accuracies:\n"
+            for i, acc in enumerate(self.model.cv_metrics['fold_accuracies']):
+                result_text += f"Fold {i + 1}: {acc:.2%}\n"
+            self.kfold_result_label.setText(result_text)
+        else:
+            self.kfold_result_label.setText("No cross-validation performed yet")
 
     def clear_model(self):
-        """Calls the reset_model function that resets the loaded model"""   
-        msg_box = QMessageBox(self)
-        msg_box.setWindowTitle("Clear Model")
-        msg_box.setText("Are you sure you want to clear the model? This will reset all charts, metrics and parameters.")
-        msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        msg_box.setDefaultButton(QMessageBox.StandardButton.No)
-        msg_box.setObjectName("clear-model-message")
+        """Clears the current model"""
+        if not self.model_loaded:
+            self.status_message.emit("No model loaded", 8000)
+            return
 
-        reply = msg_box.exec()
-
-        if reply == QMessageBox.StandardButton.Yes:
-            self.status_message.emit("Model cleared successfully", 8000)
-            self.reset_model()
+        self.reset_model()
+        self.status_message.emit("Model cleared", 8000)
 
     def reset_model(self):
-        """Clears the current model and resets UI elements while preserving dataset"""   
-        dataset_loaded = self.model.is_data_loaded()
-        trainloader = self.model.trainloader
-        valloader = self.model.valloader
-        testloader = self.model.testloader
-        old_classes = self.model.classes 
+        """Resets model and UI elements"""
+        # Reset model and UI
+        self.model.reset_metrics()
+        self.model.training_params = {
+            'epochs': None,
+            'learning_rate': None,
+            'momentum': None,
+            'training_time': None
+        }
+        self.model.history = {
+            'train_loss': None,
+            'val_loss': None
+        }
         
-        # Create a new model instance
-        self.model = self.model_class()
-        
-        # Restore dataset if it was loaded
-        if dataset_loaded:
-            self.model.dataset_loaded = dataset_loaded
-            self.model.trainloader = trainloader
-            self.model.valloader = valloader
-            self.model.testloader = testloader
-            self.model.classes = old_classes
-            
-        # Initialize the model after setting the classes
-        self.model.initialize_model()
-        self.model_loaded = False
-
         # Reset UI elements
-        self.model_info_widget.set_model_status("No model loaded", "red")
-        self.model_info_widget.set_model_file("None")
-
-        # Reset metrics and parameters
         self.metrics_widget.reset_metrics()
         self.parameters_widget.reset_parameters()
-
-        # Reset plots
         self.plot_widget1.plot_loss_history(self.plot_widget1)
         self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
+        self.kfold_result_label.setText("No cross-validation performed yet")
 
+        # Update model status
+        self.model_info_widget.set_model_status("No model loaded") 
+        self.model_info_widget.set_model_file("")
+        
         # Disable buttons
         self.save_model_btn.setEnabled(False)
         self.clear_model_btn.setEnabled(False)
+        self.model_loaded = False
 
     def _load_dataset(self):
         """Loads the dataset on startup"""
@@ -182,7 +181,9 @@ class ModelTab(QWidget):
 
                     # Update UI with loaded data
                     self._update_ui_from_model_data()
-                    self.model_info_widget.set_model_file(default_model_path.split("/")[-1]) 
+                    # Display only the filename, not the full path
+                    filename = os.path.basename(default_model_path)
+                    self.model_info_widget.set_model_file(filename) 
                     self.model_loaded = True
                     self.model_info_widget.set_model_status("Model loaded successfully", "green")
                     self.save_model_btn.setEnabled(True)
@@ -205,38 +206,18 @@ class ModelTab(QWidget):
 
         if file_path:
             try:
-                # Load model and Check if the it's architecture matches
-                checkpoint = torch.load(file_path, weights_only=False)  
-
-                if isinstance(self.model, SimpleCnnModel):
-                    if not all(key in checkpoint['model_state'] for key in ['conv1.weight', 'conv2.weight']):
-                        raise ValueError("This model file is not compatible with Simple CNN architecture")
-                elif isinstance(self.model, ResNetModel):
-                    if not all(key in checkpoint['model_state'] for key in ['layer1.0.conv1.weight', 'layer1.0.conv2.weight']):
-                        raise ValueError("This model file is not compatible with ResNet architecture")
-                elif isinstance(self.model, VGG16Model):
-                    if not all(key in checkpoint['model_state'] for key in ['features.0.weight', 'features.2.weight', 'classifier.6.weight']):
-                        raise ValueError("This model file is not compatible with VGG16 architecture")
-                elif isinstance(self.model, EfficientNetModel):
-                    if not all(key in checkpoint['model_state'] for key in ['features.0.0.weight', 'features.1.0.block.0.0.weight', 'classifier.1.weight']):
-                        raise ValueError("This model file is not compatible with EfficientNet architecture")
-                
-                self.model.initialize_model()
-
-                # Load model and get metadata
-                metadata = self.model.load_model(file_path)
-
-                # Update GroupBox title with model name
-                self.metrics_group.setTitle(f"{self.model_name} Stats")
-
-                # Update the model name label
-                self.model_info_widget.set_model_file(file_path.split("/")[-1]) 
-
-                # Reset metrics, parametrs and plots first
+                # Reset metrics, parameters and plots first
                 self.metrics_widget.reset_metrics()
                 self.parameters_widget.reset_parameters()
                 self.plot_widget1.plot_loss_history(self.plot_widget1)
                 self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
+                self.kfold_result_label.setText("No cross-validation performed yet")
+
+                metadata = self.model.load_model(file_path)
+
+                # Display filename
+                filename = os.path.basename(file_path)
+                self.model_info_widget.set_model_file(filename)
 
                 # Update UI with loaded data only if the data exists
                 if metadata['training_params']['epochs'] is not None:
@@ -273,19 +254,13 @@ class ModelTab(QWidget):
     def train_model(self):
         param_dialog = ParametersDialog(self)
         
-        # If we have model parameters, set them in the dialog
-        if self.model.training_params['epochs'] is not None:
-            param_dialog.set_parameters(
-                epochs=self.model.training_params['epochs'],
-                learning_rate=self.model.training_params['learning_rate'],
-                momentum=self.model.training_params['momentum']
-            )
-        
+        # Get parameters from dialog
         result = param_dialog.exec()
         
+        # If dialog was canceled, return
         if result != QDialog.DialogCode.Accepted:
             return
-            
+        
         # Get parameters from dialog
         params = param_dialog.get_parameters()
         epochs = params['epochs']
@@ -304,6 +279,7 @@ class ModelTab(QWidget):
             # Reset metrics display
             self.metrics_widget.reset_metrics()
             self.parameters_widget.reset_parameters()
+            self.kfold_result_label.setText("No cross-validation performed yet")
 
             # Update model status
             self.model_info_widget.set_model_status("Training in progress...", "blue")
@@ -322,6 +298,7 @@ class ModelTab(QWidget):
             
             # Connect signals when training and testing are finished
             dialog.complete.connect(self.handle_training_and_testing_complete)
+            
             # Handle errors
             dialog.error_occurred.connect(self.handle_training_and_testing_error)
 
@@ -375,6 +352,176 @@ class ModelTab(QWidget):
         self.status_message.emit(f"Error: {error_message}", 8000)  
         self.reset_model()
 
+    def train_kfold(self):
+        """Performs K-fold cross-validation on the model"""
+        try:
+            # Check if dataset is loaded
+            if not self.model.is_data_loaded():
+                self.status_message.emit("Dataset not loaded. Please load the dataset first.", 8000)
+                return
+
+            k = self.k_spinbox.value()
+            self.kfold_result_label.setText("Cross-validation in progress...")
+            self.kfold_train_btn.setEnabled(False)
+
+            # Get the training parameters from the current model
+            epochs = self.model.training_params['epochs']
+            learning_rate = self.model.training_params['learning_rate']
+            momentum = self.model.training_params['momentum']
+
+            # If parameters are not set, show the parameters dialog
+            if epochs is None or learning_rate is None or momentum is None:
+                param_dialog = ParametersDialog(self)
+                result = param_dialog.exec()
+                
+                if result != QDialog.DialogCode.Accepted:
+                    self.kfold_result_label.setText("No cross-validation performed yet")
+                    self.kfold_train_btn.setEnabled(True)
+                    return
+                    
+                # Get parameters from dialog
+                params = param_dialog.get_parameters()
+                epochs = params['epochs']
+                learning_rate = params['learning_rate']
+                momentum = params['momentum']
+
+            # Reset cross-validation metrics in the model
+            self.model.cv_metrics = {
+                'k': None,
+                'avg_accuracy': None,
+                'std_accuracy': None,
+                'fold_accuracies': None
+            }
+
+            # Perform K-fold cross-validation
+            self.accuracies = []  # Store accuracies as instance variable
+            self.current_fold = 0  # Track current fold
+            
+            # Start the first fold
+            self._start_next_fold(k, epochs, learning_rate, momentum)
+
+        except Exception as e:
+            error_message = f"Error during cross-validation: {str(e)}"
+            print(f"Cross-validation error: {error_message}")
+            self.status_message.emit(error_message, 8000)
+            self.kfold_result_label.setText("Error during cross-validation")
+            self.kfold_train_btn.setEnabled(True)
+            
+    def _start_next_fold(self, k, epochs, learning_rate, momentum):
+        """Starts the next fold of K-fold cross-validation"""
+        try:
+            if self.current_fold < k:
+                # Create a new model instance for this fold
+                fold_model = self.model_class()
+                fold_model.initialize_model()
+                
+                # Split the data into k folds
+                fold_model.load_data("./dataset/fruitveg-dataset", k=k, current_fold=self.current_fold)
+                
+                # Create and show progress dialog for this fold
+                dialog = ProgressDialog(
+                    self, 
+                    epochs=epochs,
+                    learning_rate=learning_rate,
+                    momentum=momentum
+                )
+                
+                # Connect signals
+                dialog.complete.connect(lambda train_result, test_result: self._handle_fold_complete(train_result, test_result, k, epochs, learning_rate, momentum))
+                dialog.error_occurred.connect(self._handle_fold_error)
+                
+                # Start training
+                dialog.start_training(fold_model, epochs, learning_rate, momentum)
+                
+                # Update progress
+                self.kfold_result_label.setText(f"Fold {self.current_fold + 1}/{k} in progress...")
+            else:
+                # All folds completed, calculate final results
+                self._calculate_final_results(k)
+        except Exception as e:
+            error_message = f"Error starting fold {self.current_fold + 1}: {str(e)}"
+            print(f"Fold error: {error_message}")
+            self.status_message.emit(error_message, 8000)
+            self.kfold_result_label.setText("Error during cross-validation")
+            self.kfold_train_btn.setEnabled(True)
+            
+    def _handle_fold_complete(self, training_result, testing_result, k, epochs, learning_rate, momentum):
+        """Handle completion of a single fold"""
+        try:
+            if testing_result is not None and 'accuracy' in testing_result:
+                self.accuracies.append(testing_result['accuracy'])
+                
+                # Move to the next fold
+                self.current_fold += 1
+                
+                # Start the next fold
+                self._start_next_fold(k, epochs, learning_rate, momentum)
+            else:
+                error_message = "No valid testing results received"
+                print(f"Fold error: {error_message}")
+                self.status_message.emit(error_message, 8000)
+                self.kfold_result_label.setText("Error during cross-validation")
+                self.kfold_train_btn.setEnabled(True)
+        except Exception as e:
+            error_message = f"Error processing fold results: {str(e)}"
+            print(f"Fold error: {error_message}")
+            self.status_message.emit(error_message, 8000)
+            self.kfold_result_label.setText("Error during cross-validation")
+            self.kfold_train_btn.setEnabled(True)
+            
+    def _calculate_final_results(self, k):
+        """Calculate and display final results of K-fold cross-validation"""
+        try:
+            if len(self.accuracies) > 0:
+                avg_accuracy = sum(self.accuracies) / len(self.accuracies)
+                if len(self.accuracies) > 1:
+                    std_accuracy = (sum((x - avg_accuracy) ** 2 for x in self.accuracies) / (len(self.accuracies) - 1)) ** 0.5
+                else:
+                    std_accuracy = 0.0
+                
+                # Store cross-validation metrics in model
+                self.model.cv_metrics = {
+                    'k': k,
+                    'avg_accuracy': avg_accuracy,
+                    'std_accuracy': std_accuracy,
+                    'fold_accuracies': self.accuracies.copy()
+                }
+                
+                result_text = f"K-fold Cross-validation Results (k={k}):\n"
+                result_text += f"Average Accuracy: {avg_accuracy:.2%}\n"
+                result_text += f"Standard Deviation: {std_accuracy:.2%}\n\n"
+                result_text += "Individual Fold Accuracies:\n"
+                for i, acc in enumerate(self.accuracies):
+                    result_text += f"Fold {i + 1}: {acc:.2%}\n"
+                
+                self.kfold_result_label.setText(result_text)
+                self.status_message.emit(f"K-fold cross-validation completed. Average accuracy: {avg_accuracy:.2%}", 8000)
+            else:
+                self.kfold_result_label.setText("Error: No valid results from cross-validation")
+                self.status_message.emit("Error: No valid results from cross-validation", 8000)
+        except Exception as e:
+            error_message = f"Error calculating final results: {str(e)}"
+            print(f"Results error: {error_message}")
+            self.status_message.emit(error_message, 8000)
+            self.kfold_result_label.setText("Error calculating final results")
+        finally:
+            self.kfold_train_btn.setEnabled(True)
+
+    def _handle_fold_error(self, error_message):
+        """Handle error during a fold"""
+        print(f"Fold error: {error_message}")
+        self.status_message.emit(f"Error: {error_message}", 8000)
+        self.kfold_result_label.setText("Error during cross-validation")
+        self.kfold_train_btn.setEnabled(True)
+        
+        # Reset cross-validation metrics in the model
+        self.model.cv_metrics = {
+            'k': None,
+            'avg_accuracy': None,
+            'std_accuracy': None,
+            'fold_accuracies': None
+        }
+
     def _create_ui(self):
         # Main layout
         main_layout = QHBoxLayout(self)
@@ -413,6 +560,35 @@ class ModelTab(QWidget):
             buttons_layout.addWidget(btn)
         model_layout.addLayout(buttons_layout)
 
+        # K-fold Cross-validation
+        kfold_group = QGroupBox("k-Fold Cross-Validation")
+        kfold_group.setObjectName("model-controls")
+        kfold_layout = QVBoxLayout()
+        kfold_layout.setContentsMargins(0, 0, 0, 0)
+        kfold_group.setLayout(kfold_layout)
+
+        # K-fold controls
+        kfold_controls_layout = QHBoxLayout()
+        self.kfold_train_btn = QPushButton("Train")
+        self.k_spinbox = QSpinBox()
+        self.k_spinbox.setRange(2, 10)
+        self.k_spinbox.setValue(5)
+        self.k_spinbox.setFixedWidth(60)
+        k_label = QLabel("k:")
+        k_label.setFixedWidth(20)
+        
+        kfold_controls_layout.addWidget(self.kfold_train_btn)
+        kfold_controls_layout.addWidget(k_label)
+        kfold_controls_layout.addWidget(self.k_spinbox)
+        kfold_controls_layout.addStretch()
+        
+        # K-fold results
+        self.kfold_result_label = QLabel("No cross-validation performed yet")
+        self.kfold_result_label.setWordWrap(True)
+        
+        kfold_layout.addLayout(kfold_controls_layout)
+        kfold_layout.addWidget(self.kfold_result_label)
+
         # Metrics group box
         self.model_name = ""
         self.metrics_group = QGroupBox(f"{self.model_name} Stats")
@@ -444,7 +620,7 @@ class ModelTab(QWidget):
         self.model_info_group.setContentsMargins(0, 0, 0, 0)
 
         # Add all components to left panel
-        for widget in [model_group, self.metrics_group, self.parameters_group, self.model_info_group]:
+        for widget in [model_group, self.metrics_group, self.parameters_group, kfold_group, self.model_info_group]:
             left_layout.addWidget(widget)
         left_layout.addStretch()
 
