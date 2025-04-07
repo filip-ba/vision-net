@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
+from PyQt6.QtCore import Qt
 
 from src.utils.custom_separator import create_separator
 
@@ -13,8 +14,13 @@ class MetricsWidget(QWidget):
 
         self.accuracy_label = QLabel("Accuracy: -")
         self.accuracy_label.setObjectName("MetricsAccuracy")
+        self.accuracy_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
+        
         self.precision_label = QLabel("Precision: -")
+        self.precision_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
+        
         self.recall_label = QLabel("Recall: -")
+        self.recall_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
 
         layout.addWidget(self.accuracy_label)
         layout.addWidget(create_separator("vertical"))

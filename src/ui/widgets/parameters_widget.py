@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PyQt6.QtCore import Qt
 
 from src.utils.custom_separator import create_separator
 
@@ -13,12 +14,19 @@ class ParametersWidget(QWidget):
         
         self.time_label = QLabel("Training Time: -")
         self.time_label.setObjectName("ModelTimeLabel")
+        self.time_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
+        
         self.epochs_label = QLabel("Epochs: -")
         self.epochs_label.setObjectName("ModelEpochsLabel")
+        self.epochs_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
+        
         self.lr_label = QLabel("Learning Rate: -")
         self.lr_label.setObjectName("ModelLrLabel")
+        self.lr_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
+        
         self.momentum_label = QLabel("Momentum: -")
         self.momentum_label.setObjectName("ModelMomentumLabel")
+        self.momentum_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
         
         layout.addWidget(self.time_label)
         layout.addWidget(create_separator("horizontal"))

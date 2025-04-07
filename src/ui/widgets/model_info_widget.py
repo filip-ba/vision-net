@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PyQt6.QtCore import Qt
 
 from src.utils.custom_separator import create_separator
 
@@ -16,9 +17,11 @@ class ModelInfoWidget(QWidget):
 
         self.model_status_label = QLabel("No model loaded")
         self.model_status_label.setObjectName("ModelStatus")
+        self.model_status_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
 
         self.model_file_label = QLabel("Model File: None")
         self.model_file_label.setObjectName("ModelFileLabel")
+        self.model_file_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
 
         layout.addWidget(self.model_status_label)
         layout.addWidget(create_separator("horizontal"))
