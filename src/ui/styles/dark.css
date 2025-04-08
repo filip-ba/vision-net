@@ -92,6 +92,20 @@ QPushButton:checked:pressed {
     background-color: #575757;
 }
 
+#sidebar-toggle-button {
+    background-color: #303030;
+    border: 1px solid #161616;
+    border-radius: 15px;
+}
+
+#sidebar-toggle-button:hover {
+    background-color: #3e3e3e;
+}
+
+#sidebar-toggle-button:pressed {
+    background-color: #575757;
+}
+
 /*------------------------------------------------- Tab Widget -------------------------------------------------*/
 QTabWidget::pane {
     background-color: #242424;

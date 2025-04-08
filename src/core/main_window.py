@@ -100,6 +100,7 @@ class MainWindow(QMainWindow):
 
         theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
         
+        # Update sidebar buttons
         for i in range(self.sidebar.layout().count()):
             item = self.sidebar.layout().itemAt(i)
             if item and item.widget() and isinstance(item.widget(), QPushButton):
@@ -113,6 +114,7 @@ class MainWindow(QMainWindow):
                     icon_path = os.path.join(icons_dir, f"classification-{theme_suffix}.png")
                 elif button_text == "Settings":
                     icon_path = os.path.join(icons_dir, f"settings-{theme_suffix}.png")
+                    
                 if icon_path and os.path.exists(icon_path):
 
                     # Create composite icon with an empty space
@@ -126,6 +128,13 @@ class MainWindow(QMainWindow):
                     painter.end()
                     
                     button.setIcon(QIcon(combined))
+        
+        # Update toggle button icon
+        menu_icon_path = os.path.join(icons_dir, f"menu-{theme_suffix}.png")
+        if os.path.exists(menu_icon_path):
+            menu_icon = QPixmap(menu_icon_path)
+            self.sidebar_toggle_button.setIcon(QIcon(menu_icon))
+            self.sidebar_toggle_button.setIconSize(QSize(16, 16))
 
     def _adjust_sidebar_width(self):
         """Adjust sidebar width based on window width"""
@@ -139,6 +148,9 @@ class MainWindow(QMainWindow):
             if self.main_layout.indexOf(self.sidebar_scroll) != -1:
                 # Temporarily disconnect the sidebar from the layout
                 self.main_layout.removeWidget(self.sidebar_scroll)
+            
+            # Show the toggle button
+            self.sidebar_toggle_button.setVisible(True)
         else:
             # Check if the sidebar is visible, if not, add it back
             if not self.sidebar_scroll.isVisible():
@@ -162,6 +174,25 @@ class MainWindow(QMainWindow):
             
             self.sidebar_scroll.setMinimumWidth(sidebar_width)
             self.sidebar_scroll.setMaximumWidth(sidebar_width)
+            
+            # Hide the toggle button when sidebar is visible
+            self.sidebar_toggle_button.setVisible(False)
+
+    def _toggle_sidebar(self):
+        """Toggle sidebar visibility when the toggle button is clicked"""
+        if self.sidebar_scroll.isVisible():
+            # Hide sidebar
+            self.sidebar_scroll.setVisible(False)
+            if self.main_layout.indexOf(self.sidebar_scroll) != -1:
+                self.main_layout.removeWidget(self.sidebar_scroll)
+        else:
+            # Show sidebar
+            self.sidebar_scroll.setVisible(True)
+            if self.main_layout.indexOf(self.sidebar_scroll) == -1:
+                content_widget = self.main_layout.itemAt(0).widget()
+                self.main_layout.removeWidget(content_widget)
+                self.main_layout.addWidget(self.sidebar_scroll, 1)
+                self.main_layout.addWidget(content_widget, 5)
 
     def eventFilter(self, obj, event):
         """Handle window resize events with event filter"""   
@@ -199,12 +230,34 @@ class MainWindow(QMainWindow):
         self.sidebar_scroll.setMinimumWidth(self.MIN_SIDEBAR_WIDTH)
         self.sidebar_scroll.setMaximumWidth(self.MIN_SIDEBAR_WIDTH)
         
+        # Create sidebar toggle button
+        self.sidebar_toggle_button = QPushButton()
+        self.sidebar_toggle_button.setObjectName("sidebar-toggle-button")
+        self.sidebar_toggle_button.setFixedSize(30, 30)
+        self.sidebar_toggle_button.setVisible(False)
+        self.sidebar_toggle_button.clicked.connect(self._toggle_sidebar)
+        
+        # Set toggle button icon
+        theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
+        menu_icon_path = os.path.join(icons_dir, f"menu-{theme_suffix}.png")
+        if os.path.exists(menu_icon_path):
+            menu_icon = QPixmap(menu_icon_path)
+            self.sidebar_toggle_button.setIcon(QIcon(menu_icon))
+            self.sidebar_toggle_button.setIconSize(QSize(16, 16))
+        
         # Container for the model settings and image classification
         content_container = QWidget()
         content_layout = QVBoxLayout(content_container)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
         
+        # Add toggle button to the top-left corner of the content container
+        toggle_button_layout = QHBoxLayout()
+        toggle_button_layout.setContentsMargins(10, 10, 0, 0)
+        toggle_button_layout.addWidget(self.sidebar_toggle_button)
+        toggle_button_layout.addStretch()
+        content_layout.addLayout(toggle_button_layout)
+
         # Create stacked widget for switching between settings and classification
         self.content_stack = QStackedWidget()
         
