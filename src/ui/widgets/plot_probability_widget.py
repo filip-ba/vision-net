@@ -142,7 +142,7 @@ class PlotProbabilityWidget(QWidget):
         for bar in bars:
             height = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2., height,
-                f'{height:.0%}',
+                f'{height:.2%}',
                 ha="center", va="bottom")
 
         ax.set_title('')
