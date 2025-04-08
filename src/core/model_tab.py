@@ -567,7 +567,7 @@ class ModelTab(QWidget):
         left_layout.setContentsMargins(0, 0, 0, 0)
         
         # Dataset, model and training
-        model_group = QGroupBox("Model")
+        model_group = QGroupBox("Model Controls")
         model_group.setObjectName("model-controls")
         
         model_layout = QVBoxLayout()
