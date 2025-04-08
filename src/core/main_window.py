@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
         # Sidebar width settings
         self.MIN_SIDEBAR_WIDTH = 190
         self.MAX_SIDEBAR_WIDTH = 260
-        self.SIDEBAR_HIDE_THRESHOLD = 900
+        self.SIDEBAR_HIDE_THRESHOLD = 950
         
         # Event filter for window resize
         self.installEventFilter(self)
@@ -205,11 +205,6 @@ class MainWindow(QMainWindow):
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
         
-        # Create a scrollable area for the content stack
-        content_scroll = QScrollArea()
-        content_scroll.setWidgetResizable(True)
-        content_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        
         # Create stacked widget for switching between settings and classification
         self.content_stack = QStackedWidget()
         
@@ -235,21 +230,34 @@ class MainWindow(QMainWindow):
         self.settings_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.settings_widget.style_changed.connect(self._update_sidebar_icons)
 
-        # Add widgets to the content stack
-        self.content_stack.addWidget(self.tab_widget)
-        self.content_stack.addWidget(self.image_classification_widget)
-        self.content_stack.addWidget(self.settings_widget) 
+        # Create scroll areas for each page
+        models_scroll = QScrollArea()
+        models_scroll.setWidgetResizable(True)
+        models_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        models_scroll.setWidget(self.tab_widget)
 
-        # Add the stacked widget to the scroll area
-        content_scroll.setWidget(self.content_stack)
+        classification_scroll = QScrollArea()
+        classification_scroll.setWidgetResizable(True)
+        classification_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        classification_scroll.setWidget(self.image_classification_widget)
+
+        settings_scroll = QScrollArea()
+        settings_scroll.setWidgetResizable(True)
+        settings_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        settings_scroll.setWidget(self.settings_widget)
+
+        # Add scroll areas to the content stack
+        self.content_stack.addWidget(models_scroll)
+        self.content_stack.addWidget(classification_scroll)
+        self.content_stack.addWidget(settings_scroll)
 
         self.status_bar = QStatusBar()
         self.status_bar.setObjectName("status-bar")
         
-        content_layout.addWidget(content_scroll, 1)
+        content_layout.addWidget(self.content_stack, 1)
         content_layout.addWidget(self.status_bar, 0)
         
-        self.main_layout.addWidget(self.sidebar_scroll, 1)  
+        self.main_layout.addWidget(self.sidebar_scroll, 1)
         self.main_layout.addWidget(content_container, 5)  
         
         self.image_classification_widget.classify_clicked.connect(self._classify_all) 

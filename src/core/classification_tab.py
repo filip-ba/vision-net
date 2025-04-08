@@ -137,6 +137,7 @@ class ClassificationTab(QWidget):
         
         # Create probability plots widget
         self.plot_widget = PlotProbabilityWidget()
+        self.plot_widget.setMinimumHeight(300)
         bottom_layout.addWidget(self.plot_widget)
         
         return bottom_layout
