@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QDialog, QProgressBar, QVBoxLayout, QLabel, QPushButton
+from PyQt6.QtWidgets import QDialog, QProgressBar, QVBoxLayout, QLabel, QPushButton, QMessageBox
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 import time
 
@@ -157,10 +157,22 @@ class ProgressDialog(QDialog):
             self.time_label.setText(f"Estimated time remaining: {time_str}")
 
     def cancel(self):
-        if self.thread:
-            self.thread.cancel()
-        self.close()
-        self.error_occurred.emit("Training canceled by user")
+        # Show confirmation dialog
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Cancel")
+        msg_box.setText("Are you sure you want to cancel the training?")
+        msg_box.setInformativeText("The training process will be terminated and all progress will be lost.")
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        msg_box.setDefaultButton(QMessageBox.StandardButton.No)
+        msg_box.setObjectName("training-cancel-dialog")
+
+        reply = msg_box.exec()
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            if self.thread:
+                self.thread.cancel()
+            self.close()
+            self.error_occurred.emit("Training canceled by user")
 
     def on_training_finished(self, result):
         """Changes design of the dialog when training is finished and saves the training result"""

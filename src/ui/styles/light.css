@@ -227,6 +227,16 @@ QMessageBox#clear-model-message QLabel {
     color: #2d2d2d;
 }
 
+QMessageBox#training-cancel-dialog {
+    background-color: #fafafa;
+    color: #2d2d2d;
+}
+
+QMessageBox#training-cancel-dialog QLabel {
+    background-color: #fafafa;
+    color: #2d2d2d;
+}
+
 /*------------------------------------------------- Spacer -------------------------------------------------*/
 #spacer {
     background-color: #ffffff;
