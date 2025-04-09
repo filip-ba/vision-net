@@ -149,6 +149,34 @@ class BaseModel(ABC):
         train_loss_history = []
         val_loss_history = []
         
+        initial_train_loss = 0.0
+        initial_val_loss = 0.0
+        
+        # Get initial training loss
+        self.net.eval()  # Use eval mode to avoid batch norm/dropout effects
+        with torch.no_grad():
+            for i, (inputs, labels) in enumerate(self.trainloader):
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                outputs = self.net(inputs)
+                loss = self.criterion(outputs, labels)
+                initial_train_loss += loss.item()
+                
+            # Get initial validation loss
+            for inputs, labels in self.valloader:
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                outputs = self.net(inputs)
+                loss = self.criterion(outputs, labels)
+                initial_val_loss += loss.item()
+        
+        # Add initial loss values to history
+        initial_train_loss = initial_train_loss / len(self.trainloader)
+        initial_val_loss = initial_val_loss / len(self.valloader)
+        train_loss_history.append(initial_train_loss)
+        val_loss_history.append(initial_val_loss)
+        
+        if progress_callback:
+            progress_callback(0.0, initial_train_loss)
+        
         for epoch in range(epochs):
             train_loss = 0.0
             val_loss = 0.0

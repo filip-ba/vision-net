@@ -68,16 +68,22 @@ class TrainingPlotWidget(QWidget):
         ax.grid(True)
 
         if train_loss_history is not None and val_loss_history is not None:
-            x = list(range(1, len(train_loss_history) + 1)) if epochs is None else list(range(1, epochs + 1))
+            # Create x axis starting from 0 to number of epochs
+            x = list(range(0, len(train_loss_history))) if epochs is None else list(range(0, epochs + 1))
             
-            # In case of single epoch, plot points instead of lines
-            if len(train_loss_history) == 1:
+            # In case we only have initial values or a single epoch
+            if len(train_loss_history) <= 2:
                 ax.plot(x, train_loss_history, 'bo-', label='Training Loss', markersize=8)  
                 ax.plot(x, val_loss_history, 'ro-', label='Validation Loss', markersize=8)  
-                ax.set_xticks([1]) 
+                ax.set_xticks(x)
             else:
                 ax.plot(x, train_loss_history, 'b-', label='Training Loss')
                 ax.plot(x, val_loss_history, 'r-', label='Validation Loss')
+                
+                # Add markers at epoch 0 to highlight initial values
+                ax.plot(0, train_loss_history[0], 'bo', markersize=6)
+                ax.plot(0, val_loss_history[0], 'ro', markersize=6)
+            
             ax.legend()
             
         plot_widget.canvas.draw() 
