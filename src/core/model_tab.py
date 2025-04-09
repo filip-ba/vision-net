@@ -3,7 +3,6 @@ from PyQt6.QtWidgets import (
     QFileDialog, QStackedWidget, QFrame, QDialog, QSpinBox, QLabel, QMessageBox )
 from PyQt6.QtCore import pyqtSignal, Qt
 import os
-import torch
 
 from src.ui.dialogs.progress_dialog import ProgressDialog
 from src.ui.widgets.training_plot_widget import TrainingPlotWidget
@@ -69,11 +68,9 @@ class ModelTab(QWidget):
         # Update loss history plot if history exists
         if (self.model.history['train_loss'] is not None and 
             self.model.history['val_loss'] is not None):
-            # Subtract 1 from the length because the history includes initial values at epoch 0
-            epochs = len(self.model.history['train_loss']) - 1
             self.plot_widget1.plot_loss_history(
                 self.plot_widget1,
-                epochs,
+                len(self.model.history['train_loss']),
                 self.model.history['train_loss'],
                 self.model.history['val_loss']
             )
@@ -336,6 +333,7 @@ class ModelTab(QWidget):
         if training_result is not None:
             train_loss_history, val_loss_history = training_result
 
+            # Plotting loss history
             self.plot_widget1.plot_loss_history(
                 self.plot_widget1, 
                 self.model.training_params['epochs'], 
