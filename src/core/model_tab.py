@@ -552,7 +552,7 @@ class ModelTab(QWidget):
         
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
         self.splitter.setChildrenCollapsible(False)
-        self.splitter.setHandleWidth(6)
+        self.splitter.setHandleWidth(10)
 
         left_panel = self._create_left_panel()
         left_panel.setMinimumWidth(400)
@@ -676,7 +676,7 @@ class ModelTab(QWidget):
         frame_layout.setSpacing(9)
 
         self.plot_stack = QStackedWidget()
-        self.plot_stack.setMinimumWidth(400)
+        self.plot_stack.setMinimumWidth(340)
         self.plot_widget1 = TrainingPlotWidget("Loss History")
         self.plot_widget2 = TrainingPlotWidget("Confusion Matrix")
         

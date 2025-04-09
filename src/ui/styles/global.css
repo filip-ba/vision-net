@@ -130,7 +130,7 @@ QGroupBox::title {
 
 #model-info {
     margin-top: 10px;
-    margin-left: 9px;
+    margin-left: 20px;
 }
 
 #results-group {
@@ -192,7 +192,7 @@ QProgressBar {
     border: 1px solid;
     border-radius: 12px;
     padding: 0px;
-    margin-left: 10px;
+    margin-left: 20px;
     margin-right: 20px;
     margin-top: 50px;
     margin-bottom: 20px;
