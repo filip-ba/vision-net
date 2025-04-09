@@ -2,9 +2,9 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy
 from PyQt6.QtCore import Qt
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
 import numpy as np
-
-from src.utils.custom_canvas import ScrollableFigureCanvas
 
 
 class TrainingPlotWidget(QWidget):
@@ -24,11 +24,18 @@ class TrainingPlotWidget(QWidget):
         spacer.setObjectName("spacer")
 
         self.figure = Figure(figsize=(5, 4), dpi=100)
-        self.canvas = ScrollableFigureCanvas(self.figure)
+        self.canvas = FigureCanvas(self.figure)
         self.canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        
+        self.figure.patch.set_facecolor('white')
+        self.canvas.setStyleSheet("background-color: white;")
+        
+        self.toolbar = NavigationToolbar(self.canvas, self)
+        self.toolbar.setStyleSheet("background-color: white;")
 
         main_layout.addWidget(self.title_label)
         main_layout.addWidget(spacer)
+        main_layout.addWidget(self.toolbar)
         main_layout.addWidget(self.canvas)
 
     def plot_confusion_matrix(self, plot_widget, conf_mat = None, classes = None):
