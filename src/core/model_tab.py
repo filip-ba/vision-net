@@ -412,7 +412,7 @@ class ModelTab(QWidget):
             # Perform K-fold cross-validation
             self.accuracies = []  # Store accuracies as instance variable
             self.current_fold = 0  # Track current fold
-            
+
             # Start the first fold
             self._start_next_fold(k, epochs, learning_rate, momentum)
 
@@ -466,6 +466,7 @@ class ModelTab(QWidget):
         """Handle completion of a single fold"""
         try:
             if testing_result is not None and 'accuracy' in testing_result:
+                print(f"Fold {self.current_fold}: Accuracy = {testing_result['accuracy']}")
                 self.accuracies.append(testing_result['accuracy'])
                 
                 # Move to the next fold
