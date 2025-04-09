@@ -209,7 +209,7 @@ class MainWindow(QMainWindow):
         
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
-        self.setGeometry(50, 50, 1200, 900)
+        self.setGeometry(50, 50, 1700, 900)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
