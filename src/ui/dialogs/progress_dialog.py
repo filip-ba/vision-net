@@ -142,18 +142,22 @@ class ProgressDialog(QDialog):
         progress_percent = int(progress * 100)
         self.progress_bar.setValue(progress_percent)
 
-        if self.start_time and progress > 0:
+        status_text = "Training in progress... "
+        if current_loss is not None:
+            status_text += f"(Loss: {current_loss:.4f})"
+        self.status_label.setText(status_text)
+        
+        if self.start_time:
             elapsed_time = time.time() - self.start_time
-            estimated_total_time = elapsed_time / progress
+            if progress < 0.001: 
+                estimated_total_time = elapsed_time * 100
+            else:
+                estimated_total_time = elapsed_time / progress
+                
             remaining_time = estimated_total_time - elapsed_time
             minutes = int(remaining_time // 60)
             seconds = int(remaining_time % 60)
             time_str = f"{minutes}m {seconds}s"
-            status_text = "Training in progress... "
-            
-            if current_loss is not None:
-                status_text += f"(Loss: {current_loss:.4f})"
-            self.status_label.setText(status_text)
             self.time_label.setText(f"Estimated time remaining: {time_str}")
 
     def cancel(self):

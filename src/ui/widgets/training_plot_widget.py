@@ -75,16 +75,22 @@ class TrainingPlotWidget(QWidget):
         ax.grid(True)
 
         if train_loss_history is not None and val_loss_history is not None:
-            x = list(range(1, len(train_loss_history) + 1)) if epochs is None else list(range(1, epochs + 1))
+            min_len = min(len(train_loss_history), len(val_loss_history))
             
-            # In case of single epoch, plot points instead of lines
-            if len(train_loss_history) == 1:
-                ax.plot(x, train_loss_history, 'bo-', label='Training Loss', markersize=8)  
-                ax.plot(x, val_loss_history, 'ro-', label='Validation Loss', markersize=8)  
-                ax.set_xticks([1]) 
-            else:
-                ax.plot(x, train_loss_history, 'b-', label='Training Loss')
-                ax.plot(x, val_loss_history, 'r-', label='Validation Loss')
-            ax.legend()
-            
-        plot_widget.canvas.draw() 
+            if min_len > 0:
+                if len(train_loss_history) == 1:
+                    x_train = [0]
+                    x_val = [0]
+                else:
+                    epochs_actual = len(train_loss_history) - 1  
+                    x_train = [i * epochs_actual / (len(train_loss_history) - 1) for i in range(len(train_loss_history))]
+                    x_val = [i * epochs_actual / (len(val_loss_history) - 1) for i in range(len(val_loss_history))]
+                
+                ax.plot(x_train, train_loss_history, 'b-', label='Training Loss')
+                ax.plot(x_val, val_loss_history, 'r-', label='Validation Loss')
+                
+                ax.set_xticks(range(epochs_actual + 1))
+                
+                ax.legend()
+                
+        plot_widget.canvas.draw()

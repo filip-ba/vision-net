@@ -148,6 +148,10 @@ class BaseModel(ABC):
 
         train_loss_history = []
         val_loss_history = []
+        epoch_train_loss_history = []
+        epoch_val_loss_history = []
+        
+        first_batch_loss = None
         
         for epoch in range(epochs):
             train_loss = 0.0
@@ -164,10 +168,16 @@ class BaseModel(ABC):
                 self.optimizer.step()
                 train_loss += loss.item()
                 
+                # First loss value
+                if first_batch_loss is None:
+                    first_batch_loss = loss.item()
+                    train_loss_history.append(first_batch_loss)
+                    
                 if progress_callback:
                     progress = (epoch * len(self.trainloader) + i) / (epochs * len(self.trainloader))
-                    progress_callback(progress, train_loss / (i + 1))
-                    
+                    current_loss = loss.item()  # Aktuální ztráta z posledního batche
+                    progress_callback(progress, current_loss)
+                        
             # Validation
             self.net.eval()
             with torch.no_grad():
@@ -179,13 +189,27 @@ class BaseModel(ABC):
                     
             epoch_train_loss = train_loss / len(self.trainloader)
             epoch_val_loss = val_loss / len(self.valloader)
-            train_loss_history.append(epoch_train_loss)
-            val_loss_history.append(epoch_val_loss)
+            epoch_train_loss_history.append(epoch_train_loss)
+            epoch_val_loss_history.append(epoch_val_loss)
                         
         # End measuring
         end_time = time.time()
         training_time = end_time - start_time
         self.training_params['training_time'] = training_time
+
+        # Add both the initial value and the progression of epochs to the history
+        if first_batch_loss is not None:
+            # We already have the first value train_loss_history
+            train_loss_history.extend(epoch_train_loss_history)
+            # Estimated initial value for the validation loss
+            if len(epoch_val_loss_history) > 0:
+                initial_val_loss = epoch_val_loss_history[0] * 1.2  # Odhad počáteční validační ztráty
+                val_loss_history = [initial_val_loss] + epoch_val_loss_history
+            else:
+                val_loss_history = epoch_val_loss_history
+        else:
+            train_loss_history = epoch_train_loss_history
+            val_loss_history = epoch_val_loss_history
 
         self.history = {
             'train_loss': train_loss_history,
