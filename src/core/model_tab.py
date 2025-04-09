@@ -466,7 +466,6 @@ class ModelTab(QWidget):
         """Handle completion of a single fold"""
         try:
             if testing_result is not None and 'accuracy' in testing_result:
-                print(f"Fold {self.current_fold}: Accuracy = {testing_result['accuracy']}")
                 self.accuracies.append(testing_result['accuracy'])
                 
                 # Move to the next fold
@@ -552,13 +551,15 @@ class ModelTab(QWidget):
         main_layout.setSpacing(0)
         
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
-        
+        self.splitter.setChildrenCollapsible(False)
+        self.splitter.setHandleWidth(6)
+
         left_panel = self._create_left_panel()
-        left_panel.setMinimumWidth(100)
+        left_panel.setMinimumWidth(400)
         self.splitter.addWidget(left_panel)
         
         right_panel = self._create_right_panel()
-        right_panel.setMinimumWidth(100)
+        right_panel.setMinimumWidth(400)
         self.splitter.addWidget(right_panel)
         
         self.splitter.setSizes([int(self.width() * 0.4), int(self.width() * 0.6)])
