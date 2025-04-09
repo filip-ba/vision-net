@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import ( 
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox,
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QSplitter, 
     QFileDialog, QStackedWidget, QFrame, QDialog, QSpinBox, QLabel, QMessageBox )
 from PyQt6.QtCore import pyqtSignal, Qt
 import os
@@ -546,18 +546,23 @@ class ModelTab(QWidget):
         }
 
     def _create_ui(self):
-        # Main layout
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(0)
-
-        # Left panel
-        left_panel = self._create_left_panel()
-        main_layout.addWidget(left_panel)
         
-        # Right panel (plots)
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
+        
+        left_panel = self._create_left_panel()
+        left_panel.setMinimumWidth(100)
+        self.splitter.addWidget(left_panel)
+        
         right_panel = self._create_right_panel()
-        main_layout.addWidget(right_panel)
+        right_panel.setMinimumWidth(100)
+        self.splitter.addWidget(right_panel)
+        
+        self.splitter.setSizes([int(self.width() * 0.4), int(self.width() * 0.6)])
+        
+        main_layout.addWidget(self.splitter)
 
     def _create_left_panel(self):
         left_panel = QWidget()
