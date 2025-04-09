@@ -121,7 +121,7 @@ QTabBar::tab:selected {
     border-bottom-color: #727273;
 }
 
-QTabBar::tab:hover:!selected {
+QTabBar::tab:hover:selected {
     background-color: #3a3a3a;
 }
 
@@ -237,4 +237,11 @@ QMessageBox#training-cancel-dialog QLabel {
 /*------------------------------------------------- Spacer -------------------------------------------------*/
 #spacer {
     background-color: #363636;
+}
+
+/*------------------------------------------------- Splitter -------------------------------------------------*/
+#splitter-windows::handle {
+    background-color: #303030;
+    margin: 10px;
+    width: 2px;
 }

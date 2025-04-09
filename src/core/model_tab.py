@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import (
     QFileDialog, QStackedWidget, QFrame, QDialog, QSpinBox, QLabel, QMessageBox )
 from PyQt6.QtCore import pyqtSignal, Qt
 import os
+import platform
 
 from src.ui.dialogs.progress_dialog import ProgressDialog
 from src.ui.widgets.training_plot_widget import TrainingPlotWidget
@@ -552,14 +553,19 @@ class ModelTab(QWidget):
         
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
         self.splitter.setChildrenCollapsible(False)
-        self.splitter.setHandleWidth(10)
+        if platform.system() == 'Windows':
+            self.splitter.setObjectName("splitter-windows")
+            self.splitter.setHandleWidth(2)
+        else:
+            self.splitter.setObjectName("splitter-linux")
+            self.splitter.setHandleWidth(12)
 
         left_panel = self._create_left_panel()
-        left_panel.setMinimumWidth(200)
+        left_panel.setMinimumWidth(400)
         self.splitter.addWidget(left_panel)
         
         right_panel = self._create_right_panel()
-        right_panel.setMinimumWidth(340)
+        right_panel.setMinimumWidth(380)
         self.splitter.addWidget(right_panel)
         
         self.splitter.setSizes([int(self.width() * 0.4), int(self.width() * 0.6)])
@@ -676,7 +682,7 @@ class ModelTab(QWidget):
         frame_layout.setSpacing(9)
 
         self.plot_stack = QStackedWidget()
-        self.plot_stack.setMinimumWidth(200)
+        self.plot_stack.setMinimumWidth(300)
         self.plot_widget1 = TrainingPlotWidget("Loss History")
         self.plot_widget2 = TrainingPlotWidget("Confusion Matrix")
         
