@@ -121,7 +121,7 @@ QTabBar::tab:selected {
     border-bottom-color: #727273;
 }
 
-QTabBar::tab:hover:selected {
+QTabBar::tab:hover:!selected {
     background-color: #3a3a3a;
 }
 

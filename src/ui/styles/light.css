@@ -122,8 +122,8 @@ QTabBar::tab:selected {
     border-bottom-color: #d8d8d8;
 }
 
-QTabBar::tab:hover:selected {
-    background-color: #f30909;
+QTabBar::tab:hover:!selected {
+    background-color: #dedede;
 }
 
 /*------------------------------------------------- Group Box -------------------------------------------------*/
