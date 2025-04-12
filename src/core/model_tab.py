@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import pyqtSignal, Qt
 import os
 import platform
+import torch
 
 from src.ui.dialogs.progress_dialog import ProgressDialog
 from src.ui.widgets.training_plot_widget import TrainingPlotWidget
@@ -222,6 +223,22 @@ class ModelTab(QWidget):
 
         if file_path:
             try:
+                # Load model and Check if the it's architecture matches
+                checkpoint = torch.load(file_path, weights_only=False)  
+
+                if isinstance(self.model, SimpleCnnModel):
+                    if not all(key in checkpoint['model_state'] for key in ['conv1.weight', 'conv2.weight']):
+                        raise ValueError("This model file is not compatible with Simple CNN architecture")
+                elif isinstance(self.model, ResNetModel):
+                    if not all(key in checkpoint['model_state'] for key in ['layer1.0.conv1.weight', 'layer1.0.conv2.weight']):
+                        raise ValueError("This model file is not compatible with ResNet architecture")
+                elif isinstance(self.model, VGG16Model):
+                    if not all(key in checkpoint['model_state'] for key in ['features.0.weight', 'features.2.weight', 'classifier.6.weight']):
+                        raise ValueError("This model file is not compatible with VGG16 architecture")
+                elif isinstance(self.model, EfficientNetModel):
+                    if not all(key in checkpoint['model_state'] for key in ['features.0.0.weight', 'features.1.0.block.0.0.weight', 'classifier.1.weight']):
+                        raise ValueError("This model file is not compatible with EfficientNet architecture")
+
                 # Reset metrics, parameters and plots first
                 self.metrics_widget.reset_metrics()
                 self.parameters_widget.reset_parameters()
@@ -561,7 +578,7 @@ class ModelTab(QWidget):
             self.splitter.setHandleWidth(12)
 
         left_panel = self._create_left_panel()
-        left_panel.setMinimumWidth(400)
+        left_panel.setMinimumWidth(420)
         self.splitter.addWidget(left_panel)
         
         right_panel = self._create_right_panel()
