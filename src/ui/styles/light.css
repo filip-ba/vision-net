@@ -217,12 +217,12 @@ QScrollBar::handle:vertical:pressed, QScrollBar::handle:horizontal:pressed {
 }
 
 /*------------------------------------------------- Message Box -------------------------------------------------*/
-QMessageBox#clear-model-message {
+QMessageBox#msg-box {
     background-color: #fafafa;
     color: #2d2d2d;
 }
 
-QMessageBox#clear-model-message QLabel {
+QMessageBox#msg-box QLabel {
     background-color: #fafafa;
     color: #2d2d2d;
 }

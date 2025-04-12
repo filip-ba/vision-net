@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QFileDialog 
 from PyQt6.QtGui import QPixmap, QImageReader
 from PyQt6.QtCore import pyqtSignal, QTimer
-import os, random
+import os, random, configparser
 
 from src.ui.widgets.image_classification_widget import ImageClassificationWidget
 from src.ui.widgets.results_widget import ResultsWidget
@@ -29,15 +29,27 @@ class ClassificationTab(QWidget):
         self.load_random_test_image()
         
     def load_random_test_image(self):
-        dataset_path = "./dataset/fruitveg-dataset/test"
+        # Get dataset path from config
+        config = configparser.ConfigParser()
+        config_path = "./model_config.ini"
+        dataset_path = "./dataset/fruitveg-dataset"  
+        
+        if os.path.exists(config_path):
+            config.read(config_path)
+            if 'Dataset' in config and 'path' in config['Dataset']:
+                config_path = config['Dataset']['path']
+                if os.path.exists(config_path):
+                    dataset_path = config_path
+        
+        test_path = os.path.join(dataset_path, "test")
 
-        if os.path.exists(dataset_path):
-            class_dirs = [d for d in os.listdir(dataset_path) 
-                        if os.path.isdir(os.path.join(dataset_path, d))]
+        if os.path.exists(test_path):
+            class_dirs = [d for d in os.listdir(test_path) 
+                        if os.path.isdir(os.path.join(test_path, d))]
             
             if class_dirs:
                 random_class = random.choice(class_dirs)
-                class_path = os.path.join(dataset_path, random_class)
+                class_path = os.path.join(test_path, random_class)
                 
                 images = [f for f in os.listdir(class_path) 
                          if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
