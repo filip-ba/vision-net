@@ -205,7 +205,7 @@ class MainWindow(QMainWindow):
     def _create_ui(self):
         project_root = self._return_project_root_folder()
         icons_dir = os.path.join(project_root, "assets/icons")
-        icon_path = os.path.join(icons_dir, "app_icon.png")
+        icon_path = os.path.join(icons_dir, "app-icon.png")
         
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
