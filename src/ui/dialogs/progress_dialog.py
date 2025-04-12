@@ -161,11 +161,9 @@ class ProgressDialog(QDialog):
             self.time_label.setText(f"Estimated time remaining: {time_str}")
 
     def cancel(self):
-        # Zavřeme okno, což vyvolá closeEvent, kde se zobrazí dialog
         self.close()
 
     def closeEvent(self, event):
-        # Pokud je trénování stále v běhu, zobraz potvrzovací dialog
         if self.thread and self.thread.isRunning():
             msg_box = QMessageBox(self)
             msg_box.setWindowTitle("Cancel")
@@ -181,11 +179,10 @@ class ProgressDialog(QDialog):
                 if self.thread:
                     self.thread.cancel()
                 self.error_occurred.emit("Training canceled by user")
-                event.accept()  # Povolí zavření okna
+                event.accept() 
             else:
-                event.ignore()  # Zabrání zavření okna
+                event.ignore() 
         else:
-            # Pokud trénování není v běhu, zavři dialog bez potvrzení
             event.accept()
 
     def on_training_finished(self, result):
