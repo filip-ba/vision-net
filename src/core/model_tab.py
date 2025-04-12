@@ -5,6 +5,7 @@ from PyQt6.QtCore import pyqtSignal, Qt
 import os
 import platform
 import torch
+import configparser
 
 from src.ui.dialogs.progress_dialog import ProgressDialog
 from src.ui.widgets.training_plot_widget import TrainingPlotWidget
@@ -37,7 +38,7 @@ class ModelTab(QWidget):
 
         # Try to load the dataset and default model on startup
         self._load_dataset()
-        self._load_default_model()
+        self._load_model_on_start()
 
         # Connect signals
         self._setup_connections()    
@@ -166,47 +167,80 @@ class ModelTab(QWidget):
             error_msg = f"Error loading dataset: {str(e)}"
             print(f"--------------------------------------{error_msg}")
             self.status_message.emit(error_msg, 8000)
-  
-    def _load_default_model(self):
+
+    def _load_model_on_start(self):
         """Attempts to load the default model on startup"""
-        # Determine the correct default model path based on model class
+        # Determine the model type and default paths
         if self.model_class == SimpleCnnModel:
-            default_model_path = "./saved_models/simple_cnn_default_model.pth"
+            default_model_path = "./saved_models/simple_cnn.pth"
+            model_type = "simple_cnn"
             self.model_name = "Simple CNN"
         elif self.model_class == ResNetModel:
-            default_model_path = "./saved_models/resnet_default_model.pth"
+            default_model_path = "./saved_models/resnet.pth"
+            model_type = "resnet"
             self.model_name = "ResNet"
         elif self.model_class == EfficientNetModel:
-            default_model_path = "./saved_models/efficientnet_default_model.pth"
+            default_model_path = "./saved_models/efficientnet.pth"
+            model_type = "efficientnet"
             self.model_name = "EfficientNet"
         elif self.model_class == VGG16Model:
-            default_model_path = "./saved_models/vgg16_default_model.pth"
+            default_model_path = "./saved_models/vgg16.pth"
+            model_type = "vgg16"
             self.model_name = "VGG16"
         else:
             default_model_path = None
             self.model_info_widget.set_model_status("No model loaded", "red")
             return
 
+        # Try to get the last loaded model path from config
+        config = configparser.ConfigParser()
+        config_path = "./model_config.ini"
+        
+        # Create default configuration if it doesn't exist
+        if not os.path.exists(config_path):
+            config['LastModels'] = {
+                'simple_cnn': default_model_path,
+                'resnet': default_model_path,
+                'efficientnet': default_model_path,
+                'vgg16': default_model_path
+            }
+            with open(config_path, 'w') as configfile:
+                config.write(configfile)
+        else:
+            config.read(config_path)
+            
+        # Get the last used model path from config, fall back to default if not found
+        try:
+            if 'LastModels' in config and model_type in config['LastModels']:
+                last_model_path = config['LastModels'][model_type]
+                if os.path.exists(last_model_path):
+                    model_path = last_model_path
+                else:
+                    model_path = default_model_path
+            else:
+                model_path = default_model_path
+        except Exception as e:
+            self.status_message.emit(f"Error reading config: {str(e)}, using default model path", 8000)
+            model_path = default_model_path
+
         self.metrics_group.setTitle(f"{self.model_name} Stats")
 
-        # Attempt to load default model
+        # Attempt to load the model
         try:
             self.model.initialize_model()
-            if os.path.exists(default_model_path):
+            if os.path.exists(model_path):
                 try:
-                    metadata = self.model.load_model(default_model_path)
-
+                    metadata = self.model.load_model(model_path)
                     # Update UI with loaded data
                     self._update_ui_from_model_data()
-                    # Display only the filename, not the full path
-                    filename = os.path.basename(default_model_path)
+                    filename = os.path.basename(model_path)
                     self.model_info_widget.set_model_file(filename) 
                     self.model_loaded = True
                     self.model_info_widget.set_model_status("Model loaded successfully", "green")
                     self.save_model_btn.setEnabled(True)
                     self.clear_model_btn.setEnabled(True)
                 except Exception as e:
-                    self.model_info_widget.set_model_status("Error loading default model", "red")
+                    self.model_info_widget.set_model_status(f"Error loading model: {str(e)}", "red")
             else:
                 self.model_info_widget.set_model_status("No model loaded", "red")
         except Exception as e:
@@ -229,15 +263,19 @@ class ModelTab(QWidget):
                 if isinstance(self.model, SimpleCnnModel):
                     if not all(key in checkpoint['model_state'] for key in ['conv1.weight', 'conv2.weight']):
                         raise ValueError("This model file is not compatible with Simple CNN architecture")
+                    model_type = "simple_cnn"
                 elif isinstance(self.model, ResNetModel):
                     if not all(key in checkpoint['model_state'] for key in ['layer1.0.conv1.weight', 'layer1.0.conv2.weight']):
                         raise ValueError("This model file is not compatible with ResNet architecture")
+                    model_type = "resnet"
                 elif isinstance(self.model, VGG16Model):
                     if not all(key in checkpoint['model_state'] for key in ['features.0.weight', 'features.2.weight', 'classifier.6.weight']):
                         raise ValueError("This model file is not compatible with VGG16 architecture")
+                    model_type = "vgg16"
                 elif isinstance(self.model, EfficientNetModel):
                     if not all(key in checkpoint['model_state'] for key in ['features.0.0.weight', 'features.1.0.block.0.0.weight', 'classifier.1.weight']):
                         raise ValueError("This model file is not compatible with EfficientNet architecture")
+                    model_type = "efficientnet"
 
                 # Reset metrics, parameters and plots first
                 self.metrics_widget.reset_metrics()
@@ -247,6 +285,9 @@ class ModelTab(QWidget):
                 self.kfold_result_label.setText("No cross-validation performed yet")
 
                 metadata = self.model.load_model(file_path)
+
+                # Save the path to config
+                self._save_model_path(model_type, file_path)
 
                 # Display filename
                 filename = os.path.basename(file_path)
@@ -264,6 +305,26 @@ class ModelTab(QWidget):
                 self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
             except Exception as e:
                 self.status_message.emit(f"Error loading model: {str(e)}", 8000)
+
+    def _save_model_path(self, model_type, model_path):
+        """Save the model path to config file"""
+        config = configparser.ConfigParser()
+        config_path = "./model_config.ini"
+        
+        # Create or read existing config
+        if os.path.exists(config_path):
+            config.read(config_path)
+        
+        # Make sure the LastModels section exists
+        if 'LastModels' not in config:
+            config['LastModels'] = {}
+        
+        # Update the model path
+        config['LastModels'][model_type] = model_path
+        
+        # Save the config
+        with open(config_path, 'w') as configfile:
+            config.write(configfile)
 
     def save_model(self):
         """Saves the trained neural network model"""
