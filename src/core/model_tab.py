@@ -23,9 +23,23 @@ class ModelTab(QWidget):
     # Signal to emit status messages to the main window
     status_message = pyqtSignal(str, int)
 
-    def __init__(self, model_class=SimpleCnnModel):
+    def __init__(self, model_class=SimpleCnnModel, shared_dataset_source=None):
         super().__init__()
         self.model_class = model_class
+        self.shared_dataset_source = shared_dataset_source
+        
+        # Set model name based on the model class
+        if model_class == SimpleCnnModel:
+            self.model_name = "Simple CNN"
+        elif model_class == ResNetModel:
+            self.model_name = "ResNet"
+        elif model_class == EfficientNetModel:
+            self.model_name = "EfficientNet"
+        elif model_class == VGG16Model:
+            self.model_name = "VGG16"
+        else:
+            self.model_name = "Unknown Model"
+            
         self._create_ui()
         self.current_image_path = None
 
@@ -161,8 +175,14 @@ class ModelTab(QWidget):
     def _load_dataset(self):
         """Loads the dataset on startup"""
         try:
-            train_size, val_size, test_size = self.model.load_data("./dataset/fruitveg-dataset")
-            self.status_message.emit(f"Dataset loaded successfully: {len(self.model.classes)} classes detected", 8000)
+            # Check if we should share the dataset from another tab
+            if self.shared_dataset_source and self.shared_dataset_source.model.dataset_loaded:
+                train_size, val_size, test_size = self.model.share_dataset(self.shared_dataset_source.model)
+                self.status_message.emit(f"Dataset shared successfully from {self.shared_dataset_source.model_name}: {len(self.model.classes)} classes", 8000)
+            else:
+                # Load the dataset normally
+                train_size, val_size, test_size = self.model.load_data("./dataset/fruitveg-dataset")
+                self.status_message.emit(f"Dataset loaded successfully: {len(self.model.classes)} classes detected", 8000)
         except Exception as e:
             error_msg = f"Error loading dataset: {str(e)}"
             print(f"--------------------------------------{error_msg}")
@@ -174,19 +194,15 @@ class ModelTab(QWidget):
         if self.model_class == SimpleCnnModel:
             default_model_path = "./saved_models/simple_cnn.pth"
             model_type = "simple_cnn"
-            self.model_name = "Simple CNN"
         elif self.model_class == ResNetModel:
             default_model_path = "./saved_models/resnet.pth"
             model_type = "resnet"
-            self.model_name = "ResNet"
         elif self.model_class == EfficientNetModel:
             default_model_path = "./saved_models/efficientnet.pth"
             model_type = "efficientnet"
-            self.model_name = "EfficientNet"
         elif self.model_class == VGG16Model:
             default_model_path = "./saved_models/vgg16.pth"
             model_type = "vgg16"
-            self.model_name = "VGG16"
         else:
             default_model_path = None
             self.model_info_widget.set_model_status("No model loaded", "red")
@@ -709,7 +725,6 @@ class ModelTab(QWidget):
         kfold_layout.addWidget(self.kfold_result_label)
 
         # Metrics group box
-        self.model_name = ""
         self.metrics_group = QGroupBox(f"{self.model_name} Stats")
         self.metrics_group.setObjectName("model-metrics")
         metrics_layout = QVBoxLayout()

@@ -264,10 +264,16 @@ class MainWindow(QMainWindow):
         # Create model settings (first page)
         self.tab_widget = QTabWidget()
         self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  
-        self.simple_cnn_tab = ModelTab(model_class=SimpleCnnModel)
-        self.resnet_tab = ModelTab(model_class=ResNetModel)
-        self.efficientnet_tab = ModelTab(model_class=EfficientNetModel)
-        self.vgg16_tab = ModelTab(model_class=VGG16Model)
+
+        # Initialize model tabs - load datasets efficiently
+        self.simple_cnn_tab = ModelTab(model_class=SimpleCnnModel, shared_dataset_source=None)
+        
+        # Initialize the ResNet tab first as it will be the source for shared datasets
+        self.resnet_tab = ModelTab(model_class=ResNetModel, shared_dataset_source=None)
+        
+        # Pass ResNet tab as the source for the other tabs with the same transformation
+        self.efficientnet_tab = ModelTab(model_class=EfficientNetModel, shared_dataset_source=self.resnet_tab)
+        self.vgg16_tab = ModelTab(model_class=VGG16Model, shared_dataset_source=self.resnet_tab)
         
         self.tab_widget.addTab(self.simple_cnn_tab, "Simple CNN")
         self.tab_widget.addTab(self.resnet_tab, "ResNet18")
