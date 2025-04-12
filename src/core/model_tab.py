@@ -119,7 +119,7 @@ class ModelTab(QWidget):
         msg_box.setText("Are you sure you want to clear the model? This will reset all charts, metrics and parameters.")
         msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         msg_box.setDefaultButton(QMessageBox.StandardButton.No)
-        msg_box.setObjectName("msg-box")
+        msg_box.setObjectName("clear-model-message")
 
         reply = msg_box.exec()
 
@@ -161,26 +161,8 @@ class ModelTab(QWidget):
     def _load_dataset(self):
         """Loads the dataset on startup"""
         try:
-            # Try to get the dataset path from config
-            config = configparser.ConfigParser()
-            config_path = "./model_config.ini"
-            
-            if os.path.exists(config_path):
-                config.read(config_path)
-                if 'Dataset' in config and 'path' in config['Dataset']:
-                    dataset_path = config['Dataset']['path']
-                    if os.path.exists(dataset_path):
-                        train_size, val_size, test_size = self.model.load_data(dataset_path)
-                        self.status_message.emit(f"Dataset loaded successfully: {len(self.model.classes)} classes detected", 8000)
-                        return
-            
-            # If no valid path found in config, try default path
-            default_path = "./dataset/fruitveg-dataset"
-            if os.path.exists(default_path):
-                train_size, val_size, test_size = self.model.load_data(default_path)
-                self.status_message.emit(f"Dataset loaded successfully: {len(self.model.classes)} classes detected", 8000)
-            else:
-                self.status_message.emit("No dataset found. Please load a dataset in Settings.", 8000)
+            train_size, val_size, test_size = self.model.load_data("./dataset/fruitveg-dataset")
+            self.status_message.emit(f"Dataset loaded successfully: {len(self.model.classes)} classes detected", 8000)
         except Exception as e:
             error_msg = f"Error loading dataset: {str(e)}"
             print(f"--------------------------------------{error_msg}")
@@ -528,20 +510,8 @@ class ModelTab(QWidget):
                 fold_model = self.model_class()
                 fold_model.initialize_model()
                 
-                # Get dataset path from config
-                config = configparser.ConfigParser()
-                config_path = "./model_config.ini"
-                dataset_path = "./dataset/fruitveg-dataset"  
-                
-                if os.path.exists(config_path):
-                    config.read(config_path)
-                    if 'Dataset' in config and 'path' in config['Dataset']:
-                        config_path = config['Dataset']['path']
-                        if os.path.exists(config_path):
-                            dataset_path = config_path
-                
                 # Split the data into k folds
-                fold_model.load_data(dataset_path, k=k, current_fold=self.current_fold)
+                fold_model.load_data("./dataset/fruitveg-dataset", k=k, current_fold=self.current_fold)
                 
                 # Create and show progress dialog for this fold
                 dialog = ProgressDialog(
@@ -653,24 +623,6 @@ class ModelTab(QWidget):
             'std_accuracy': None,
             'fold_accuracies': None
         }
-
-    def handle_dataset_change(self):
-        """Handle dataset change by showing confirmation dialog and clearing models"""
-        msg_box = QMessageBox(self)
-        msg_box.setWindowTitle("Change Dataset")
-        msg_box.setText("Changing the dataset will clear all trained models as they may not be compatible with the new dataset. Do you want to continue?")
-        msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        msg_box.setDefaultButton(QMessageBox.StandardButton.No)
-        msg_box.setObjectName("msg-box")
-
-        reply = msg_box.exec()
-
-        if reply == QMessageBox.StandardButton.Yes:
-            # Clear all models
-            self.reset_model()
-            self.status_message.emit("All models cleared due to dataset change", 8000)
-            return True
-        return False
 
     def _create_ui(self):
         main_layout = QHBoxLayout(self)

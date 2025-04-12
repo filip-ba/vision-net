@@ -1,9 +1,7 @@
-from PyQt6.QtWidgets import ( QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, 
-                             QGroupBox, QPushButton, QLabel, QFileDialog)
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QGroupBox, QPushButton, QLabel
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtCore import Qt, QSize, pyqtSignal
 import os
-import configparser
 
 
 class SettingsTab(QWidget):
@@ -19,31 +17,6 @@ class SettingsTab(QWidget):
         """Create the settings page UI"""
         settings_layout = QVBoxLayout(self)
         
-        # Dataset group
-        dataset_group = QGroupBox("Dataset")
-        dataset_group.setObjectName("dataset-group")
-        dataset_layout = QHBoxLayout(dataset_group)
-        dataset_layout.setContentsMargins(0, 0, 0, 0)
-        dataset_layout.setSpacing(25)
-
-        # Load dataset button
-        self.load_dataset_btn = QPushButton("Load")
-        self.load_dataset_btn.setFixedWidth(150)
-        self.load_dataset_btn.clicked.connect(self._load_dataset)
-        
-        # Current dataset path label
-        self.dataset_path_label = QLabel("Current dataset: Not loaded")
-        self.dataset_path_label.setWordWrap(True)
-        self.dataset_path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
-        
-        # Load last used dataset path from config
-        self._load_last_dataset_path()
-        
-        dataset_layout.addWidget(self.load_dataset_btn)
-        dataset_layout.addWidget(self.dataset_path_label)
-        settings_layout.addWidget(dataset_group)
-
-        # Style group
         style_group = QGroupBox("Style")
         style_group.setObjectName("style-group")
         style_layout = QVBoxLayout(style_group)
@@ -97,7 +70,6 @@ class SettingsTab(QWidget):
         buttons_layout.addWidget(light_label, 1, 0, Qt.AlignmentFlag.AlignCenter)
         buttons_layout.addWidget(self.dark_button, 0, 1, Qt.AlignmentFlag.AlignCenter) 
         buttons_layout.addWidget(dark_label, 1, 1, Qt.AlignmentFlag.AlignCenter)
-        buttons_layout.setSpacing(5)
         
         # Connect button signals
         self.light_button.clicked.connect(self._on_light_style_clicked)
@@ -108,82 +80,6 @@ class SettingsTab(QWidget):
         
         # Add a spacer to push everything to the top
         settings_layout.addStretch()
-    
-    def _load_last_dataset_path(self):
-        """Load the last used dataset path from config"""
-        config = configparser.ConfigParser()
-        config_path = "./model_config.ini"
-        
-        if os.path.exists(config_path):
-            config.read(config_path)
-            if 'Dataset' in config and 'path' in config['Dataset']:
-                dataset_path = config['Dataset']['path']
-                if os.path.exists(dataset_path):
-                    self.dataset_path_label.setText(f"Current dataset: {dataset_path}")
-                    return
-        
-        # If no valid path found, try default path
-        default_path = "./dataset/fruitveg-dataset"
-        if os.path.exists(default_path):
-            self.dataset_path_label.setText(f"Current dataset: {default_path}")
-        else:
-            self.dataset_path_label.setText("Current dataset: Not loaded")
-    
-    def _save_dataset_path(self, path):
-        """Save the dataset path to config file"""
-        config = configparser.ConfigParser()
-        config_path = "./model_config.ini"
-        
-        # Create or read existing config
-        if os.path.exists(config_path):
-            config.read(config_path)
-        
-        # Make sure the Dataset section exists
-        if 'Dataset' not in config:
-            config['Dataset'] = {}
-        
-        # Update the dataset path
-        config['Dataset']['path'] = path
-        
-        # Save the config
-        with open(config_path, 'w') as configfile:
-            config.write(configfile)
-    
-    def _load_dataset(self):
-        """Open file dialog to select dataset directory"""
-        dataset_path = QFileDialog.getExistingDirectory(
-            self,
-            "Select Dataset Directory",
-            "",
-            QFileDialog.Option.ShowDirsOnly
-        )
-        
-        if dataset_path:
-            # Check if the directory has the required structure
-            required_dirs = ['train', 'valid', 'test']
-            if all(os.path.exists(os.path.join(dataset_path, d)) for d in required_dirs):
-                # Get the main window to access model tabs
-                main_window = self.window()
-                if hasattr(main_window, 'tab_widget'):
-                    # Get all model tabs
-                    model_tabs = []
-                    for i in range(main_window.tab_widget.count()):
-                        widget = main_window.tab_widget.widget(i)
-                        if hasattr(widget, 'handle_dataset_change'):
-                            model_tabs.append(widget)
-                    
-                    # If there are model tabs, show confirmation dialog
-                    if model_tabs:
-                        # Use the first model tab to show the dialog
-                        if not model_tabs[0].handle_dataset_change():
-                            return  # User cancelled
-                    
-                    # Update dataset path and clear models
-                    self.dataset_path_label.setText(f"Current dataset: {dataset_path}")
-                    self._save_dataset_path(dataset_path)
-                    self.status_message.emit("Dataset loaded successfully", 8000)
-            else:
-                self.status_message.emit("Invalid dataset structure. Required directories: train, valid, test", 8000)
     
     def _on_light_style_clicked(self):
         if not self.light_button.isChecked():

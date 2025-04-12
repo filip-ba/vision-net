@@ -113,7 +113,7 @@ QGroupBox::title {
     margin-top: 18px; 
 }
 
-#model-controls, #dataset-group {
+#model-controls {
     padding: 15px;
     margin-bottom: 5px;
 }
