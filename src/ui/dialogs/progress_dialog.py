@@ -161,22 +161,32 @@ class ProgressDialog(QDialog):
             self.time_label.setText(f"Estimated time remaining: {time_str}")
 
     def cancel(self):
-        # Show confirmation dialog
-        msg_box = QMessageBox(self)
-        msg_box.setWindowTitle("Cancel")
-        msg_box.setText("Are you sure you want to cancel the training?")
-        msg_box.setInformativeText("The training process will be terminated and all progress will be lost.")
-        msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        msg_box.setDefaultButton(QMessageBox.StandardButton.No)
-        msg_box.setObjectName("training-cancel-dialog")
+        # Zavřeme okno, což vyvolá closeEvent, kde se zobrazí dialog
+        self.close()
 
-        reply = msg_box.exec()
-        
-        if reply == QMessageBox.StandardButton.Yes:
-            if self.thread:
-                self.thread.cancel()
-            self.close()
-            self.error_occurred.emit("Training canceled by user")
+    def closeEvent(self, event):
+        # Pokud je trénování stále v běhu, zobraz potvrzovací dialog
+        if self.thread and self.thread.isRunning():
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("Cancel")
+            msg_box.setText("Are you sure you want to cancel the training?")
+            msg_box.setInformativeText("The training process will be terminated and all progress will be lost.")
+            msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            msg_box.setDefaultButton(QMessageBox.StandardButton.No)
+            msg_box.setObjectName("training-cancel-dialog")
+
+            reply = msg_box.exec()
+            
+            if reply == QMessageBox.StandardButton.Yes:
+                if self.thread:
+                    self.thread.cancel()
+                self.error_occurred.emit("Training canceled by user")
+                event.accept()  # Povolí zavření okna
+            else:
+                event.ignore()  # Zabrání zavření okna
+        else:
+            # Pokud trénování není v běhu, zavři dialog bez potvrzení
+            event.accept()
 
     def on_training_finished(self, result):
         """Changes design of the dialog when training is finished and saves the training result"""
