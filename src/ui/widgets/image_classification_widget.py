@@ -71,7 +71,7 @@ class ImageClassificationWidget(QWidget):
         
     def scale_image(self):
         """Scale image to fit display while preserving aspect ratio"""
-        if not hasattr(self, 'original_pixmap') or self.original_pixmap.isNull():
+        if self.original_pixmap is None or self.original_pixmap.isNull():
             return
             
         display_size = self.image_display.size()
