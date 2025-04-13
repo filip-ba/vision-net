@@ -33,7 +33,7 @@ class ClassificationTab(QWidget):
         """Returns the path to the root directory of the project, works both in development and in the executable"""
         if getattr(sys, 'frozen', False):
             # Executable
-            return os.path.dirname(sys.executable)
+            return sys._MEIPASS
         else:
             # IDE
             current_file_path = os.path.abspath(__file__)

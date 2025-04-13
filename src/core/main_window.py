@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
         # Sidebar width settings
         self.MIN_SIDEBAR_WIDTH = 190
         self.MAX_SIDEBAR_WIDTH = 260
-        self.SIDEBAR_HIDE_THRESHOLD = 950
+        self.SIDEBAR_HIDE_THRESHOLD = 1000
         
         # Event filter for window resize
         self.installEventFilter(self)
@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
         """Returns the path to the root directory of the project, works both in development and in the executable"""
         if getattr(sys, 'frozen', False):
             # Executable
-            return os.path.dirname(sys.executable)
+            return sys._MEIPASS
         else:
             # IDE
             current_file_path = os.path.abspath(__file__)
