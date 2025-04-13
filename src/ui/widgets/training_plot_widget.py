@@ -14,8 +14,8 @@ class CustomToolbar(QToolBar):
         super().__init__(parent)
         self.canvas = canvas
         self.nav = NavigationToolbar2QT(canvas, parent)
-        self.setIconSize(QSize(20, 20))
-        self.setObjectName("matplotlib-toolbar")
+        self.nav.setObjectName("matplotlib-toolbar")
+        self.setIconSize(QSize(25, 25))
 
         project_root = self.get_project_root()
         icon_path = os.path.join(project_root, "assets", "icons", "mpl_toolbar_icons")
@@ -46,6 +46,7 @@ class CustomToolbar(QToolBar):
     def add_button(self, name, icon_path, callback):
         btn = QToolButton(self)
         btn.setIcon(QIcon(icon_path))
+        btn.setObjectName("matplotlib-toolbutton")
         btn.setToolTip(name.capitalize().replace('_', ' '))
         btn.clicked.connect(callback)
         self.addWidget(btn)
@@ -74,6 +75,7 @@ class TrainingPlotWidget(QWidget):
         self.canvas.setStyleSheet("background-color: white;")
 
         self.toolbar = CustomToolbar(self.canvas, self)
+        self.toolbar.setObjectName("matplotlib-toolbar")
 
         main_layout.addWidget(self.title_label)
         main_layout.addWidget(spacer)
