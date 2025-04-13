@@ -184,6 +184,7 @@ class ModelTab(QWidget):
         # Disable buttons
         self.save_model_btn.setEnabled(False)
         self.clear_model_btn.setEnabled(False)
+        self.kfold_train_btn.setEnabled(False)
         self.model_loaded = False
 
     def _load_dataset(self):
@@ -272,6 +273,7 @@ class ModelTab(QWidget):
                     self.model_info_widget.set_model_status("Model loaded successfully", "green")
                     self.save_model_btn.setEnabled(True)
                     self.clear_model_btn.setEnabled(True)
+                    self.kfold_train_btn.setEnabled(True)
                 except Exception as e:
                     self.model_info_widget.set_model_status(f"Error loading model: {str(e)}", "red")
             else:
@@ -333,6 +335,7 @@ class ModelTab(QWidget):
                 self.model_loaded = True
                 self.save_model_btn.setEnabled(True)
                 self.clear_model_btn.setEnabled(True)
+                self.kfold_train_btn.setEnabled(True)
                 self.model_info_widget.set_model_status("Model loaded successfully", "green")
 
                 self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
@@ -457,6 +460,7 @@ class ModelTab(QWidget):
             self.model_loaded = True
             self.save_model_btn.setEnabled(True)
             self.clear_model_btn.setEnabled(True)
+            self.kfold_train_btn.setEnabled(True)
             self.model_info_widget.set_model_status("Model trained successfully", "green")
             self.parameters_widget.update_parameters(self.model.training_params)
             
@@ -717,6 +721,37 @@ class ModelTab(QWidget):
             buttons_layout.addWidget(btn)
         model_layout.addLayout(buttons_layout)
 
+        # Metrics group box
+        self.metrics_group = QGroupBox(f"{self.model_name} Stats")
+        self.metrics_group.setObjectName("model-metrics")
+        self.metrics_group.setToolTip("Displays the basic metrics of the current model and the parameters it was trained with.")
+        metrics_layout = QVBoxLayout()
+        metrics_layout.setContentsMargins(18, 0, 18, 0)
+        self.metrics_widget = MetricsWidget()
+        metrics_layout.addWidget(self.metrics_widget)
+        self.metrics_group.setLayout(metrics_layout)
+
+        # Parameters group box
+        self.parameters_group = QGroupBox("")
+        self.parameters_group.setObjectName("model-parameters")
+        parameters_layout = QVBoxLayout()
+        parameters_layout.setContentsMargins(0, 18, 0, 18)
+        self.parameters_widget = ParametersWidget()
+        parameters_layout.addWidget(self.parameters_widget)
+        self.parameters_group.setLayout(parameters_layout)
+        self.parameters_group.setContentsMargins(0, 0, 0, 0)
+
+        # Model info group box
+        self.model_info_group = QGroupBox("Status")
+        self.model_info_group.setObjectName("model-info")
+        self.model_info_group.setToolTip("Displays basic information about the dataset and the current model.")
+        model_info_layout = QVBoxLayout()
+        model_info_layout.setContentsMargins(0, 18, 0, 18)
+        self.model_info_widget = ModelInfoWidget()  
+        model_info_layout.addWidget(self.model_info_widget)
+        self.model_info_group.setLayout(model_info_layout)
+        self.model_info_group.setContentsMargins(0, 0, 0, 0)
+
         # K-fold Cross-validation
         kfold_group = QGroupBox("k-Fold Cross-Validation")
         kfold_group.setObjectName("model-controls")
@@ -727,6 +762,8 @@ class ModelTab(QWidget):
         # Train button
         self.kfold_train_btn = QPushButton("Train")
         self.kfold_train_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.kfold_train_btn.setToolTip("Start k-fold cross-validation with the same parameters as the current model.")
+        self.kfold_train_btn.setEnabled(False)
 
         # k label and spinbox layout
         k_settings_layout = QHBoxLayout()
@@ -737,6 +774,7 @@ class ModelTab(QWidget):
         self.k_spinbox.setRange(2, 10)
         self.k_spinbox.setValue(5)
         self.k_spinbox.setFixedWidth(50)
+        self.k_spinbox.setToolTip("Select the number of folds (k) for cross-validation.")
         k_settings_layout.addWidget(k_label)
         k_settings_layout.addWidget(self.k_spinbox)
         k_settings_layout.addStretch()
@@ -755,35 +793,6 @@ class ModelTab(QWidget):
         kfold_layout.addLayout(kfold_controls_layout)
         kfold_layout.addSpacing(10)
         kfold_layout.addWidget(self.kfold_result_label)
-
-        # Metrics group box
-        self.metrics_group = QGroupBox(f"{self.model_name} Stats")
-        self.metrics_group.setObjectName("model-metrics")
-        metrics_layout = QVBoxLayout()
-        metrics_layout.setContentsMargins(18, 0, 18, 0)
-        self.metrics_widget = MetricsWidget()
-        metrics_layout.addWidget(self.metrics_widget)
-        self.metrics_group.setLayout(metrics_layout)
-
-        # Parameters group box
-        self.parameters_group = QGroupBox("")
-        self.parameters_group.setObjectName("model-parameters")
-        parameters_layout = QVBoxLayout()
-        parameters_layout.setContentsMargins(0, 18, 0, 18)
-        self.parameters_widget = ParametersWidget()
-        parameters_layout.addWidget(self.parameters_widget)
-        self.parameters_group.setLayout(parameters_layout)
-        self.parameters_group.setContentsMargins(0, 0, 0, 0)
-
-        # Model info group box
-        self.model_info_group = QGroupBox("")
-        self.model_info_group.setObjectName("model-info")
-        model_info_layout = QVBoxLayout()
-        model_info_layout.setContentsMargins(0, 18, 0, 18)
-        self.model_info_widget = ModelInfoWidget()  
-        model_info_layout.addWidget(self.model_info_widget)
-        self.model_info_group.setLayout(model_info_layout)
-        self.model_info_group.setContentsMargins(0, 0, 0, 0)
 
         # Create widget containers for the left panel
         for widget in [model_group, self.metrics_group, self.parameters_group, kfold_group]:
