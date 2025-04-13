@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import ( 
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QSplitter, 
-    QFileDialog, QStackedWidget, QFrame, QDialog, QSpinBox, QLabel, QMessageBox )
+    QFileDialog, QStackedWidget, QFrame, QDialog, QSpinBox, QLabel, QMessageBox, QSizePolicy )
 from PyQt6.QtCore import pyqtSignal, Qt
 import sys
 import os
@@ -704,9 +704,13 @@ class ModelTab(QWidget):
         # Model buttons
         buttons_layout = QHBoxLayout()
         self.train_model_btn = QPushButton("Train")
+        self.train_model_btn.setToolTip("Start training the selected model with the current dataset and settings.")
         self.save_model_btn = QPushButton("Save")
+        self.save_model_btn.setToolTip("Save the current model's weights to a file.")
         self.load_model_btn = QPushButton("Load")
+        self.load_model_btn.setToolTip("Load model weights from a saved file.")
         self.clear_model_btn = QPushButton("Clear")
+        self.clear_model_btn.setToolTip("Reset the model and clear training progress.")
         self.save_model_btn.setEnabled(False)
         self.clear_model_btn.setEnabled(False)
         for btn in [self.train_model_btn, self.load_model_btn, self.save_model_btn, self.clear_model_btn]:
@@ -720,21 +724,28 @@ class ModelTab(QWidget):
         kfold_layout.setContentsMargins(0, 0, 0, 0)
         kfold_group.setLayout(kfold_layout)
 
-        # K-fold controls
-        kfold_controls_layout = QHBoxLayout()
+        # Train button
         self.kfold_train_btn = QPushButton("Train")
+        self.kfold_train_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+
+        # k label and spinbox layout
+        k_settings_layout = QHBoxLayout()
         k_label = QLabel("k:")
-        k_label.setFixedWidth(20)
+        k_label.setFixedWidth(15)
+        k_label.setObjectName("k_label")
         self.k_spinbox = QSpinBox()
         self.k_spinbox.setRange(2, 10)
         self.k_spinbox.setValue(5)
-        self.k_spinbox.setFixedWidth(60)
-        
-        kfold_controls_layout.addWidget(self.kfold_train_btn)
-        kfold_controls_layout.addSpacing(5)
-        kfold_controls_layout.addWidget(k_label)
-        kfold_controls_layout.addWidget(self.k_spinbox)
-        kfold_controls_layout.addStretch()
+        self.k_spinbox.setFixedWidth(50)
+        k_settings_layout.addWidget(k_label)
+        k_settings_layout.addWidget(self.k_spinbox)
+        k_settings_layout.addStretch()
+
+        # Upper layout
+        kfold_controls_layout = QHBoxLayout()
+        kfold_controls_layout.addWidget(self.kfold_train_btn, 1)        
+        kfold_controls_layout.addSpacing(20)  
+        kfold_controls_layout.addLayout(k_settings_layout, 3)    
         
         # K-fold results
         self.kfold_result_label = QLabel("No cross-validation performed yet")
