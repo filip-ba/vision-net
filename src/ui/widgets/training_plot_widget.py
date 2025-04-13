@@ -31,7 +31,7 @@ class TrainingPlotWidget(QWidget):
         self.canvas.setStyleSheet("background-color: white;")
         
         self.toolbar = NavigationToolbar(self.canvas, self)
-        self.toolbar.setStyleSheet("background-color: white;")
+        self.toolbar.setObjectName("matplotlib-toolbar")
 
         main_layout.addWidget(self.title_label)
         main_layout.addWidget(spacer)

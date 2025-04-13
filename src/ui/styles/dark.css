@@ -241,7 +241,53 @@ QMessageBox#training-cancel-dialog QLabel {
 
 /*------------------------------------------------- Splitter -------------------------------------------------*/
 #splitter-windows::handle {
-    background-color: #303030;
-    margin: 10px;
-    width: 2px;
+    background-color: #4f4f4f;
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 1px;
+}
+
+/*------------------------------------------------- Toolbar -------------------------------------------------*/
+#matplotlib-toolbar {
+    background-color: #ffffff;
+    color: white;
+    border: none;
+}
+
+#matplotlib-toolbar QToolButton {
+    background-color: transparent;
+}
+
+#matplotlib-toolbar QLabel {
+    background-color: transparent;
+    color: #ffffff;
+}
+
+#matplotlib-toolbar QToolButton:hover {
+    background-color: #e0e0e0;
+}
+
+#matplotlib-toolbar QToolButton:pressed {
+    background-color: #d8d8d8;
+}
+
+/*------------------------------------------------- Line Edit -------------------------------------------------*/
+QLineEdit {
+    background-color: #4a4a4a;
+    color: white;
+    border: 1px solid #161616;
+    padding: 5px;
+}
+
+QLineEdit:disabled {
+    background-color: #404040;
+    color: #707070;
+}
+
+/*------------------------------------------------- ToolTip -------------------------------------------------*/
+QToolTip {
+    background-color: #4a4a4a;
+    color: white;
+    border: 1px solid #6f8396;
+    padding: 5px;
 }
