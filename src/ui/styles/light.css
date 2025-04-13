@@ -250,27 +250,32 @@ QMessageBox#training-cancel-dialog QLabel {
 }
 
 /*------------------------------------------------- Toolbar -------------------------------------------------*/
-#matplotlib-toolbar {
+#matplotlib-toolbutton {
     background-color: #ffffff;
+    border: none;
+}
+
+#matplotlib-toolbutton:hover {
+    background-color: #e0e0e0;
+}
+
+#matplotlib-toolbutton:pressed {
+    background-color: #d8d8d8;
+}
+
+#matplotlib-toolbar {
+    background-color: white;
     color: white;
     border: none;
 }
 
 #matplotlib-toolbar QToolButton {
-    background-color: transparent;
+    background-color: white;
 }
 
 #matplotlib-toolbar QLabel {
     background-color: transparent;
     color: #2d2d2d;
-}
-
-#matplotlib-toolbar QToolButton:hover {
-    background-color: #e0e0e0;
-}
-
-#matplotlib-toolbar QToolButton:pressed {
-    background-color: #d8d8d8;
 }
 
 /*------------------------------------------------- Line Edit -------------------------------------------------*/

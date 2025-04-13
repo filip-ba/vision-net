@@ -279,3 +279,8 @@ QScrollBar::add-line, QScrollBar::sub-line {
 QScrollBar::add-page, QScrollBar::sub-page {
     background: none;
 }
+
+/*------------------------------------------------- Toolbar -------------------------------------------------*/
+#matplotlib-toolbar {
+    padding: 10px;
+}
