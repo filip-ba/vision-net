@@ -77,9 +77,15 @@ class ParametersDialog(QDialog):
         params_group.setLayout(params_layout)
  
         self.epochs_widget = ParametersWidget("Epochs:", 1, 100, 10, step_size=1.0)
+        self.epochs_widget.setToolTip("Number of training epochs. One epoch means one pass through the entire training dataset.")
+
         self.learning_rate_widget = ParametersWidget("Learning Rate:", 0.000001, 1.0, 0.001, 6, step_size=0.01)
+        self.learning_rate_widget.setToolTip("Learning rate controls how much the model's weights are adjusted during training.")
+
         self.momentum_widget = ParametersWidget("Momentum:", 0.0, 1.0, 0.9, 6, step_size=0.01)
-        
+        self.momentum_widget.setToolTip("Momentum helps accelerate training by dampening oscillations during gradient descent.")
+
+                
         for widget in [self.epochs_widget, self.learning_rate_widget, self.momentum_widget]:
             params_layout.addWidget(widget)
         
