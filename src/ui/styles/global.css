@@ -284,3 +284,26 @@ QScrollBar::add-page, QScrollBar::sub-page {
 #matplotlib-toolbar {
     padding: 10px;
 }
+
+#matplotlib-toolbutton {
+    background-color: #ffffff;
+    border: none;
+}
+
+#matplotlib-toolbutton:hover {
+    background-color: #e0e0e0;
+}
+
+#matplotlib-toolbutton:pressed {
+    background-color: #d8d8d8;
+}
+
+#matplotlib-toolbutton:checked {
+    background-color: #c2c2c2
+}
+
+#matplotlib-toolbar {
+    background-color: white;
+    color: white;
+    border: none;
+}

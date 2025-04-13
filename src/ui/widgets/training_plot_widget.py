@@ -14,20 +14,45 @@ class CustomToolbar(QToolBar):
         super().__init__(parent)
         self.canvas = canvas
         self.nav = NavigationToolbar2QT(canvas, parent)
-        self.nav.setObjectName("matplotlib-toolbar")
         self.setIconSize(QSize(25, 25))
+        self.nav.setObjectName("matplotlib-toolbar")
+
+        self.tool_buttons = {}
 
         project_root = self.get_project_root()
-        icon_path = os.path.join(project_root, "assets", "icons", "mpl_toolbar_icons")
+        icon_dir = os.path.join(project_root, "assets", "icons", "mpl_toolbar_icons")
 
-        self.add_button("home", os.path.join(icon_path, "home.png"), self.nav.home)
-        self.add_button("back", os.path.join(icon_path, "back.png"), self.nav.back)
-        self.add_button("forward", os.path.join(icon_path, "forward.png"), self.nav.forward)
-        self.add_button("move", os.path.join(icon_path, "move.png"), self.nav.pan)
-        self.add_button("zoom", os.path.join(icon_path, "zoom.png"), self.nav.zoom)
-        self.add_button("subplots", os.path.join(icon_path, "subplots.png"), self.nav.configure_subplots)
-        self.add_button("qt4_editor_options", os.path.join(icon_path, "qt4_editor_options.png"), self.nav.edit_parameters)
-        self.add_button("filesave", os.path.join(icon_path, "filesave.png"), self.nav.save_figure)
+        buttons = [
+            ("home", "home.png", self.nav.home, False),
+            ("back", "back.png", self.nav.back, False),
+            ("forward", "forward.png", self.nav.forward, False),
+            ("move", "move.png", self.nav.pan, True),
+            ("zoom", "zoom.png", self.nav.zoom, True),
+            ("qt4_editor_options", "qt4_editor_options.png", self.nav.edit_parameters, False),
+            ("subplots", "subplots.png", self.nav.configure_subplots, False),
+            ("filesave", "filesave.png", self.nav.save_figure, False),
+        ]
+
+        for name, icon_file, callback, checkable in buttons:
+            icon_path = os.path.join(icon_dir, icon_file)
+            self.add_button(name, icon_path, callback, checkable)
+
+    def add_button(self, name, icon_path, callback, checkable=False):
+        btn = QToolButton(self)
+        btn.setObjectName("matplotlib-toolbutton")
+        btn.setIcon(QIcon(icon_path))
+        btn.setToolTip(name.capitalize().replace('_', ' '))
+        btn.setCheckable(checkable)
+        btn.clicked.connect(lambda checked=False, b=btn: self.on_button_clicked(name, callback, b))
+        self.tool_buttons[name] = btn
+        self.addWidget(btn)
+
+    def on_button_clicked(self, name, callback, clicked_button):
+        """Disable all checkable buttons except the current one"""
+        for n, b in self.tool_buttons.items():
+            if b.isCheckable() and b != clicked_button:
+                b.setChecked(False)
+        callback()
 
     def get_project_root(self):
         """Returns the path to the root directory of the project, works both in development and in the executable"""
@@ -42,14 +67,6 @@ class CustomToolbar(QToolBar):
             src_dir = os.path.dirname(ui_dir)
             project_root = os.path.dirname(src_dir)
             return project_root
-
-    def add_button(self, name, icon_path, callback):
-        btn = QToolButton(self)
-        btn.setIcon(QIcon(icon_path))
-        btn.setObjectName("matplotlib-toolbutton")
-        btn.setToolTip(name.capitalize().replace('_', ' '))
-        btn.clicked.connect(callback)
-        self.addWidget(btn)
 
 
 class TrainingPlotWidget(QWidget):
