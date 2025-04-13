@@ -40,16 +40,16 @@ class ClassificationTab(QWidget):
             core_dir = os.path.dirname(current_file_path)
             src_dir = os.path.dirname(core_dir)
             project_root = os.path.dirname(src_dir)
-            return os.path.dirname(project_root)
+            return project_root
 
     def load_random_test_image(self):
         project_root = self.get_project_root()
-        dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
+        dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset", "test")
 
         if os.path.exists(dataset_dir):
             class_dirs = [d for d in os.listdir(dataset_dir) 
                         if os.path.isdir(os.path.join(dataset_dir, d))]
-            
+
             if class_dirs:
                 random_class = random.choice(class_dirs)
                 class_path = os.path.join(dataset_dir, random_class)
@@ -60,10 +60,14 @@ class ClassificationTab(QWidget):
                 if images:
                     random_image = random.choice(images)
                     image_path = os.path.join(class_path, random_image)
-                    
+
                     self.current_image_path = image_path
                     self.image_widget.update_image_display(image_path)
                     return
+                else:
+                    print("No images found")
+        else:
+            print("No class_dirs found")
                     
         # If no image could be loaded
         self.current_image_path = None

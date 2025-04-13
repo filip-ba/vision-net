@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
             core_dir = os.path.dirname(current_file_path)
             src_dir = os.path.dirname(core_dir)
             project_root = os.path.dirname(src_dir)
-            return os.path.dirname(project_root)
+            return project_root
 
     def _classify_all(self):
         """Classify the loaded image"""
@@ -245,7 +245,6 @@ class MainWindow(QMainWindow):
         # Set toggle button icon
         theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
         menu_icon_path = os.path.join(icons_dir, f"menu-{theme_suffix}.png")
-        print(f"_______________________Full menu icon path: {menu_icon_path}")
 
         if os.path.exists(menu_icon_path):
             menu_icon = QPixmap(menu_icon_path)

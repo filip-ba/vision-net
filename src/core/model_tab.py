@@ -76,7 +76,7 @@ class ModelTab(QWidget):
             core_dir = os.path.dirname(current_file_path)
             src_dir = os.path.dirname(core_dir)
             project_root = os.path.dirname(src_dir)
-            return os.path.dirname(project_root)
+            return project_root
 
     def update_metrics_display(self, metrics):
         """Method to update the metrics"""
