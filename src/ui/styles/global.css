@@ -183,7 +183,14 @@ QLabel[objectName^="Metrics"] {
 
 /*------------------------------------------------- Progress Bar -------------------------------------------------*/
 QProgressBar {
+    border: 1px solid;
+    border-radius: 4px;
     text-align: center;
+}
+
+QProgressBar::chunk {    
+    width: 10px;
+    margin: 0px;
 }
 
 /*------------------------------------------------- Plot Frame -------------------------------------------------*/

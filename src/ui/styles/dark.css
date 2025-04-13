@@ -156,11 +156,13 @@ QLabel {
 
 /*------------------------------------------------- Progress Bar -------------------------------------------------*/
 QProgressBar {
-    background-color: #3d3d3d;
+    border-color: #444;
+    background-color: #3d3d3d;   
+    color: white;
 }
 
 QProgressBar::chunk {
-    background-color: #6f8396;
+    background-color: #6f8396;    
 }
 
 /*------------------------------------------------- Plot Frame -------------------------------------------------*/
