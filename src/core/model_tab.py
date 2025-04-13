@@ -2,21 +2,22 @@ from PyQt6.QtWidgets import (
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QSplitter, 
     QFileDialog, QStackedWidget, QFrame, QDialog, QSpinBox, QLabel, QMessageBox )
 from PyQt6.QtCore import pyqtSignal, Qt
+import sys
 import os
 import platform
 import torch
 import configparser
 
-from src.ui.dialogs.progress_dialog import ProgressDialog
-from src.ui.widgets.training_plot_widget import TrainingPlotWidget
-from src.ui.dialogs.parameters_dialog import ParametersDialog
-from src.ui.widgets.parameters_widget import ParametersWidget
-from src.ui.widgets.metrics_widget import MetricsWidget
-from src.ui.widgets.model_info_widget import ModelInfoWidget
-from src.models.simple_cnn_model import SimpleCnnModel
-from src.models.resnet_model import ResNetModel
-from src.models.efficientnet_model import EfficientNetModel
-from src.models.vgg16_model import VGG16Model
+from ..ui.dialogs.progress_dialog import ProgressDialog
+from ..ui.widgets.training_plot_widget import TrainingPlotWidget
+from ..ui.dialogs.parameters_dialog import ParametersDialog
+from ..ui.widgets.parameters_widget import ParametersWidget
+from ..ui.widgets.metrics_widget import MetricsWidget
+from ..ui.widgets.model_info_widget import ModelInfoWidget
+from ..models.simple_cnn_model import SimpleCnnModel
+from ..models.resnet_model import ResNetModel
+from ..models.efficientnet_model import EfficientNetModel
+from ..models.vgg16_model import VGG16Model
 
 
 class ModelTab(QWidget):
@@ -63,6 +64,19 @@ class ModelTab(QWidget):
         self.train_model_btn.clicked.connect(self.train_model)
         self.clear_model_btn.clicked.connect(self.clear_model)
         self.kfold_train_btn.clicked.connect(self.train_kfold)
+
+    def get_project_root(self):
+        """Returns the path to the root directory of the project, works both in development and in the executable"""
+        if getattr(sys, 'frozen', False):
+            # Executable
+            return os.path.dirname(sys.executable)
+        else:
+            # IDE
+            current_file_path = os.path.abspath(__file__)
+            core_dir = os.path.dirname(current_file_path)
+            src_dir = os.path.dirname(core_dir)
+            project_root = os.path.dirname(src_dir)
+            return os.path.dirname(project_root)
 
     def update_metrics_display(self, metrics):
         """Method to update the metrics"""
@@ -181,7 +195,9 @@ class ModelTab(QWidget):
                 self.status_message.emit(f"Dataset shared successfully from {self.shared_dataset_source.model_name}: {len(self.model.classes)} classes", 8000)
             else:
                 # Load the dataset normally
-                train_size, val_size, test_size = self.model.load_data("./dataset/fruitveg-dataset")
+                project_root = self.get_project_root()
+                dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
+                train_size, val_size, test_size = self.model.load_data(dataset_dir)
                 self.status_message.emit(f"Dataset loaded successfully: {len(self.model.classes)} classes detected", 8000)
         except Exception as e:
             error_msg = f"Error loading dataset: {str(e)}"
@@ -190,18 +206,19 @@ class ModelTab(QWidget):
 
     def _load_model_on_start(self):
         """Attempts to load the default model on startup"""
+        project_root = self.get_project_root()
         # Determine the model type and default paths
         if self.model_class == SimpleCnnModel:
-            default_model_path = "./saved_models/simple_cnn.pth"
+            default_model_path = os.path.join(project_root, "saved_models", "simple_cnn.pth")
             model_type = "simple_cnn"
         elif self.model_class == ResNetModel:
-            default_model_path = "./saved_models/resnet.pth"
+            default_model_path = os.path.join(project_root, "saved_models", "resnet.pth")
             model_type = "resnet"
         elif self.model_class == EfficientNetModel:
-            default_model_path = "./saved_models/efficientnet.pth"
+            default_model_path = os.path.join(project_root, "saved_models", "efficientnet.pth")
             model_type = "efficientnet"
         elif self.model_class == VGG16Model:
-            default_model_path = "./saved_models/vgg16.pth"
+            default_model_path = os.path.join(project_root, "saved_models", "vgg16.pth")
             model_type = "vgg16"
         else:
             default_model_path = None
@@ -210,7 +227,7 @@ class ModelTab(QWidget):
 
         # Try to get the last loaded model path from config
         config = configparser.ConfigParser()
-        config_path = "./model_config.ini"
+        config_path = os.path.join(project_root, "model_config.ini")
         
         # Create default configuration if it doesn't exist
         if not os.path.exists(config_path):
@@ -325,7 +342,8 @@ class ModelTab(QWidget):
     def _save_model_path(self, model_type, model_path):
         """Save the model path to config file"""
         config = configparser.ConfigParser()
-        config_path = "./model_config.ini"
+        project_root = self.get_project_root()
+        config_path = os.path.join(project_root, "model_config.ini")
         
         # Create or read existing config
         if os.path.exists(config_path):
@@ -526,8 +544,11 @@ class ModelTab(QWidget):
                 fold_model = self.model_class()
                 fold_model.initialize_model()
                 
+                project_root = self.get_project_root()
+                dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
+                
                 # Split the data into k folds
-                fold_model.load_data("./dataset/fruitveg-dataset", k=k, current_fold=self.current_fold)
+                fold_model.load_data(dataset_dir, k=k, current_fold=self.current_fold)
                 
                 # Create and show progress dialog for this fold
                 dialog = ProgressDialog(

@@ -7,7 +7,7 @@ from PyQt6.QtCore import Qt
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 
-from src.utils.custom_canvas import ScrollableFigureCanvas
+from ...utils.custom_canvas import ScrollableFigureCanvas
 
 
 class PlotProbabilityWidget(QWidget):

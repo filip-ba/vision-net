@@ -7,6 +7,7 @@ from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 from PIL import Image
 from abc import ABC, abstractmethod
 import time
+import os
 
 
 class BaseModel(ABC):
@@ -84,7 +85,8 @@ class BaseModel(ABC):
         
         if k is not None and current_fold is not None:
             # Load all training data
-            full_train_dataset = datasets.ImageFolder(root=f"{data_dir}/train", transform=train_transform)
+            full_train_dataset = datasets.ImageFolder(root=os.path.join(data_dir, "train"), transform=train_transform)
+
             
             # Calculate fold size
             fold_size = len(full_train_dataset) // k
@@ -107,17 +109,17 @@ class BaseModel(ABC):
             self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=False)
             
             # Load test data normally
-            test_dataset = datasets.ImageFolder(root=f"{data_dir}/test", transform=test_transform)
+            test_dataset = datasets.ImageFolder(root=os.path.join(data_dir, "test"), transform=test_transform)
             self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
             
             # Store classes from the full dataset
             self.classes = full_train_dataset.classes
         else:
             # Original loading logic
-            train_dataset = datasets.ImageFolder(root=f"{data_dir}/train", transform=train_transform)
-            val_dataset = datasets.ImageFolder(root=f"{data_dir}/valid", transform=train_transform)
-            test_dataset = datasets.ImageFolder(root=f"{data_dir}/test", transform=test_transform)
-            
+            train_dataset = datasets.ImageFolder(root=os.path.join(data_dir, "train"), transform=train_transform)
+            val_dataset = datasets.ImageFolder(root=os.path.join(data_dir, "valid"), transform=train_transform)
+            test_dataset = datasets.ImageFolder(root=os.path.join(data_dir, "test"), transform=test_transform)
+
             self.trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
             self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=False)
             self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)

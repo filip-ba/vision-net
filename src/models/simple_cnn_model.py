@@ -4,7 +4,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torchvision import transforms
 
-from src.models.base_model import BaseModel
+from .base_model import BaseModel 
 
 
 class SimpleCnnModel(BaseModel):

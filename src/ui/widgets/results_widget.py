@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy
 from PyQt6.QtCore import Qt
 
-from src.utils.custom_separator import create_separator
+from ...utils.custom_separator import create_separator
 
 
 class ResultsWidget(QWidget):

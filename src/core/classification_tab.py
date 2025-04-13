@@ -2,10 +2,11 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QFileDialog
 from PyQt6.QtGui import QPixmap, QImageReader
 from PyQt6.QtCore import pyqtSignal, QTimer
 import os, random
+import sys
 
-from src.ui.widgets.image_classification_widget import ImageClassificationWidget
-from src.ui.widgets.results_widget import ResultsWidget
-from src.ui.widgets.plot_probability_widget import PlotProbabilityWidget
+from ..ui.widgets.image_classification_widget import ImageClassificationWidget
+from ..ui.widgets.results_widget import ResultsWidget
+from ..ui.widgets.plot_probability_widget import PlotProbabilityWidget
 
 
 class ClassificationTab(QWidget):
@@ -27,17 +28,31 @@ class ClassificationTab(QWidget):
         
         # Load random image on startup
         self.load_random_test_image()
-        
-    def load_random_test_image(self):
-        dataset_path = "./dataset/fruitveg-dataset/test"
 
-        if os.path.exists(dataset_path):
-            class_dirs = [d for d in os.listdir(dataset_path) 
-                        if os.path.isdir(os.path.join(dataset_path, d))]
+    def get_project_root(self):
+        """Returns the path to the root directory of the project, works both in development and in the executable"""
+        if getattr(sys, 'frozen', False):
+            # Executable
+            return os.path.dirname(sys.executable)
+        else:
+            # IDE
+            current_file_path = os.path.abspath(__file__)
+            core_dir = os.path.dirname(current_file_path)
+            src_dir = os.path.dirname(core_dir)
+            project_root = os.path.dirname(src_dir)
+            return os.path.dirname(project_root)
+
+    def load_random_test_image(self):
+        project_root = self.get_project_root()
+        dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
+
+        if os.path.exists(dataset_dir):
+            class_dirs = [d for d in os.listdir(dataset_dir) 
+                        if os.path.isdir(os.path.join(dataset_dir, d))]
             
             if class_dirs:
                 random_class = random.choice(class_dirs)
-                class_path = os.path.join(dataset_path, random_class)
+                class_path = os.path.join(dataset_dir, random_class)
                 
                 images = [f for f in os.listdir(class_path) 
                          if f.lower().endswith(('.png', '.jpg', '.jpeg'))]

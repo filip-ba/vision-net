@@ -25,7 +25,7 @@ class SettingsTab(QWidget):
         buttons_layout.setSpacing(20)
 
         project_root = self._return_project_root_folder()
-        themes_dir = os.path.join(project_root, "assets/themes")
+        themes_dir = os.path.join(project_root, "assets", "themes")
         
         # Light theme button
         self.light_button = QPushButton()

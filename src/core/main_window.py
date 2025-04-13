@@ -3,16 +3,16 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget, QSiz
                              QPushButton, QLabel, QScrollArea)
 from PyQt6.QtGui import QIcon, QPixmap, QPainter
 from PyQt6.QtCore import Qt, QSize, QTimer, QEvent
+import sys
 import os
 
 from src.core.model_tab import ModelTab
 from src.core.classification_tab import ClassificationTab
 from src.core.settings_tab import SettingsTab
-from src.models.simple_cnn_model import SimpleCnnModel
-from src.models.resnet_model import ResNetModel
-from src.models.efficientnet_model import EfficientNetModel
-from src.models.vgg16_model import VGG16Model
-
+from ..models.simple_cnn_model import SimpleCnnModel  
+from ..models.resnet_model import ResNetModel 
+from ..models.efficientnet_model import EfficientNetModel  
+from ..models.vgg16_model import VGG16Model
 
 class MainWindow(QMainWindow):
     
@@ -40,12 +40,18 @@ class MainWindow(QMainWindow):
     def update_status_bar(self, message, timeout=8000):
         self.status_bar.showMessage(message, timeout)
              
-    def _return_project_root_folder(self):
-        current_file_path = os.path.abspath(__file__)
-        core_dir  = os.path.dirname(current_file_path)
-        src_dir = os.path.dirname(core_dir)
-        project_root = os.path.dirname(src_dir)
-        return project_root
+    def get_project_root(self):
+        """Returns the path to the root directory of the project, works both in development and in the executable"""
+        if getattr(sys, 'frozen', False):
+            # Executable
+            return os.path.dirname(sys.executable)
+        else:
+            # IDE
+            current_file_path = os.path.abspath(__file__)
+            core_dir = os.path.dirname(current_file_path)
+            src_dir = os.path.dirname(core_dir)
+            project_root = os.path.dirname(src_dir)
+            return os.path.dirname(project_root)
 
     def _classify_all(self):
         """Classify the loaded image"""
@@ -94,9 +100,8 @@ class MainWindow(QMainWindow):
     
     def _update_sidebar_icons(self):
         """Update sidebar icons based on current theme"""
-
-        project_root = self._return_project_root_folder()
-        icons_dir = os.path.join(project_root, "assets/icons")
+        project_root = self.get_project_root()
+        icons_dir = os.path.join(project_root, "assets", "icons")
 
         theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
         
@@ -203,8 +208,8 @@ class MainWindow(QMainWindow):
         return super().eventFilter(obj, event)
     
     def _create_ui(self):
-        project_root = self._return_project_root_folder()
-        icons_dir = os.path.join(project_root, "assets/icons")
+        project_root = self.get_project_root()
+        icons_dir = os.path.join(project_root, "assets", "icons")
         icon_path = os.path.join(icons_dir, "app-icon.png")
         
         self.setWindowIcon(QIcon(icon_path))
@@ -240,6 +245,8 @@ class MainWindow(QMainWindow):
         # Set toggle button icon
         theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
         menu_icon_path = os.path.join(icons_dir, f"menu-{theme_suffix}.png")
+        print(f"_______________________Full menu icon path: {menu_icon_path}")
+
         if os.path.exists(menu_icon_path):
             menu_icon = QPixmap(menu_icon_path)
             self.sidebar_toggle_button.setIcon(QIcon(menu_icon))
@@ -392,8 +399,8 @@ class MainWindow(QMainWindow):
         button.setCheckable(True)
         
         # Path to assets folder
-        project_root = self._return_project_root_folder()
-        icons_dir = os.path.join(project_root, "assets/icons")
+        project_root = self.get_project_root()
+        icons_dir = os.path.join(project_root, "assets", "icons")
         
         # Set icons based on current theme
         theme_suffix = "dark"  
