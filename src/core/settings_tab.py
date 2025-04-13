@@ -42,7 +42,7 @@ class SettingsTab(QWidget):
             light_preview = QPixmap(light_preview_path)
             self.light_button.setIcon(QIcon(light_preview))
             self.light_button.setIconSize(QSize(180, 120))
-        
+
         # Dark theme button
         self.dark_button = QPushButton()
         self.dark_button.setObjectName("dark-style-button")
@@ -70,7 +70,8 @@ class SettingsTab(QWidget):
         buttons_layout.addWidget(light_label, 1, 0, Qt.AlignmentFlag.AlignCenter)
         buttons_layout.addWidget(self.dark_button, 0, 1, Qt.AlignmentFlag.AlignCenter) 
         buttons_layout.addWidget(dark_label, 1, 1, Qt.AlignmentFlag.AlignCenter)
-        
+        buttons_layout.setSpacing(10)
+
         # Connect button signals
         self.light_button.clicked.connect(self._on_light_style_clicked)
         self.dark_button.clicked.connect(self._on_dark_style_clicked)
