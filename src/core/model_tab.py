@@ -849,31 +849,29 @@ class ModelTab(QWidget):
         self.plot_widget1 = TrainingPlotWidget("Loss History")
         self.plot_widget2 = TrainingPlotWidget("Confusion Matrix")
         
-        # Initialize empty plots
         self.plot_widget1.plot_loss_history(self.plot_widget1)
         self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
         
-        self.plot_stack.addWidget(self.plot_widget2)  
-        self.plot_stack.addWidget(self.plot_widget1) 
+        self.plot_stack.addWidget(self.plot_widget1)  
+        self.plot_stack.addWidget(self.plot_widget2) 
         frame_layout.addWidget(self.plot_stack)
         
-        # Buttons
         buttons_layout = QHBoxLayout()
         buttons_layout.setContentsMargins(0, 0, 0, 0)
         buttons_layout.setSpacing(0)
-        self.btn_confusion_matrix = QPushButton("Confusion Matrix")  
-        self.btn_confusion_matrix.setObjectName("conf-matrix")
         self.btn_loss_history = QPushButton("Loss History")
         self.btn_loss_history.setObjectName("loss-history")
-        self.btn_confusion_matrix.setCheckable(True)
+        self.btn_confusion_matrix = QPushButton("Confusion Matrix")  
+        self.btn_confusion_matrix.setObjectName("conf-matrix")
         self.btn_loss_history.setCheckable(True)
-        self.btn_confusion_matrix.setChecked(True)  
+        self.btn_confusion_matrix.setCheckable(True)
+        self.btn_loss_history.setChecked(True)  # Loss History selected by default
 
-        self.btn_confusion_matrix.clicked.connect(lambda: self._switch_plot(0))  
-        self.btn_loss_history.clicked.connect(lambda: self._switch_plot(1)) 
+        self.btn_loss_history.clicked.connect(lambda: self._switch_plot(0)) 
+        self.btn_confusion_matrix.clicked.connect(lambda: self._switch_plot(1))  
         
-        buttons_layout.addWidget(self.btn_confusion_matrix)  
-        buttons_layout.addWidget(self.btn_loss_history)
+        buttons_layout.addWidget(self.btn_loss_history)  
+        buttons_layout.addWidget(self.btn_confusion_matrix)
         
         frame_layout.addLayout(buttons_layout)
 
