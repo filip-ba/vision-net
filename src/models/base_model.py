@@ -258,7 +258,7 @@ class BaseModel(ABC):
         accuracy = correct / total if total > 0 else 0.0
         
         precision, recall, f1, _ = precision_recall_fscore_support(
-            all_labels, all_preds, average='weighted', zero_division=0
+            all_labels, all_preds, average='macro', zero_division=0
         )
         
         conf_matrix = confusion_matrix(all_labels, all_preds)
