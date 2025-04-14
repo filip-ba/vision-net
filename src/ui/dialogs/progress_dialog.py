@@ -46,8 +46,6 @@ class TrainingThread(QThread):
                     metrics = self.model.test()
                     if metrics is None:
                         raise ValueError("Testing returned no results")
-                    if 'accuracy' not in metrics:
-                        raise ValueError("Testing results do not contain accuracy metric")
                     self.testing_finished.emit(metrics)
                 except Exception as e:
                     self.error.emit(f"Testing error: {str(e)}")
