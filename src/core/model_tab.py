@@ -194,14 +194,14 @@ class ModelTab(QWidget):
             if self.shared_dataset_source and self.shared_dataset_source.model.dataset_loaded:
                 train_size, val_size, test_size = self.model.share_dataset(self.shared_dataset_source.model)
                 self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
-                self.model_info_widget.dataset_status_label.setToolTip("")
+                self.model_info_widget.show_help_icon(False)
             else:
                 # Load the dataset normally (Simple CNN & ResNet)
                 project_root = self.get_project_root()
                 dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
                 train_size, val_size, test_size = self.model.load_data(dataset_dir)
                 self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
-                self.model_info_widget.dataset_status_label.setToolTip("")
+                self.model_info_widget.show_help_icon(False)
             self.model_info_widget.refresh_button.setVisible(False)
             self.train_model_btn.setEnabled(True)
             self.load_model_btn.setEnabled(True)
@@ -210,8 +210,8 @@ class ModelTab(QWidget):
             self.load_model_btn.setEnabled(False)
             error_msg = f"Error loading dataset: {str(e)}"
             self.status_message.emit(error_msg, 8000)
-            self.model_info_widget.dataset_status_label.setToolTip("Copy the 'fruitveg-dataset' folder to the 'dataset' folder in the project root directory.")
             self.model_info_widget.set_dataset_status("No dataset found", color="red") 
+            self.model_info_widget.show_help_icon(True)
 
     def _load_model_on_start(self):
         """Attempts to load the default model on startup"""
@@ -750,7 +750,6 @@ class ModelTab(QWidget):
         # Metrics group box
         self.metrics_group = QGroupBox(f"{self.model_name} Stats")
         self.metrics_group.setObjectName("model-metrics")
-        self.metrics_group.setToolTip("Displays the basic metrics of the current model and the parameters it was trained with.")
         metrics_layout = QVBoxLayout()
         metrics_layout.setContentsMargins(18, 0, 18, 0)
         self.metrics_widget = MetricsWidget()
@@ -770,7 +769,6 @@ class ModelTab(QWidget):
         # Model info group box
         self.model_info_group = QGroupBox("Status")
         self.model_info_group.setObjectName("model-info")
-        self.model_info_group.setToolTip("Displays basic information about the dataset and the current model.")
         model_info_layout = QVBoxLayout()
         model_info_layout.setContentsMargins(0, 18, 0, 18)
         self.model_info_widget = ModelInfoWidget()  

@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QToolButton, QStyle, QToolTip
+from PyQt6.QtCore import Qt, QSize, QPoint
 
 from ...utils.custom_separator import create_separator
 
@@ -26,14 +26,27 @@ class ModelInfoWidget(QWidget):
         self.dataset_status_label = QLabel("No dataset found")
         self.dataset_status_label.setObjectName("ModelStatus")
         self.dataset_status_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
+        
+        self.help_icon = QToolButton()
+        self.help_icon.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxQuestion))
+        self.help_icon.setIconSize(QSize(20, 20))
+        self.help_icon.setStyleSheet("border: none; background-color: white;")  
+        self.help_icon.setToolTip("Copy the 'fruitveg-dataset' folder to the 'dataset' folder in the project root directory.")
+        self.help_icon.setVisible(False)  
 
         self.refresh_button = QPushButton()
         self.refresh_button.setMaximumSize(30, 30)
+        self.refresh_button.setToolTip("Tries to load the dataset.")
+
+        dataset_label_layout = QHBoxLayout()
+        dataset_label_layout.setSpacing(3) 
+        dataset_label_layout.addWidget(self.dataset_status_label)
+        dataset_label_layout.addWidget(self.help_icon)
 
         dataset_layout = QHBoxLayout()
         dataset_layout.setContentsMargins(0, 0, 20, 0)
-        dataset_layout.addWidget(self.dataset_status_label)
-        dataset_layout.addStretch
+        dataset_layout.addLayout(dataset_label_layout)  
+        dataset_layout.addStretch()  
         dataset_layout.addWidget(self.refresh_button)
 
         layout.addWidget(self.model_file_label)
@@ -41,6 +54,18 @@ class ModelInfoWidget(QWidget):
         layout.addWidget(self.model_status_label)
         layout.addWidget(create_separator("horizontal"))
         layout.addLayout(dataset_layout)
+
+        self.help_icon.clicked.connect(self._show_help_tooltip)
+
+    def show_help_icon(self, show: bool):
+        self.help_icon.setVisible(show)
+
+    def _show_help_tooltip(self):
+        QToolTip.showText(
+            self.help_icon.mapToGlobal(QPoint(0, self.help_icon.height())),
+            self.help_icon.toolTip(),
+            self.help_icon
+        )
 
     def set_model_file(self, file_name, color=None):
         """Updates the model file label with optional color for the file name."""
