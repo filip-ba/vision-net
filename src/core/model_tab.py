@@ -242,19 +242,17 @@ class ModelTab(QWidget):
         # Try to get the last loaded model path from config
         config = configparser.ConfigParser()
         config_path = os.path.join(project_root, "model_config.ini")
-        
+
         # Create default configuration if it doesn't exist
         if not os.path.exists(config_path):
             config['LastModels'] = {
-                'simple_cnn': default_model_path,
-                'resnet': default_model_path,
-                'efficientnet': default_model_path,
-                'vgg16': default_model_path
+                'simple_cnn': os.path.join(project_root, "saved_models", "simple_cnn.pth"),
+                'resnet': os.path.join(project_root, "saved_models", "resnet.pth"),
+                'efficientnet': os.path.join(project_root, "saved_models", "efficientnet.pth"),
+                'vgg16': os.path.join(project_root, "saved_models", "vgg16.pth")
             }
             with open(config_path, 'w') as configfile:
                 config.write(configfile)
-        else:
-            config.read(config_path)
             
         # Get the last used model path from config, fall back to default if not found
         try:
