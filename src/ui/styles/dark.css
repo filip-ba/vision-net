@@ -275,3 +275,9 @@ QToolTip {
     border: 1px solid #6f8396;
     padding: 5px;
 }
+
+/*------------------------------------------------- Help Icon -------------------------------------------------*/
+#help-icon {
+    border: none; 
+    background-color: #363636;
+}  

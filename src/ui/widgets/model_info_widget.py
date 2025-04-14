@@ -33,7 +33,7 @@ class ModelInfoWidget(QWidget):
         self.help_icon = QToolButton()
         self.help_icon.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxQuestion))
         self.help_icon.setIconSize(QSize(20, 20))
-        self.help_icon.setStyleSheet("border: none; background-color: white;")  
+        self.help_icon.setObjectName("help-icon")
         self.help_icon.setToolTip("Copy the 'fruitveg-dataset' folder to the 'dataset' folder in the project root directory.")
         self.help_icon.setVisible(False)  
 
