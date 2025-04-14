@@ -194,16 +194,18 @@ class ModelTab(QWidget):
             if self.shared_dataset_source and self.shared_dataset_source.model.dataset_loaded:
                 train_size, val_size, test_size = self.model.share_dataset(self.shared_dataset_source.model)
                 self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
+                self.model_info_widget.dataset_status_label.setToolTip("")
             else:
                 # Load the dataset normally (Simple CNN & ResNet)
                 project_root = self.get_project_root()
                 dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
                 train_size, val_size, test_size = self.model.load_data(dataset_dir)
                 self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
+                self.model_info_widget.dataset_status_label.setToolTip("")
         except Exception as e:
             error_msg = f"Error loading dataset: {str(e)}"
-            print(error_msg)
             self.status_message.emit(error_msg, 8000)
+            self.model_info_widget.dataset_status_label.setToolTip("Copy the 'fruitveg-dataset' folder to the 'dataset' folder in the project root directory.")
             self.model_info_widget.set_dataset_status("No dataset found", color="red") 
 
     def _load_model_on_start(self):
