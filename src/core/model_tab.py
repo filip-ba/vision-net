@@ -190,20 +190,21 @@ class ModelTab(QWidget):
     def _load_dataset(self):
         """Loads the dataset on startup"""
         try:
-            # Check if we should share the dataset from another tab
+            # Check if we should share the dataset from another tab (EfficientNet & VGG16)
             if self.shared_dataset_source and self.shared_dataset_source.model.dataset_loaded:
                 train_size, val_size, test_size = self.model.share_dataset(self.shared_dataset_source.model)
-                self.status_message.emit(f"Dataset shared successfully from {self.shared_dataset_source.model_name}: {len(self.model.classes)} classes", 8000)
+                self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
             else:
-                # Load the dataset normally
+                # Load the dataset normally (Simple CNN & ResNet)
                 project_root = self.get_project_root()
                 dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
                 train_size, val_size, test_size = self.model.load_data(dataset_dir)
-                self.status_message.emit(f"Dataset loaded successfully: {len(self.model.classes)} classes detected", 8000)
+                self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
         except Exception as e:
             error_msg = f"Error loading dataset: {str(e)}"
-            print(f"--------------------------------------{error_msg}")
+            print(error_msg)
             self.status_message.emit(error_msg, 8000)
+            self.model_info_widget.set_dataset_status("No dataset found", color="red") 
 
     def _load_model_on_start(self):
         """Attempts to load the default model on startup"""
@@ -270,14 +271,14 @@ class ModelTab(QWidget):
                     filename = os.path.basename(model_path)
                     self.model_info_widget.set_model_file(filename) 
                     self.model_loaded = True
-                    self.model_info_widget.set_model_status("Model loaded successfully", "green")
+                    self.model_info_widget.set_model_status("Model loaded", "green")
                     self.save_model_btn.setEnabled(True)
                     self.clear_model_btn.setEnabled(True)
                     self.kfold_train_btn.setEnabled(True)
                 except Exception as e:
-                    self.model_info_widget.set_model_status(f"Error loading model: {str(e)}", "red")
+                    self.model_info_widget.set_model_status("Error loading the model", "red")
             else:
-                self.model_info_widget.set_model_status("No model loaded", "red")
+                self.model_info_widget.set_model_status("No model found")
         except Exception as e:
             self.model_info_widget.set_model_status("Error initializing model", "red")
             
@@ -336,10 +337,11 @@ class ModelTab(QWidget):
                 self.save_model_btn.setEnabled(True)
                 self.clear_model_btn.setEnabled(True)
                 self.kfold_train_btn.setEnabled(True)
-                self.model_info_widget.set_model_status("Model loaded successfully", "green")
+                self.model_info_widget.set_model_status("Model loaded", "green")
 
                 self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
             except Exception as e:
+                self.model_info_widget.set_model_status("Error loading the model", "red")
                 self.status_message.emit(f"Error loading model: {str(e)}", 8000)
 
     def _save_model_path(self, model_type, model_path):

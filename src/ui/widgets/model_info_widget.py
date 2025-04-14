@@ -15,23 +15,40 @@ class ModelInfoWidget(QWidget):
         layout.setSpacing(18)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.model_status_label = QLabel("No model loaded")
-        self.model_status_label.setObjectName("ModelStatus")
-        self.model_status_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
-
         self.model_file_label = QLabel("Model File: None")
         self.model_file_label.setObjectName("ModelFileLabel")
         self.model_file_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
 
+        self.model_status_label = QLabel("No model loaded")
+        self.model_status_label.setObjectName("ModelStatus")
+        self.model_status_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
+
+        self.dataset_status_label = QLabel("No dataset found")
+        self.dataset_status_label.setObjectName("ModelStatus")
+        self.dataset_status_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
+
+        layout.addWidget(self.model_file_label)
+        layout.addWidget(create_separator("horizontal"))
         layout.addWidget(self.model_status_label)
         layout.addWidget(create_separator("horizontal"))
-        layout.addWidget(self.model_file_label)
-
-    def set_model_status(self, status, color="red"):
-        """Updates the model status label."""
-        self.model_status_label.setText(f"{status}")
-        self.model_status_label.setStyleSheet(f"color: {color};")
+        layout.addWidget(self.dataset_status_label)
 
     def set_model_file(self, file_name):
         """Updates the model file label."""
         self.model_file_label.setText(f"Model File: {file_name}")
+
+    def set_model_status(self, status, color=None):
+        """Updates the model status label."""
+        self.model_status_label.setText(status)
+        if color is None:
+            self.model_status_label.setStyleSheet("") 
+        else:
+            self.model_status_label.setStyleSheet(f"color: {color};")
+
+    def set_dataset_status(self, status, color=None):
+        """Updates the dataset status label."""
+        self.dataset_status_label.setText(status)
+        if color is None:
+            self.dataset_status_label.setStyleSheet("")
+        else:
+            self.dataset_status_label.setStyleSheet(f"color: {color};")
