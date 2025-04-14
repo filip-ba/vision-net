@@ -42,7 +42,7 @@ Tento program je aplikace vytvořená pomocí PyQt6, která poskytuje uživatels
    prilohy/source_code/fruitvegnet/saved_models
    ```
 
-. To start the application, use the following command:
+5. To start the application, use the following command:
     ```bash
     python main.py
     ```
