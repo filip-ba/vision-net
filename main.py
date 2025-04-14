@@ -1,3 +1,7 @@
+import ctypes
+myappid = 'mycompany.fruitvegnet.version'
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
 import sys
 from PyQt6.QtWidgets import QApplication
 
