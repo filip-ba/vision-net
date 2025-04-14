@@ -313,14 +313,14 @@ class ModelTab(QWidget):
                     if not all(key in checkpoint['model_state'] for key in ['layer1.0.conv1.weight', 'layer1.0.conv2.weight']):
                         raise ValueError("This model file is not compatible with ResNet architecture")
                     model_type = "resnet"
-                elif isinstance(self.model, VGG16Model):
-                    if not all(key in checkpoint['model_state'] for key in ['features.0.weight', 'features.2.weight', 'classifier.6.weight']):
-                        raise ValueError("This model file is not compatible with VGG16 architecture")
-                    model_type = "vgg16"
                 elif isinstance(self.model, EfficientNetModel):
                     if not all(key in checkpoint['model_state'] for key in ['features.0.0.weight', 'features.1.0.block.0.0.weight', 'classifier.1.weight']):
                         raise ValueError("This model file is not compatible with EfficientNet architecture")
                     model_type = "efficientnet"
+                elif isinstance(self.model, VGG16Model):
+                    if not all(key in checkpoint['model_state'] for key in ['features.0.weight', 'features.2.weight', 'classifier.6.weight']):
+                        raise ValueError("This model file is not compatible with VGG16 architecture")
+                    model_type = "vgg16"
 
                 # Reset metrics, parameters and plots first
                 self.metrics_widget.reset_metrics()
@@ -380,9 +380,15 @@ class ModelTab(QWidget):
 
     def save_model(self):
         """Saves the trained neural network model"""
-        if not self.model_loaded:
-            self.status_message.emit("No model to save", 8000)
-            return
+        if isinstance(self.model, SimpleCnnModel):
+            model_type = "simple_cnn"
+        elif isinstance(self.model, ResNetModel):
+            model_type == "resnet"
+        elif isinstance(self.model, EfficientNetModel):
+            model_type == "efficientnet"
+        elif isinstance(self.model, VGG16Model):
+            model_type == "vgg16"
+
         file_path, _ = QFileDialog.getSaveFileName(
             self,
             "Save Model",
@@ -393,6 +399,11 @@ class ModelTab(QWidget):
         if file_path:
             try:
                 self.model.save_model(file_path)
+                # Save path to config
+                self._save_model_path(model_type, file_path)
+                # Display filename
+                filename = os.path.basename(file_path)
+                self.model_info_widget.set_model_file(filename)
                 self.status_message.emit("Model saved successfully", 8000)
             except Exception as e:
                 self.status_message.emit(f"Error saving model: {str(e)}", 8000)
