@@ -6,9 +6,9 @@ The program can recognize selected pieces of fruit and vegetables wrapped in a m
 
 A custom simple dataset was created for this purpose. But the program will work with any other dataset, it just needs to be put in the ```dataset``` folder and called ```fruitveg-dataset```It also needs to support the following structure:  
 - ```dataset/fruitveg-dataset```
-   - ```/fruitveg-dataset/train```
-   - ```/fruitveg-dataset/test```
-   - ```/fruitveg-dataset/valid```
+   - ```/train```
+   - ```/test```
+   - ```/valid```
 
 ## Dependencies
 - OS: Windows/Linux 
