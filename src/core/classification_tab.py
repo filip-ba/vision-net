@@ -87,7 +87,9 @@ class ClassificationTab(QWidget):
             if not pixmap.isNull():
                 self.current_image_path = file_path
                 self.image_widget.update_image_display(file_path)
-                self.image_loaded.emit("Image loaded", 8000)
+                self.plot_widget.init_plot()
+                self.results_widget.reset_results()
+                self.image_loaded.emit("Image loaded, previous results cleared.", 8000)
             else:
                 self.current_image_path = None
                 self.image_loaded.emit("Failed to load image", 8000)

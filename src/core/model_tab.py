@@ -198,6 +198,8 @@ class ModelTab(QWidget):
             else:
                 # Load the dataset normally (Simple CNN & ResNet)
                 project_root = self.get_project_root()
+                dataset_root = os.path.join(project_root, "dataset")
+                os.makedirs(dataset_root, exist_ok=True)
                 dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
                 train_size, val_size, test_size = self.model.load_data(dataset_dir)
                 self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 

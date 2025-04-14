@@ -32,13 +32,13 @@ class ModelInfoWidget(QWidget):
         
         self.help_icon = QToolButton()
         self.help_icon.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxQuestion))
-        self.help_icon.setIconSize(QSize(20, 20))
+        self.help_icon.setIconSize(QSize(25, 25))
         self.help_icon.setObjectName("help-icon")
         self.help_icon.setToolTip("Copy the 'fruitveg-dataset' folder to the 'dataset' folder in the project root directory.")
         self.help_icon.setVisible(False)  
 
         self.refresh_button = QPushButton()
-        self.refresh_button.setMaximumSize(30, 30)
+        self.refresh_button.setMaximumSize(35, 35)
         self.refresh_button.setToolTip("Tries to load the dataset.")
 
         dataset_label_layout = QHBoxLayout()
@@ -111,4 +111,4 @@ class ModelInfoWidget(QWidget):
         if os.path.exists(icon_path):
             pixmap = QPixmap(icon_path)
             self.refresh_button.setIcon(QIcon(pixmap))
-            self.refresh_button.setIconSize(QSize(20, 20))
+            self.refresh_button.setIconSize(QSize(25, 25))
