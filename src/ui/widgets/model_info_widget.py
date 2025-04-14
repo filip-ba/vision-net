@@ -92,9 +92,9 @@ class ModelInfoWidget(QWidget):
             self.dataset_status_label.setStyleSheet("")
         else:
             self.dataset_status_label.setStyleSheet(f"color: {color};")
-
-    def update_refresh_icon(self, theme: str):
-        """Updates the refresh icon based on the current theme."""
+      
+    def get_project_root(self):
+        """Returns the path to the root directory of the project, works both in development and in the executable"""
         if getattr(sys, 'frozen', False):
             # Executable
             return sys._MEIPASS
@@ -105,7 +105,11 @@ class ModelInfoWidget(QWidget):
             ui_dir = os.path.dirname(widgets_dir)
             src_dir = os.path.dirname(ui_dir)
             project_root = os.path.dirname(src_dir)
+            return project_root
 
+    def update_refresh_icon(self, theme: str):
+        """Updates the refresh icon based on the current theme."""
+        project_root = self.get_project_root()
         icon_path = os.path.join(project_root, "assets", "icons", f"refresh-{theme}.png")
 
         if os.path.exists(icon_path):
