@@ -64,7 +64,6 @@ class ModelTab(QWidget):
         self.train_model_btn.clicked.connect(self.train_model)
         self.clear_model_btn.clicked.connect(self.clear_model)
         self.kfold_train_btn.clicked.connect(self.train_kfold)
-        self.model_info_widget.refresh_button.clicked.connect(self._load_dataset)
 
     def get_project_root(self):
         """Returns the path to the root directory of the project, works both in development and in the executable"""
@@ -205,6 +204,7 @@ class ModelTab(QWidget):
                 self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
                 self.model_info_widget.dataset_status_label.setToolTip("")
                 print("NORMALNE")
+            self.model_info_widget.refresh_button.setVisible(False)
         except Exception as e:
             error_msg = f"Error loading dataset: {str(e)}"
             self.status_message.emit(error_msg, 8000)
