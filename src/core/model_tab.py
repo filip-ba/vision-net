@@ -440,7 +440,6 @@ class ModelTab(QWidget):
 
             # Update model status
             self.model_info_widget.set_model_status("Training in progress...", "blue")
-            self.model_info_widget.set_model_file("")
 
             # Reset plots
             self.plot_widget1.plot_loss_history(self.plot_widget1)
@@ -489,7 +488,8 @@ class ModelTab(QWidget):
             self.kfold_train_btn.setEnabled(True)
             self.model_info_widget.set_model_status("Model trained successfully", "green")
             self.parameters_widget.update_parameters(self.model.training_params)
-            
+            self.model_info_widget.set_model_file("Not saved", "red")
+
             # Update UI with testing results
             if testing_result is not None:
                 self.metrics_widget.update_metrics(testing_result)

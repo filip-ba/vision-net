@@ -42,9 +42,12 @@ class ModelInfoWidget(QWidget):
         layout.addWidget(create_separator("horizontal"))
         layout.addLayout(dataset_layout)
 
-    def set_model_file(self, file_name):
-        """Updates the model file label."""
-        self.model_file_label.setText(f"Model File: {file_name}")
+    def set_model_file(self, file_name, color=None):
+        """Updates the model file label with optional color for the file name."""
+        if color is None:
+            self.model_file_label.setText(f"Model File: {file_name}")
+        else:
+            self.model_file_label.setText(f'Model File: <span style="color: {color}">{file_name}</span>')
 
     def set_model_status(self, status, color=None):
         """Updates the model status label."""
