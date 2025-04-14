@@ -896,6 +896,6 @@ class ModelTab(QWidget):
     def _switch_plot(self, index):
         """Switches between plots and updates button status"""
         self.plot_stack.setCurrentIndex(index)
-        buttons = [self.btn_confusion_matrix, self.btn_loss_history]
+        buttons = [self.btn_loss_history, self.btn_confusion_matrix]
         for i, btn in enumerate(buttons):
             btn.setChecked(i == index)
