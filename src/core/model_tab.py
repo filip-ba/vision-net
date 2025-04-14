@@ -195,7 +195,6 @@ class ModelTab(QWidget):
                 train_size, val_size, test_size = self.model.share_dataset(self.shared_dataset_source.model)
                 self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
                 self.model_info_widget.dataset_status_label.setToolTip("")
-                print("SHARED")
             else:
                 # Load the dataset normally (Simple CNN & ResNet)
                 project_root = self.get_project_root()
@@ -203,9 +202,12 @@ class ModelTab(QWidget):
                 train_size, val_size, test_size = self.model.load_data(dataset_dir)
                 self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
                 self.model_info_widget.dataset_status_label.setToolTip("")
-                print("NORMALNE")
             self.model_info_widget.refresh_button.setVisible(False)
+            self.train_model_btn.setEnabled(True)
+            self.load_model_btn.setEnabled(True)
         except Exception as e:
+            self.train_model_btn.setEnabled(False)
+            self.load_model_btn.setEnabled(False)
             error_msg = f"Error loading dataset: {str(e)}"
             self.status_message.emit(error_msg, 8000)
             self.model_info_widget.dataset_status_label.setToolTip("Copy the 'fruitveg-dataset' folder to the 'dataset' folder in the project root directory.")
@@ -213,6 +215,8 @@ class ModelTab(QWidget):
 
     def _load_model_on_start(self):
         """Attempts to load the default model on startup"""
+        if self.model.dataset_loaded == False:
+            return
         project_root = self.get_project_root()
         # Determine the model type and default paths
         if self.model_class == SimpleCnnModel:

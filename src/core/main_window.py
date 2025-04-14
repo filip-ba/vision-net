@@ -52,6 +52,8 @@ class MainWindow(QMainWindow):
         # Shared dataset from ResNet
         self.efficientnet_tab._load_dataset()
         self.vgg16_tab._load_dataset()
+        # Try to load random test image
+        self.image_classification_widget.load_random_test_image()
 
     def update_status_bar(self, message, timeout=8000):
         self.status_bar.showMessage(message, timeout)
