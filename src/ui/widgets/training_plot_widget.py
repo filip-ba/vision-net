@@ -108,10 +108,12 @@ class TrainingPlotWidget(QWidget):
         ax.set_xlabel('Predicted', labelpad=15)
         ax.set_ylabel('True', labelpad=15)
 
-        # Limit to a maximum of 10 classes
+        # Limit to a maximum of 10 classes based on the sum of confusion matrix rows
         if conf_mat is not None and classes is not None:
-            conf_mat = conf_mat[:10, :10]  # Limit confusion matrix to 10x10
-            classes = classes[:10]  # Limit classes to 10
+            class_sums = conf_mat.sum(axis=1)
+            sorted_indices = np.argsort(class_sums)[-10:]  
+            conf_mat = conf_mat[sorted_indices][:, sorted_indices]  
+            classes = [classes[i] for i in sorted_indices] 
 
             im = ax.imshow(conf_mat, cmap='Blues', aspect='auto')
             cbar = plot_widget.figure.colorbar(im)
