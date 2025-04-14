@@ -108,7 +108,11 @@ class TrainingPlotWidget(QWidget):
         ax.set_xlabel('Predicted', labelpad=15)
         ax.set_ylabel('True', labelpad=15)
 
-        if conf_mat is not None or classes is not None:
+        # Limit to a maximum of 10 classes
+        if conf_mat is not None and classes is not None:
+            conf_mat = conf_mat[:10, :10]  # Limit confusion matrix to 10x10
+            classes = classes[:10]  # Limit classes to 10
+
             im = ax.imshow(conf_mat, cmap='Blues', aspect='auto')
             cbar = plot_widget.figure.colorbar(im)
             cbar.ax.tick_params(labelsize=8)

@@ -133,6 +133,10 @@ class PlotProbabilityWidget(QWidget):
         if model_type not in self.plot_widgets:
             return
             
+        # Limit to a maximum of 10 classes
+        classes = classes[:10]
+        probabilities = probabilities[:10]
+
         figure = self.plot_widgets[model_type]['figure']
         figure.clear()
         ax = figure.add_subplot(111)
