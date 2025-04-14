@@ -386,11 +386,11 @@ class ModelTab(QWidget):
         if isinstance(self.model, SimpleCnnModel):
             model_type = "simple_cnn"
         elif isinstance(self.model, ResNetModel):
-            model_type == "resnet"
+            model_type = "resnet"
         elif isinstance(self.model, EfficientNetModel):
-            model_type == "efficientnet"
+            model_type = "efficientnet"
         elif isinstance(self.model, VGG16Model):
-            model_type == "vgg16"
+            model_type = "vgg16"
 
         file_path, _ = QFileDialog.getSaveFileName(
             self,
