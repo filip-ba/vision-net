@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import ( 
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QSplitter, 
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QSplitter,
     QFileDialog, QStackedWidget, QFrame, QDialog, QSpinBox, QLabel, QMessageBox, QSizePolicy )
 from PyQt6.QtCore import pyqtSignal, Qt
 import sys
@@ -766,16 +766,6 @@ class ModelTab(QWidget):
         self.parameters_group.setLayout(parameters_layout)
         self.parameters_group.setContentsMargins(0, 0, 0, 0)
 
-        # Model info group box
-        self.model_info_group = QGroupBox("Status")
-        self.model_info_group.setObjectName("model-info")
-        model_info_layout = QVBoxLayout()
-        model_info_layout.setContentsMargins(0, 18, 0, 18)
-        self.model_info_widget = ModelInfoWidget()  
-        model_info_layout.addWidget(self.model_info_widget)
-        self.model_info_group.setLayout(model_info_layout)
-        self.model_info_group.setContentsMargins(0, 0, 0, 0)
-
         # K-fold Cross-validation
         kfold_group = QGroupBox("k-Fold Cross-Validation")
         kfold_group.setObjectName("model-controls")
@@ -874,7 +864,16 @@ class ModelTab(QWidget):
 
         right_layout.addWidget(self.plot_frame)
         
-        # Add model info group below the plot frame
+        # Model info group box
+        self.model_info_group = QGroupBox("Status")
+        self.model_info_group.setObjectName("model-info")
+        model_info_layout = QVBoxLayout()
+        model_info_layout.setContentsMargins(0, 18, 0, 18)
+        self.model_info_widget = ModelInfoWidget()  
+        model_info_layout.addWidget(self.model_info_widget)
+        self.model_info_group.setLayout(model_info_layout)
+        self.model_info_group.setContentsMargins(0, 0, 0, 0)
+
         right_layout.addWidget(self.model_info_group)
         
         right_layout.addStretch()

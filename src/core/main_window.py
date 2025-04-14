@@ -116,13 +116,18 @@ class MainWindow(QMainWindow):
             if item and item.widget() and isinstance(item.widget(), QPushButton):
                 item.widget().setChecked(item.widget() == clicked_button)
     
-    def _update_sidebar_icons(self):
+    def _update_icons(self):
         """Update sidebar icons based on current theme"""
         project_root = self.get_project_root()
         icons_dir = os.path.join(project_root, "assets", "icons")
 
         theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
-        
+
+        # Update refresh icon
+        for tab in [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]:
+            if hasattr(tab, "model_info_widget"):
+                tab.model_info_widget.update_refresh_icon(theme_suffix)
+
         # Update sidebar buttons
         for i in range(self.sidebar.layout().count()):
             item = self.sidebar.layout().itemAt(i)
@@ -311,7 +316,7 @@ class MainWindow(QMainWindow):
         # Create settings page (third page)
         self.settings_widget = SettingsTab(self.style_manager)
         self.settings_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.settings_widget.style_changed.connect(self._update_sidebar_icons)
+        self.settings_widget.style_changed.connect(self._update_icons)
 
         # Create scroll areas for each page
         models_scroll = QScrollArea()
@@ -349,7 +354,7 @@ class MainWindow(QMainWindow):
         self._connect_dataset_refresh_signals()
         
         # Update sidebar icons based on current style
-        self._update_sidebar_icons()
+        self._update_icons()
 
     def _create_sidebar(self):
         sidebar = QWidget()

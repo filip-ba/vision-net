@@ -1,5 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QToolButton, QStyle, QToolTip
 from PyQt6.QtCore import Qt, QSize, QPoint
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QIcon, QPixmap
+import sys, os
 
 from ...utils.custom_separator import create_separator
 
@@ -89,3 +92,23 @@ class ModelInfoWidget(QWidget):
             self.dataset_status_label.setStyleSheet("")
         else:
             self.dataset_status_label.setStyleSheet(f"color: {color};")
+
+    def update_refresh_icon(self, theme: str):
+        """Updates the refresh icon based on the current theme."""
+        if getattr(sys, 'frozen', False):
+            # Executable
+            return sys._MEIPASS
+        else:
+            # IDE
+            current_file_path = os.path.abspath(__file__)
+            widgets_dir = os.path.dirname(current_file_path)
+            ui_dir = os.path.dirname(widgets_dir)
+            src_dir = os.path.dirname(ui_dir)
+            project_root = os.path.dirname(src_dir)
+
+        icon_path = os.path.join(project_root, "assets", "icons", f"refresh-{theme}.png")
+
+        if os.path.exists(icon_path):
+            pixmap = QPixmap(icon_path)
+            self.refresh_button.setIcon(QIcon(pixmap))
+            self.refresh_button.setIconSize(QSize(20, 20))
