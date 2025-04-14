@@ -16,26 +16,33 @@ Tento program je aplikace vytvořená pomocí PyQt6, která poskytuje uživatels
 - matplotlib
 - numpy
 
-## Running the program
-1. Klonujte repozitář:
-   ```bash
-   git clone https://github.com/vaše_uživatelské_jméno/vaše_repozitář.git
-   ```
-2. Přejděte do adresáře projektu:
-   ```bash
-   cd vaše_repozitář
-   ```
-3. Nainstalujte požadované balíčky:
+## How to run
+1. Open CMD in the root folder of the project (main folder with the main.py, requirements.txt, ...)
+
+2. Install the required packages (you need to have pip installed):
    ```bash
    pip install -r requirements.txt
    ```
 
-## Spuštění
-Pro spuštění aplikace použijte následující příkaz:
-```bash
-python main.py
-```
+3. Copy the ```fruitveg-dataset``` folder from the following path:
+   ```bash
+   prilohy/dataset/
+   ```
+   to the following path:
+   ```bash
+   prilohy/source_code/fruitvegnet/dataset
+   ```
 
-## Použití
-[Popište, jak používat aplikaci, jaké funkce nabízí, atd.]
+4. Copy the contents of the ```saved_models``` folder from the path:
+   ```bash
+   prilohy/saved_models
+   ```
+   to the following folder:
+   ```bash
+   prilohy/source_code/fruitvegnet/saved_models
+   ```
 
+. To start the application, use the following command:
+    ```bash
+    python main.py
+    ```
