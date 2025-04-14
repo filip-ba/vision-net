@@ -1,8 +1,9 @@
 import ctypes
-myappid = 'mycompany.fruitvegnet.version'
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-
 import sys
+
+if sys.platform == "win32":
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u"mycompany.fruitvegnet.version")
+
 from PyQt6.QtWidgets import QApplication
 
 from src.ui.styles.style_manager import StyleManager
