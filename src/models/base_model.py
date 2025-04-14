@@ -36,7 +36,9 @@ class BaseModel(ABC):
             'accuracy': None,
             'precision': None,
             'recall': None,
-            'confusion_matrix': None
+            'confusion_matrix': None,
+            'class_recall': None,
+            'class_names': None   
         }
         self.history = {
             'train_loss': None,
@@ -257,8 +259,14 @@ class BaseModel(ABC):
         
         accuracy = correct / total if total > 0 else 0.0
         
+        # Calculate micro-averaged metrics
         precision, recall, f1, _ = precision_recall_fscore_support(
             all_labels, all_preds, average='macro', zero_division=0
+        )
+        
+        # Calculate per-class metrics
+        class_precision, class_recall, class_f1, class_support = precision_recall_fscore_support(
+            all_labels, all_preds, average=None, zero_division=0
         )
         
         conf_matrix = confusion_matrix(all_labels, all_preds)
@@ -267,7 +275,9 @@ class BaseModel(ABC):
             'accuracy': accuracy,
             'precision': precision,
             'recall': recall,
-            'confusion_matrix': conf_matrix
+            'confusion_matrix': conf_matrix,
+            'class_recall': class_recall,  
+            'class_names': self.classes   
         }
         
         return self.metrics
@@ -335,6 +345,10 @@ class BaseModel(ABC):
                 'std_accuracy': None,
                 'fold_accuracies': None
             }
+        
+        if 'class_recall' not in self.metrics or 'class_names' not in self.metrics:
+            if self.dataset_loaded and self.testloader is not None:
+                self.test()  
         
         return {
             'training_params': self.training_params,

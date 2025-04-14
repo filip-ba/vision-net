@@ -34,8 +34,15 @@ class MetricsWidget(QWidget):
         self.accuracy_label.setText("Accuracy: -")
         self.precision_label.setText("Precision: -")
         self.recall_label.setText("Recall: -")
+        self.recall_label.setToolTip("")
 
     def update_metrics(self, metrics):
         self.accuracy_label.setText(f"Accuracy: {metrics['accuracy']:.0%}")
         self.precision_label.setText(f"Precision: {metrics['precision']:.0%}")
         self.recall_label.setText(f"Recall: {metrics['recall']:.0%}")
+        
+        if 'class_recall' in metrics and 'class_names' in metrics:
+            tooltip_text = "Per-class Recall:\n"
+            for i, (class_name, recall_value) in enumerate(zip(metrics['class_names'], metrics['class_recall'])):
+                tooltip_text += f"{class_name}: {recall_value:.0%}\n"
+            self.recall_label.setToolTip(tooltip_text)
