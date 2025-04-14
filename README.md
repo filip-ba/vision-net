@@ -28,26 +28,10 @@ A custom simple dataset was created for this purpose. But the program will work 
    ```bash
    pip install -r requirements.txt
    ```
+3. In the root directory create ```dataset/fruitveg-dataset``` (the names must be the same!).
+   Put your ```/train```, ```/test``` and ```/valid``` in the ```fruitveg-dataset``` folder.
 
-3. Copy the ```fruitveg-dataset``` folder from the following path:
-   ```bash
-   prilohy/dataset/
-   ```
-   to the following path:
-   ```bash
-   prilohy/source_code/fruitvegnet/dataset
-   ```
-
-4. Copy the contents of the ```saved_models``` folder from the path:
-   ```bash
-   prilohy/saved_models
-   ```
-   to the following folder:
-   ```bash
-   prilohy/source_code/fruitvegnet/saved_models
-   ```
-
-5. To start the application, use the following command:
+4. To start the application, use the following command:
     ```bash
     python main.py
     ```
