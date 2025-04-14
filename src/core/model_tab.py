@@ -64,6 +64,7 @@ class ModelTab(QWidget):
         self.train_model_btn.clicked.connect(self.train_model)
         self.clear_model_btn.clicked.connect(self.clear_model)
         self.kfold_train_btn.clicked.connect(self.train_kfold)
+        self.model_info_widget.refresh_button.clicked.connect(self._load_dataset)
 
     def get_project_root(self):
         """Returns the path to the root directory of the project, works both in development and in the executable"""
@@ -195,6 +196,7 @@ class ModelTab(QWidget):
                 train_size, val_size, test_size = self.model.share_dataset(self.shared_dataset_source.model)
                 self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
                 self.model_info_widget.dataset_status_label.setToolTip("")
+                print("SHARED")
             else:
                 # Load the dataset normally (Simple CNN & ResNet)
                 project_root = self.get_project_root()
@@ -202,6 +204,7 @@ class ModelTab(QWidget):
                 train_size, val_size, test_size = self.model.load_data(dataset_dir)
                 self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
                 self.model_info_widget.dataset_status_label.setToolTip("")
+                print("NORMALNE")
         except Exception as e:
             error_msg = f"Error loading dataset: {str(e)}"
             self.status_message.emit(error_msg, 8000)
@@ -345,6 +348,10 @@ class ModelTab(QWidget):
             except Exception as e:
                 self.model_info_widget.set_model_status("Error loading the model", "red")
                 self.status_message.emit(f"Error loading model: {str(e)}", 8000)
+                import traceback
+                error_msg = f"Error loading model: {str(e)}\n{traceback.format_exc()}"
+                print(error_msg)  # Print to console for debugging
+                raise Exception(error_msg)
 
     def _save_model_path(self, model_type, model_path):
         """Save the model path to config file"""
