@@ -253,7 +253,9 @@ class ModelTab(QWidget):
             }
             with open(config_path, 'w') as configfile:
                 config.write(configfile)
-            
+        else:
+            config.read(config_path)            
+    
         # Get the last used model path from config, fall back to default if not found
         try:
             if 'LastModels' in config and model_type in config['LastModels']:
