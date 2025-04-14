@@ -32,7 +32,7 @@ class VGG16Model(BaseModel):
             param.requires_grad = False
         num_features = self.net.classifier[6].in_features
         
-        num_classes = len(self.classes) if self.classes is not None else 6
+        num_classes = len(self.classes) if self.classes is not None else 5
         self.net.classifier[6] = nn.Linear(num_features, num_classes)
         
         self.net = self.net.to(self.device)

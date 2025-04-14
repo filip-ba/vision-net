@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
 from PyQt6.QtCore import Qt
 
 from ...utils.custom_separator import create_separator
@@ -27,11 +27,20 @@ class ModelInfoWidget(QWidget):
         self.dataset_status_label.setObjectName("ModelStatus")
         self.dataset_status_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
 
+        self.refresh_button = QPushButton()
+        self.refresh_button.setMaximumSize(30, 30)
+
+        dataset_layout = QHBoxLayout()
+        dataset_layout.setContentsMargins(0, 0, 20, 0)
+        dataset_layout.addWidget(self.dataset_status_label)
+        dataset_layout.addStretch
+        dataset_layout.addWidget(self.refresh_button)
+
         layout.addWidget(self.model_file_label)
         layout.addWidget(create_separator("horizontal"))
         layout.addWidget(self.model_status_label)
         layout.addWidget(create_separator("horizontal"))
-        layout.addWidget(self.dataset_status_label)
+        layout.addLayout(dataset_layout)
 
     def set_model_file(self, file_name):
         """Updates the model file label."""

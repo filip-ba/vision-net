@@ -37,7 +37,7 @@ class ResNetModel(BaseModel):
         num_features = self.net.fc.in_features
         
         # Determine number of classes dynamically if dataset is loaded
-        num_classes = len(self.classes) if self.classes is not None else 6
+        num_classes = len(self.classes) if self.classes is not None else 5
         self.net.fc = nn.Linear(num_features, num_classes)
 
         # Move to device

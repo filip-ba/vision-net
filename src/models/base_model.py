@@ -82,7 +82,7 @@ class BaseModel(ABC):
     def load_data(self, data_dir, k=None, current_fold=None):
         """Loads and prepares dataset. If k and current_fold are provided, performs K-fold cross-validation split."""
         train_transform, test_transform = self.get_transforms()
-        
+
         if k is not None and current_fold is not None:
             # Load all training data
             full_train_dataset = datasets.ImageFolder(root=os.path.join(data_dir, "train"), transform=train_transform)

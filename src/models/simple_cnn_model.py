@@ -27,7 +27,7 @@ class SimpleCnnModel(BaseModel):
 
     def initialize_model(self):
         """Initializes the model"""
-        num_classes = len(self.classes) if self.classes is not None else 6
+        num_classes = len(self.classes) if self.classes is not None else 5
         
         class Net(nn.Module):
             def __init__(self, num_classes):
