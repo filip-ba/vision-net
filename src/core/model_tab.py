@@ -327,7 +327,7 @@ class ModelTab(QWidget):
                     if not all(key in checkpoint['model_state'] for key in ['features.0.weight', 'features.2.weight', 'classifier.6.weight']):
                         raise ValueError("This model file is not compatible with VGG16 architecture")
                     model_type = "vgg16"
-
+                    
                 # Reset metrics, parameters and plots first
                 self.metrics_widget.reset_metrics()
                 self.parameters_widget.reset_parameters()
