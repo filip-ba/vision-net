@@ -188,7 +188,9 @@ class ModelTab(QWidget):
         self.model_loaded = False
 
     def _load_dataset(self):
-        """Loads the dataset on startup"""
+        """Loads the dataset on startup. If shared_dataset_source is provided (for EfficientNet & VGG16),
+        it will use the dataset from that source. Otherwise, it will load the dataset from the default location.
+        Updates the UI to reflect the dataset loading status."""
         try:
             # Check if we should share the dataset from another tab (EfficientNet & VGG16)
             if self.shared_dataset_source and self.shared_dataset_source.model.dataset_loaded:
@@ -217,7 +219,8 @@ class ModelTab(QWidget):
             self.model_info_widget.refresh_button.setVisible(True)
 
     def _load_model_on_start(self):
-        """Attempts to load the default model on startup"""
+        """Attempts to load the default model on startup. The model path is determined based on the model type
+        and can be overridden by a saved path in the configuration file. Updates the UI to reflect the model loading status."""
         if self.model.dataset_loaded == False:
             return
         project_root = self.get_project_root()
@@ -521,7 +524,7 @@ class ModelTab(QWidget):
         self._load_dataset()
 
     def train_kfold(self):
-        """Performs K-fold cross-validation on the model"""
+        """Performs k-fold cross-validation training."""
         try:
             # Check if dataset is loaded
             if not self.model.is_data_loaded():

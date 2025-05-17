@@ -43,6 +43,8 @@ class ClassificationTab(QWidget):
             return project_root
 
     def load_random_test_image(self):
+        """Loads a random image from the test dataset. The image is selected from a random class
+        and then a random image from that class. Updates the UI to display the selected image."""
         project_root = self.get_project_root()
         dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset", "test")
 
@@ -73,6 +75,9 @@ class ClassificationTab(QWidget):
         self.current_image_path = None
             
     def load_image(self):
+        """Opens a file dialog for the user to select an image file. Supports all image formats
+        that Qt can handle. Updates the UI to display the selected image and resets previous
+        classification results."""
         supported_formats = [f"*.{fmt.data().decode()}" for fmt in QImageReader.supportedImageFormats()]
         filter_string = "Image Files ({})".format(" ".join(supported_formats))
         file_path, _ = QFileDialog.getOpenFileName(
@@ -95,11 +100,18 @@ class ClassificationTab(QWidget):
                 self.image_loaded.emit("Failed to load image", 8000)
                 
     def update_result(self, model_type, result):
-        """Update the classification result for a specific model"""
+        """Updates the classification result for a specific model in the results widget.
+        Args:
+            model_type (str): The type of model (e.g., 'simple_cnn', 'resnet')
+            result (str): The classification result or error message"""
         self.results_widget.update_result(model_type, result)
 
     def update_plot(self, model_type, classes, probabilities):
-        """Update probability plot for a specific model"""
+        """Updates the probability plot for a specific model.
+        Args:
+            model_type (str): The type of model (e.g., 'simple_cnn', 'resnet')
+            classes (list): List of class names
+            probabilities (list): List of probabilities for each class"""
         self.plot_widget.update_plot(model_type, classes, probabilities)
         
     def init_plot(self, model_type=None):

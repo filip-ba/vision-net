@@ -192,7 +192,7 @@ class BaseModel(ABC):
                     
                 if progress_callback:
                     progress = (epoch * len(self.trainloader) + i) / (epochs * len(self.trainloader))
-                    current_loss = loss.item()  # Aktuální ztráta z posledního batche
+                    current_loss = loss.item()  # Current loss from the last batch
                     progress_callback(progress, current_loss)
                         
             # Validation
@@ -220,7 +220,7 @@ class BaseModel(ABC):
             train_loss_history.extend(epoch_train_loss_history)
             # Estimated initial value for the validation loss
             if len(epoch_val_loss_history) > 0:
-                initial_val_loss = epoch_val_loss_history[0] * 1.2  # Odhad počáteční validační ztráty
+                initial_val_loss = epoch_val_loss_history[0] * 1.2  # Estimate of initial validation loss
                 val_loss_history = [initial_val_loss] + epoch_val_loss_history
             else:
                 val_loss_history = epoch_val_loss_history
@@ -259,7 +259,7 @@ class BaseModel(ABC):
         
         accuracy = correct / total if total > 0 else 0.0
         
-        # Calculate micro-averaged metrics
+        # Calculate macro-averaged metrics
         precision, recall, f1, _ = precision_recall_fscore_support(
             all_labels, all_preds, average='macro', zero_division=0
         )
