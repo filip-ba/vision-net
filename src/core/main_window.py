@@ -9,6 +9,7 @@ import os
 from src.core.model_tab import ModelTab
 from src.core.classification_tab import ClassificationTab
 from src.core.settings_tab import SettingsTab
+from src.core.dataset_tab import DatasetTab  
 from ..models.simple_cnn_model import SimpleCnnModel  
 from ..models.resnet_model import ResNetModel 
 from ..models.efficientnet_model import EfficientNetModel  
@@ -140,6 +141,8 @@ class MainWindow(QMainWindow):
                     icon_path = os.path.join(icons_dir, f"model-{theme_suffix}.png")
                 elif button_text == "Classification":
                     icon_path = os.path.join(icons_dir, f"classification-{theme_suffix}.png")
+                elif button_text == "Dataset":
+                    icon_path = os.path.join(icons_dir, f"dataset-{theme_suffix}.png")
                 elif button_text == "Settings":
                     icon_path = os.path.join(icons_dir, f"settings-{theme_suffix}.png")
                     
@@ -238,7 +241,6 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
         self.setGeometry(50, 50, 1280, 960)
-
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
@@ -246,26 +248,20 @@ class MainWindow(QMainWindow):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
         
-        # Create scrollable sidebar
         self.sidebar_scroll = QScrollArea()
         self.sidebar_scroll.setWidgetResizable(True)
         self.sidebar_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.sidebar_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        
         self.sidebar = self._create_sidebar()
         self.sidebar_scroll.setWidget(self.sidebar)
-        
         self.sidebar_scroll.setMinimumWidth(self.MIN_SIDEBAR_WIDTH)
         self.sidebar_scroll.setMaximumWidth(self.MIN_SIDEBAR_WIDTH)
-        
-        # Create sidebar toggle button
         self.sidebar_toggle_button = QPushButton()
         self.sidebar_toggle_button.setObjectName("sidebar-toggle-button")
         self.sidebar_toggle_button.setFixedSize(30, 30)
         self.sidebar_toggle_button.setVisible(False)
         self.sidebar_toggle_button.clicked.connect(self._toggle_sidebar)
         
-        # Set toggle button icon
         theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
         menu_icon_path = os.path.join(icons_dir, f"menu-{theme_suffix}.png")
 
@@ -274,13 +270,11 @@ class MainWindow(QMainWindow):
             self.sidebar_toggle_button.setIcon(QIcon(menu_icon))
             self.sidebar_toggle_button.setIconSize(QSize(16, 16))
         
-        # Container for the model settings and image classification
         content_container = QWidget()
         content_layout = QVBoxLayout(content_container)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
         
-        # Add toggle button to the top-left corner of the content container
         toggle_button_layout = QHBoxLayout()
         toggle_button_layout.setContentsMargins(10, 10, 0, 0)
         toggle_button_layout.addWidget(self.sidebar_toggle_button)
@@ -313,7 +307,11 @@ class MainWindow(QMainWindow):
         self.image_classification_widget = ClassificationTab()
         self.image_classification_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
-        # Create settings page (third page)
+        # Create dataset tab (third page)
+        self.dataset_widget = DatasetTab()
+        self.dataset_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        
+        # Create settings page (fourth page)
         self.settings_widget = SettingsTab(self.style_manager)
         self.settings_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.settings_widget.style_changed.connect(self._update_icons)
@@ -329,6 +327,11 @@ class MainWindow(QMainWindow):
         classification_scroll.setFrameShape(QFrame.Shape.NoFrame)
         classification_scroll.setWidget(self.image_classification_widget)
 
+        dataset_scroll = QScrollArea()
+        dataset_scroll.setWidgetResizable(True)
+        dataset_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        dataset_scroll.setWidget(self.dataset_widget)
+
         settings_scroll = QScrollArea()
         settings_scroll.setWidgetResizable(True)
         settings_scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -337,6 +340,7 @@ class MainWindow(QMainWindow):
         # Add scroll areas to the content stack
         self.content_stack.addWidget(models_scroll)
         self.content_stack.addWidget(classification_scroll)
+        self.content_stack.addWidget(dataset_scroll)
         self.content_stack.addWidget(settings_scroll)
 
         self.status_bar = QStatusBar()
@@ -392,9 +396,11 @@ class MainWindow(QMainWindow):
         # Add navigation buttons
         models_btn = self._create_sidebar_button("Models", 0)
         classify_btn = self._create_sidebar_button("Classification", 1)
+        dataset_btn = self._create_sidebar_button("Dataset", 2)
         
         sidebar_layout.addWidget(models_btn)
         sidebar_layout.addWidget(classify_btn)
+        sidebar_layout.addWidget(dataset_btn)
         
         # Add stretch to push the settings button to the bottom
         sidebar_layout.addStretch()
@@ -409,7 +415,7 @@ class MainWindow(QMainWindow):
         sidebar_layout.addItem(spacer)
 
         # Add Settings button at the bottom
-        settings_btn = self._create_sidebar_button("Settings", 2)
+        settings_btn = self._create_sidebar_button("Settings", 3)
         sidebar_layout.addWidget(settings_btn)
 
         sidebar_layout.addItem(spacer)
@@ -432,13 +438,15 @@ class MainWindow(QMainWindow):
             icon_path = os.path.join(icons_dir, f"model-{theme_suffix}.png")
         elif text == "Classification":
             icon_path = os.path.join(icons_dir, f"classification-{theme_suffix}.png")
+        elif text == "Dataset":
+            icon_path = os.path.join(icons_dir, f"dataset-{theme_suffix}.png")
         elif text == "Settings":
             icon_path = os.path.join(icons_dir, f"settings-{theme_suffix}.png")
         
         # Create composite icon with an empty space
         original_icon = QPixmap(icon_path)
     
-        combined = QPixmap(19 + 9, 19)  # 19px icon + 9px space
+        combined = QPixmap(22 + 9, 22)  # 19px icon + 9px space
         combined.fill(Qt.GlobalColor.transparent)
         
         painter = QPainter(combined)
