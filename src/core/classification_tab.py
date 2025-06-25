@@ -87,14 +87,14 @@ class ClassificationTab(QWidget):
         if 0 <= self.current_test_index < len(self.test_images):
             image_path, class_name = self.test_images[self.current_test_index]
             self.current_image_path = image_path
-            self.image_widget.update_image(image_path)
+            self.classification_widget.update_image(image_path)
             self._load_results_from_cache(image_path, class_name)
             self._update_navigation_buttons()
 
     def _update_navigation_buttons(self):
         prev_enabled = self.current_test_index > 0
         next_enabled = self.current_test_index < len(self.test_images) - 1
-        self.image_widget.update_navigation_buttons(prev_enabled, next_enabled)
+        self.classification_widget.update_navigation_buttons(prev_enabled, next_enabled)
         
     def _load_results_from_cache(self, image_path, class_name=None):
         if image_path in self.classification_results_cache:
@@ -134,7 +134,7 @@ class ClassificationTab(QWidget):
             pixmap = QPixmap(file_path)
             if not pixmap.isNull():
                 self.current_image_path = file_path
-                self.image_widget.update_image(file_path)
+                self.classification_widget.update_image(file_path)
                 self._load_results_from_cache(file_path)
             else:
                 self.current_image_path = None
@@ -169,36 +169,32 @@ class ClassificationTab(QWidget):
     def showEvent(self, event):
         """Scale the image in image display properly after the start of the application"""
         super().showEvent(event)
-        QTimer.singleShot(50, self.image_widget.scale_image)
+        QTimer.singleShot(50, self.classification_widget.scale_image)
 
     def _create_ui(self):
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(10, 10, 10, 0)
         main_layout.setSpacing(10)  
-
         top_layout = self._create_top_layout()
         bottom_layout = self._create_bottom_layout()
-        
         main_layout.addLayout(top_layout, 4)
         main_layout.addLayout(bottom_layout, 6)
-
         self.setLayout(main_layout)
 
-        # Connect signals
-        self.image_widget.load_btn.clicked.connect(self.load_image)
-        self.image_widget.classify_clicked.connect(self.classify_clicked.emit)
-        self.image_widget.prev_clicked.connect(self.show_previous_test_image)
-        self.image_widget.next_clicked.connect(self.show_next_test_image)
+        self.classification_widget.load_img_btn_clicked.connect(self.load_image)
+        self.classification_widget.classify_img_btn_clicked.connect(self.classify_clicked.emit)
+        self.classification_widget.prev_clicked.connect(self.show_previous_test_image)
+        self.classification_widget.next_clicked.connect(self.show_next_test_image)
         
     def _create_top_layout(self):
         top_layout = QHBoxLayout()
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(0)
 
-        self.image_widget = ClassificationWidget()
+        self.classification_widget = ClassificationWidget()
         self.results_widget = ResultsWidget()
         
-        top_layout.addWidget(self.image_widget, 3)
+        top_layout.addWidget(self.classification_widget, 3)
         top_layout.addWidget(self.results_widget, 2)
         return top_layout
         
