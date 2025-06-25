@@ -93,7 +93,6 @@ class MainWindow(QMainWindow):
                     result = tab.model.predict_image(self.image_classification_widget.current_image_path)
                     predicted_class = result['class']
                     probabilities = result['probabilities']
-                    
                     self.image_classification_widget.update_result(model_info['type'], predicted_class)
                     self.image_classification_widget.update_plot(model_info['type'], tab.model.classes, probabilities)
                     
@@ -106,6 +105,7 @@ class MainWindow(QMainWindow):
                     self.update_status_bar("No models available for classification")
             else:
                 self.image_classification_widget.update_result(model_info['type'], "No model")
+                self.image_classification_widget.init_plot(model_info['type'])
 
     def _switch_page(self, index, clicked_button):
         """Switch between sidebar pages"""

@@ -2,13 +2,15 @@ from PyQt6.QtWidgets import (
     QWidget, QGroupBox, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QSizePolicy
 )
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QPixmap, QIcon
+from PyQt6.QtCore import Qt, pyqtSignal, QSize
 
 
 class ImageClassificationWidget(QWidget):
     image_loaded = pyqtSignal(str, int)
     classify_clicked = pyqtSignal()
+    prev_clicked = pyqtSignal()
+    next_clicked = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -25,18 +27,46 @@ class ImageClassificationWidget(QWidget):
         group_box.setObjectName("classification-group")
         group_layout = QVBoxLayout()
         group_layout.setContentsMargins(15, 15, 15, 15)
-        group_layout.setSpacing(15)
+        group_layout.setSpacing(10)
         
         self.image_display = QLabel()
         self.image_display.setObjectName("image-display")
         self.image_display.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.image_display.setMinimumSize(100, 100)  
         self.image_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        group_layout.addWidget(self.image_display)
-        
+
+        # --- Navigation Buttons --- 
+        self.prev_btn = QPushButton()
+        self.prev_btn.setIcon(QIcon.fromTheme("go-previous"))
+        self.prev_btn.setIconSize(QSize(24, 24))
+        self.prev_btn.setToolTip("Previous test image")
+        self.prev_btn.setObjectName("prev-btn")
+
+        self.next_btn = QPushButton()
+        self.next_btn.setIcon(QIcon.fromTheme("go-next"))
+        self.next_btn.setIconSize(QSize(24, 24))
+        self.next_btn.setToolTip("Next test image")
+        self.next_btn.setObjectName("next-btn")
+
+        nav_layout = QHBoxLayout()
+        nav_layout.setContentsMargins(0, 0, 0, 0)
+        nav_layout.setSpacing(0)
+        nav_layout.addWidget(self.prev_btn)
+        nav_layout.addWidget(self.next_btn)
+
+        # --- Top Layout (Image + Nav Buttons) --- 
+        top_part_layout = QVBoxLayout()
+        top_part_layout.setContentsMargins(0, 0, 0, 0)
+        top_part_layout.setSpacing(0)
+        top_part_layout.addWidget(self.image_display)
+        top_part_layout.addLayout(nav_layout)
+
+        group_layout.addLayout(top_part_layout)
+
+        # --- Action Buttons --- 
         button_layout = QHBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)
-        button_layout.setSpacing(5)
+        button_layout.setSpacing(10)
         self.load_btn = QPushButton("Load")
         self.classify_btn = QPushButton("Classify")
         button_layout.addWidget(self.load_btn)
@@ -51,7 +81,13 @@ class ImageClassificationWidget(QWidget):
         # Connect signals
         self.load_btn.clicked.connect(self.load_image)
         self.classify_btn.clicked.connect(self.classify_clicked.emit)
+        self.prev_btn.clicked.connect(self.prev_clicked.emit)
+        self.next_btn.clicked.connect(self.next_clicked.emit)
         
+    def update_navigation_buttons(self, prev_enabled, next_enabled):
+        self.prev_btn.setEnabled(prev_enabled)
+        self.next_btn.setEnabled(next_enabled)
+
     def load_image(self):
         """Signal to parent to load an image"""
         pass

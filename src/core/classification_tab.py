@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QPushButton)
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFileDialog)
 from PyQt6.QtGui import QPixmap, QImageReader, QIcon
 from PyQt6.QtCore import pyqtSignal, QTimer, QSize
 import os, random
@@ -92,8 +92,9 @@ class ClassificationTab(QWidget):
             self._update_navigation_buttons()
 
     def _update_navigation_buttons(self):
-        self.prev_btn.setEnabled(self.current_test_index > 0)
-        self.next_btn.setEnabled(self.current_test_index < len(self.test_images) - 1)
+        prev_enabled = self.current_test_index > 0
+        next_enabled = self.current_test_index < len(self.test_images) - 1
+        self.image_widget.update_navigation_buttons(prev_enabled, next_enabled)
         
     def _load_results_from_cache(self, image_path, class_name=None):
         if image_path in self.classification_results_cache:
@@ -178,38 +179,16 @@ class ClassificationTab(QWidget):
         top_layout = self._create_top_layout()
         bottom_layout = self._create_bottom_layout()
         
-        nav_layout = QHBoxLayout()
-        nav_layout.setContentsMargins(0, 0, 0, 0)
-        
-        self.prev_btn = QPushButton()
-        self.prev_btn.setIcon(QIcon.fromTheme("go-previous"))
-        self.prev_btn.setIconSize(QSize(24, 24))
-        self.prev_btn.setToolTip("Previous test image")
-        self.prev_btn.setMaximumWidth(50)
-        self.prev_btn.setEnabled(False)
-        
-        self.next_btn = QPushButton()
-        self.next_btn.setIcon(QIcon.fromTheme("go-next"))
-        self.next_btn.setIconSize(QSize(24, 24))
-        self.next_btn.setToolTip("Next test image")
-        self.next_btn.setMaximumWidth(50)
-        
-        nav_layout.addStretch()
-        nav_layout.addWidget(self.prev_btn)
-        nav_layout.addSpacing(10)
-        nav_layout.addWidget(self.next_btn)
-        nav_layout.addStretch()
-        
         main_layout.addLayout(top_layout, 4)
-        main_layout.addLayout(nav_layout, 0)  
         main_layout.addLayout(bottom_layout, 6)
-        
+
         self.setLayout(main_layout)
-        
+
+        # Connect signals
         self.image_widget.load_btn.clicked.connect(self.load_image)
         self.image_widget.classify_clicked.connect(self.classify_clicked.emit)
-        self.prev_btn.clicked.connect(self.show_previous_test_image)
-        self.next_btn.clicked.connect(self.show_next_test_image)
+        self.image_widget.prev_clicked.connect(self.show_previous_test_image)
+        self.image_widget.next_clicked.connect(self.show_next_test_image)
         
     def _create_top_layout(self):
         top_layout = QHBoxLayout()
@@ -219,8 +198,8 @@ class ClassificationTab(QWidget):
         self.image_widget = ImageClassificationWidget()
         self.results_widget = ResultsWidget()
         
-        top_layout.addWidget(self.image_widget, 2)
-        top_layout.addWidget(self.results_widget, 3)
+        top_layout.addWidget(self.image_widget, 3)
+        top_layout.addWidget(self.results_widget, 2)
         return top_layout
         
     def _create_bottom_layout(self):

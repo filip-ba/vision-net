@@ -63,6 +63,22 @@ QPushButton {
     border-radius: 0px;
 }
 
+#prev-btn {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 6px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    height: 18px;
+}
+
+#next-btn {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 6px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    height: 18px;
+}
+
 #light-style-button, #dark-style-button {
     border-radius: 12px;
 }
