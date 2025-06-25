@@ -60,7 +60,6 @@ class MainWindow(QMainWindow):
         self.status_bar.showMessage(message, timeout)
              
     def get_project_root(self):
-        """Returns the path to the root directory of the project, works both in development and in the executable"""
         if getattr(sys, 'frozen', False):
             # Executable
             return sys._MEIPASS

@@ -6,7 +6,7 @@ from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
 
 
-class ImageClassificationWidget(QWidget):
+class ClassificationWidget(QWidget):
     image_loaded = pyqtSignal(str, int)
     classify_clicked = pyqtSignal()
     prev_clicked = pyqtSignal()

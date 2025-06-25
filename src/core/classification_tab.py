@@ -1,10 +1,10 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFileDialog)
-from PyQt6.QtGui import QPixmap, QImageReader, QIcon
-from PyQt6.QtCore import pyqtSignal, QTimer, QSize
+from PyQt6.QtGui import QPixmap, QImageReader
+from PyQt6.QtCore import pyqtSignal, QTimer
 import os, random
 import sys
 
-from ..ui.widgets.image_classification_widget import ImageClassificationWidget
+from ..ui.widgets.classification_widget import ClassificationWidget
 from ..ui.widgets.results_widget import ResultsWidget
 from ..ui.widgets.plot_probability_widget import PlotProbabilityWidget
 
@@ -195,7 +195,7 @@ class ClassificationTab(QWidget):
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(0)
 
-        self.image_widget = ImageClassificationWidget()
+        self.image_widget = ClassificationWidget()
         self.results_widget = ResultsWidget()
         
         top_layout.addWidget(self.image_widget, 3)
