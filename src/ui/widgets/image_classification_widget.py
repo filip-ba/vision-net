@@ -56,7 +56,7 @@ class ImageClassificationWidget(QWidget):
         """Signal to parent to load an image"""
         pass
         
-    def update_image_display(self, image_path):
+    def update_image(self, image_path):
         """Update the image display with the specified image"""
         if not image_path:
             return
