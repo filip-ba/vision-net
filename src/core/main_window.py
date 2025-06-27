@@ -117,12 +117,19 @@ class MainWindow(QMainWindow):
             if item and item.widget() and isinstance(item.widget(), QPushButton):
                 item.widget().setChecked(item.widget() == clicked_button)
     
+
+    def _set_icons_based_on_current_theme(self):
+        pass
+
     def _update_icons(self):
         """Update sidebar icons based on current theme"""
         project_root = self.get_project_root()
         icons_dir = os.path.join(project_root, "assets", "icons")
 
         theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
+
+        window_icon_path = os.path.join(icons_dir, "app-icon.png")        
+        self.setWindowIcon(QIcon(window_icon_path))
 
         # Update refresh icon
         for tab in [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]:
@@ -159,6 +166,7 @@ class MainWindow(QMainWindow):
                     painter.end()
                     
                     button.setIcon(QIcon(combined))
+                    button.setIconSize(QSize(19 + 9, 19))
         
         # Update toggle button icon
         menu_icon_path = os.path.join(icons_dir, f"menu-{theme_suffix}.png")
@@ -237,11 +245,6 @@ class MainWindow(QMainWindow):
         return super().eventFilter(obj, event)
     
     def _create_ui(self):
-        project_root = self.get_project_root()
-        icons_dir = os.path.join(project_root, "assets", "icons")
-        icon_path = os.path.join(icons_dir, "app-icon.png")
-        
-        self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("FruitVegNet")
         self.setGeometry(50, 50, 1280, 960)
         central_widget = QWidget()
@@ -264,14 +267,6 @@ class MainWindow(QMainWindow):
         self.sidebar_toggle_button.setFixedSize(30, 30)
         self.sidebar_toggle_button.setVisible(False)
         self.sidebar_toggle_button.clicked.connect(self._toggle_sidebar)
-        
-        theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
-        menu_icon_path = os.path.join(icons_dir, f"menu-{theme_suffix}.png")
-
-        if os.path.exists(menu_icon_path):
-            menu_icon = QPixmap(menu_icon_path)
-            self.sidebar_toggle_button.setIcon(QIcon(menu_icon))
-            self.sidebar_toggle_button.setIconSize(QSize(16, 16))
         
         content_container = QWidget()
         content_layout = QVBoxLayout(content_container)
@@ -427,36 +422,6 @@ class MainWindow(QMainWindow):
         button = QPushButton(text)
         button.setObjectName("sidebar-button")
         button.setCheckable(True)
-        
-        # Path to assets folder
-        project_root = self.get_project_root()
-        icons_dir = os.path.join(project_root, "assets", "icons")
-        
-        # Set icons based on current theme
-        theme_suffix = "dark"  
-        icon_path = None
-        if text == "Models":
-            icon_path = os.path.join(icons_dir, f"model-{theme_suffix}.png")
-        elif text == "Classification":
-            icon_path = os.path.join(icons_dir, f"classification-{theme_suffix}.png")
-        elif text == "Dataset":
-            icon_path = os.path.join(icons_dir, f"dataset-{theme_suffix}.png")
-        elif text == "Settings":
-            icon_path = os.path.join(icons_dir, f"settings-{theme_suffix}.png")
-        
-        # Create composite icon with an empty space
-        original_icon = QPixmap(icon_path)
-    
-        combined = QPixmap(22 + 9, 22)  # 19px icon + 9px space
-        combined.fill(Qt.GlobalColor.transparent)
-        
-        painter = QPainter(combined)
-        painter.drawPixmap(0, 0, original_icon.scaled(19, 19, Qt.AspectRatioMode.KeepAspectRatio, 
-                                                    Qt.TransformationMode.SmoothTransformation))
-        painter.end()
-        
-        button.setIcon(QIcon(combined))
-        button.setIconSize(QSize(19 + 9, 19))  # Combined icon with empty space
 
         if page_index == 0:
             button.setChecked(True)
