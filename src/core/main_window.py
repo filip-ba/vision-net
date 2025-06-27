@@ -176,7 +176,7 @@ class MainWindow(QMainWindow):
             self.sidebar_toggle_button.setIconSize(QSize(16, 16))
 
         # Update icons in classification tab
-        self.image_classification_widget.update_icons(theme_suffix, icons_dir)
+        self.image_classification_widget.classification_widget.update_icons(theme_suffix, icons_dir)
 
     def _adjust_sidebar_width(self):
         """Adjust sidebar width based on window width"""
