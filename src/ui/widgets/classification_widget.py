@@ -1,8 +1,10 @@
 from PyQt6.QtWidgets import (
     QWidget, QGroupBox, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QSizePolicy )
+    QLabel, QPushButton, QSizePolicy, QStyle)
 from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
+
+import os
 
 
 class ClassificationWidget(QWidget):
@@ -17,7 +19,15 @@ class ClassificationWidget(QWidget):
         self.current_image_path = None
         self.original_pixmap = None
         self._create_ui()
-        
+
+    def update_icons(self, theme_suffix, icons_dir):
+        next_btn_icon_path = os.path.join(icons_dir, f"next-{theme_suffix}.png")
+        self.next_btn.setIcon(QIcon(next_btn_icon_path))
+        self.next_btn.setIconSize(QSize(20, 20))
+        previous_btn_icon_path = os.path.join(icons_dir, f"previous-{theme_suffix}.png")
+        self.prev_btn.setIcon(QIcon(previous_btn_icon_path))
+        self.prev_btn.setIconSize(QSize(20, 20))
+
     def update_navigation_buttons(self, prev_enabled, next_enabled):
         self.prev_btn.setEnabled(prev_enabled)
         self.next_btn.setEnabled(next_enabled)
@@ -69,13 +79,9 @@ class ClassificationWidget(QWidget):
         self.image_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.prev_btn = QPushButton()
-        self.prev_btn.setIcon(QIcon.fromTheme("go-previous"))
-        self.prev_btn.setIconSize(QSize(24, 24))
         self.prev_btn.setToolTip("Previous test image")
         self.prev_btn.setObjectName("prev-btn")
         self.next_btn = QPushButton()
-        self.next_btn.setIcon(QIcon.fromTheme("go-next"))
-        self.next_btn.setIconSize(QSize(24, 24))
         self.next_btn.setToolTip("Next test image")
         self.next_btn.setObjectName("next-btn")
         nav_layout = QHBoxLayout()

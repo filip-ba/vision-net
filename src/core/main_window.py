@@ -31,6 +31,7 @@ class MainWindow(QMainWindow):
         self.installEventFilter(self)
         
         self._create_ui()
+        self._update_icons()
 
     def _connect_tab_status_signals(self):
         """Connect status signals from tabs to the main window status bar"""
@@ -147,7 +148,7 @@ class MainWindow(QMainWindow):
                     
                 if icon_path and os.path.exists(icon_path):
 
-                    # Create composite icon with an empty space
+                    # Create composite icon with an empty space (looks better)
                     original_icon = QPixmap(icon_path)
                 
                     combined = QPixmap(19 + 9, 19)  # 19px icon + 9px space
@@ -165,6 +166,9 @@ class MainWindow(QMainWindow):
             menu_icon = QPixmap(menu_icon_path)
             self.sidebar_toggle_button.setIcon(QIcon(menu_icon))
             self.sidebar_toggle_button.setIconSize(QSize(16, 16))
+
+        # Update icons in classification tab
+        self.image_classification_widget.update_icons(theme_suffix, icons_dir)
 
     def _adjust_sidebar_width(self):
         """Adjust sidebar width based on window width"""
@@ -285,6 +289,7 @@ class MainWindow(QMainWindow):
         
         # Create model settings (first page)
         self.tab_widget = QTabWidget()
+        self.tab_widget.setMovable(True)
         self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  
 
         # Initialize model tabs - load datasets efficiently
@@ -355,9 +360,6 @@ class MainWindow(QMainWindow):
         self.image_classification_widget.image_loaded.connect(self.update_status_bar) 
         self._connect_tab_status_signals()
         self._connect_dataset_refresh_signals()
-        
-        # Update sidebar icons based on current style
-        self._update_icons()
 
     def _create_sidebar(self):
         sidebar = QWidget()

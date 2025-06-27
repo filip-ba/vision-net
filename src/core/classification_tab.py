@@ -166,6 +166,9 @@ class ClassificationTab(QWidget):
     def switch_plot(self, model_type):
         self.plot_widget.switch_plot(model_type)
 
+    def update_icons(self, theme_suffix, icons_dir):
+        self.classification_widget.update_icons(theme_suffix, icons_dir)
+
     def showEvent(self, event):
         """Scale the image in image display properly after the start of the application"""
         super().showEvent(event)

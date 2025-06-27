@@ -1,10 +1,8 @@
-import os
 from PyQt6.QtCore import QSettings
+import os
 
 
 class StyleManager:
-    """Manages application styles and provides functionality to switch between themes."""
-    
     STYLE_LIGHT = "light"
     STYLE_DARK = "dark"
     
