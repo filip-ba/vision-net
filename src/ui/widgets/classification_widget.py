@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QGroupBox, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QSizePolicy, QStyle)
+    QLabel, QPushButton, QSizePolicy)
 from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
 
@@ -20,13 +20,13 @@ class ClassificationWidget(QWidget):
         self.original_pixmap = None
         self._create_ui()
 
-    def update_icons(self, theme_suffix, icons_dir):
+    def set_arrow_icons(self, icons_dir, theme_suffix):
         next_btn_icon_path = os.path.join(icons_dir, f"next-{theme_suffix}.png")
         self.next_btn.setIcon(QIcon(next_btn_icon_path))
-        self.next_btn.setIconSize(QSize(20, 20))
+        self.next_btn.setIconSize(QSize(16, 16))
         previous_btn_icon_path = os.path.join(icons_dir, f"previous-{theme_suffix}.png")
         self.prev_btn.setIcon(QIcon(previous_btn_icon_path))
-        self.prev_btn.setIconSize(QSize(20, 20))
+        self.prev_btn.setIconSize(QSize(16, 16))
 
     def update_navigation_buttons(self, prev_enabled, next_enabled):
         self.prev_btn.setEnabled(prev_enabled)

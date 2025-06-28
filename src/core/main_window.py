@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
         self.installEventFilter(self)
         
         self._create_ui()
-        self._update_icons()
+        self._set_icons_based_on_current_theme()
 
     def _connect_tab_status_signals(self):
         """Connect status signals from tabs to the main window status bar"""
@@ -117,23 +117,21 @@ class MainWindow(QMainWindow):
             if item and item.widget() and isinstance(item.widget(), QPushButton):
                 item.widget().setChecked(item.widget() == clicked_button)
     
-
     def _set_icons_based_on_current_theme(self):
-        pass
-
-
-
-    def _update_icons(self):
-        """Update sidebar icons based on current theme"""
         project_root = self.get_project_root()
         icons_dir = os.path.join(project_root, "assets", "icons")
-
         theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
 
+        self._set_window_icon(icons_dir)
+        self._set_sidebar_icons(icons_dir, theme_suffix)
+        self._set_menu_toggle_icon(icons_dir, theme_suffix)
+        self.image_classification_widget.classification_widget.set_arrow_icons(icons_dir, theme_suffix)
+
+    def _set_window_icon(self, icons_dir):
         window_icon_path = os.path.join(icons_dir, "app-icon.png")        
         self.setWindowIcon(QIcon(window_icon_path))
 
-        # Update sidebar buttons
+    def _set_sidebar_icons(self, icons_dir, theme_suffix):
         for i in range(self.sidebar.layout().count()):
             item = self.sidebar.layout().itemAt(i)
             if item and item.widget() and isinstance(item.widget(), QPushButton):
@@ -151,7 +149,6 @@ class MainWindow(QMainWindow):
                     icon_path = os.path.join(icons_dir, f"settings-{theme_suffix}.png")
                     
                 if icon_path and os.path.exists(icon_path):
-
                     # Create composite icon with an empty space (looks better)
                     original_icon = QPixmap(icon_path)
                 
@@ -164,16 +161,13 @@ class MainWindow(QMainWindow):
                     
                     button.setIcon(QIcon(combined))
                     button.setIconSize(QSize(19 + 9, 19))
-        
-        # Update toggle button icon
+
+    def _set_menu_toggle_icon(self, icons_dir, theme_suffix):
         menu_icon_path = os.path.join(icons_dir, f"menu-{theme_suffix}.png")
         if os.path.exists(menu_icon_path):
             menu_icon = QPixmap(menu_icon_path)
             self.sidebar_toggle_button.setIcon(QIcon(menu_icon))
             self.sidebar_toggle_button.setIconSize(QSize(16, 16))
-
-        # Update icons in classification tab
-        self.image_classification_widget.classification_widget.update_icons(theme_suffix, icons_dir)
 
     def _adjust_sidebar_width(self):
         """Adjust sidebar width based on window width"""
@@ -310,7 +304,7 @@ class MainWindow(QMainWindow):
         # Create settings page (fourth page)
         self.settings_widget = SettingsTab(self.style_manager)
         self.settings_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.settings_widget.style_changed.connect(self._update_icons)
+        self.settings_widget.style_changed.connect(self._set_icons_based_on_current_theme)
 
         # Create scroll areas for each page
         models_scroll = QScrollArea()
