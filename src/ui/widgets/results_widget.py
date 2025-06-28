@@ -13,6 +13,7 @@ class ResultsWidget(QWidget):
             'efficientnet': 'EfficientNet',
             'vgg16': 'VGG 16'
         }
+
         self.result_labels = {}
         self.model_labels = {}
         self._create_ui()
@@ -40,29 +41,23 @@ class ResultsWidget(QWidget):
         right_column = QVBoxLayout()
         right_column.setSpacing(18)
         right_column.setContentsMargins(0, 0, 0, 0)
-
-        self.model_labels = {
-            'simple_cnn': QLabel("Simple CNN"),
-            'resnet': QLabel("ResNet"),
-            'efficientnet': QLabel("EfficientNet"),
-            'vgg16': QLabel("VGG 16")
-        }
-        
-        # Add model labels to the left column
-        for model_id, label in self.model_labels.items():
-            label.setObjectName(f"Model{model_id.title().replace('_', '')}")
+        self.model_labels = {}
+        model_items = list(self.model_names.items())
+        for i, (model_id, model_name) in enumerate(model_items):
+            label = QLabel(model_name)
+            label.setObjectName(f"Model")
             label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
             label.setMinimumWidth(70)
+            self.model_labels[model_id] = label
             left_column.addWidget(label, 1)
-            
-            # Add separator after each label except the last one
-            if model_id != list(self.model_names.keys())[-1]:
+
+            if i < len(model_items) - 1:
                 left_column.addWidget(create_separator("horizontal"))
 
         # Create result labels
         self.result_labels = {}
         for i, model_id in enumerate(self.model_names.keys()):
-            result_label = QLabel("None") 
+            result_label = QLabel("") 
             result_label.setStyleSheet("font-weight: 700;")
             result_label.setObjectName("ModelResultLabel")
             result_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
@@ -99,7 +94,7 @@ class ResultsWidget(QWidget):
     
     def reset_results(self):
         for model_id in self.result_labels:
-            self.result_labels[model_id].setText("None") 
+            self.result_labels[model_id].setText("") 
             self.result_labels[model_id].setStyleSheet("font-weight: 700;")
             if model_id in self.model_labels:
                 self.model_labels[model_id].setToolTip("") 
