@@ -16,13 +16,6 @@ class ClassificationTab(QWidget):
     def __init__(self):
         super().__init__()  
 
-        self.model_names = {
-            'simple_cnn': 'Simple CNN',
-            'resnet': 'ResNet',
-            'efficientnet': 'EfficientNet',
-            'vgg16': 'VGG16'
-        }
-
         self._create_ui()    
         
         self.current_image_path = None
