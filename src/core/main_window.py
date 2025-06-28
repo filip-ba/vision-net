@@ -121,6 +121,8 @@ class MainWindow(QMainWindow):
     def _set_icons_based_on_current_theme(self):
         pass
 
+
+
     def _update_icons(self):
         """Update sidebar icons based on current theme"""
         project_root = self.get_project_root()
@@ -130,11 +132,6 @@ class MainWindow(QMainWindow):
 
         window_icon_path = os.path.join(icons_dir, "app-icon.png")        
         self.setWindowIcon(QIcon(window_icon_path))
-
-        # Update refresh icon
-        for tab in [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]:
-            if hasattr(tab, "model_info_widget"):
-                tab.model_info_widget.update_refresh_icon(theme_suffix)
 
         # Update sidebar buttons
         for i in range(self.sidebar.layout().count()):

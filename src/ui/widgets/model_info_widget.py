@@ -1,7 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QToolButton, QStyle, QToolTip
-from PyQt6.QtCore import Qt, QSize, QPoint
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtCore import Qt
 import sys, os
 
 from ...utils.custom_separator import create_separator
@@ -29,13 +27,6 @@ class ModelInfoWidget(QWidget):
         self.dataset_status_label = QLabel("No dataset found")
         self.dataset_status_label.setObjectName("ModelStatus")
         self.dataset_status_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
-        
-        self.help_icon = QToolButton()
-        self.help_icon.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxQuestion))
-        self.help_icon.setIconSize(QSize(25, 25))
-        self.help_icon.setObjectName("help-icon")
-        self.help_icon.setToolTip("Copy the 'fruitveg-dataset' folder to the 'dataset' folder in the project root directory.")
-        self.help_icon.setVisible(False)  
 
         self.refresh_button = QPushButton()
         self.refresh_button.setMaximumSize(35, 35)
@@ -44,7 +35,6 @@ class ModelInfoWidget(QWidget):
         dataset_label_layout = QHBoxLayout()
         dataset_label_layout.setSpacing(3) 
         dataset_label_layout.addWidget(self.dataset_status_label)
-        dataset_label_layout.addWidget(self.help_icon)
 
         dataset_layout = QHBoxLayout()
         dataset_layout.setContentsMargins(0, 0, 20, 0)
@@ -58,27 +48,13 @@ class ModelInfoWidget(QWidget):
         layout.addWidget(create_separator("horizontal"))
         layout.addLayout(dataset_layout)
 
-        self.help_icon.clicked.connect(self._show_help_tooltip)
-
-    def show_help_icon(self, show: bool):
-        self.help_icon.setVisible(show)
-
-    def _show_help_tooltip(self):
-        QToolTip.showText(
-            self.help_icon.mapToGlobal(QPoint(0, self.help_icon.height())),
-            self.help_icon.toolTip(),
-            self.help_icon
-        )
-
     def set_model_file(self, file_name, color=None):
-        """Updates the model file label with optional color for the file name."""
         if color is None:
             self.model_file_label.setText(f"Model File: {file_name}")
         else:
             self.model_file_label.setText(f'Model File: <span style="color: {color}">{file_name}</span>')
 
     def set_model_status(self, status, color=None):
-        """Updates the model status label."""
         self.model_status_label.setText(status)
         if color is None:
             self.model_status_label.setStyleSheet("") 
@@ -86,7 +62,6 @@ class ModelInfoWidget(QWidget):
             self.model_status_label.setStyleSheet(f"color: {color};")
 
     def set_dataset_status(self, status, color=None):
-        """Updates the dataset status label."""
         self.dataset_status_label.setText(status)
         if color is None:
             self.dataset_status_label.setStyleSheet("")
@@ -94,7 +69,6 @@ class ModelInfoWidget(QWidget):
             self.dataset_status_label.setStyleSheet(f"color: {color};")
       
     def get_project_root(self):
-        """Returns the path to the root directory of the project, works both in development and in the executable"""
         if getattr(sys, 'frozen', False):
             # Executable
             return sys._MEIPASS
@@ -106,13 +80,3 @@ class ModelInfoWidget(QWidget):
             src_dir = os.path.dirname(ui_dir)
             project_root = os.path.dirname(src_dir)
             return project_root
-
-    def update_refresh_icon(self, theme: str):
-        """Updates the refresh icon based on the current theme."""
-        project_root = self.get_project_root()
-        icon_path = os.path.join(project_root, "assets", "icons", f"refresh-{theme}.png")
-
-        if os.path.exists(icon_path):
-            pixmap = QPixmap(icon_path)
-            self.refresh_button.setIcon(QIcon(pixmap))
-            self.refresh_button.setIconSize(QSize(25, 25))
