@@ -122,14 +122,9 @@ class MainWindow(QMainWindow):
         icons_dir = os.path.join(project_root, "assets", "icons")
         theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
 
-        self._set_window_icon(icons_dir)
         self._set_sidebar_icons(icons_dir, theme_suffix)
         self._set_menu_toggle_icon(icons_dir, theme_suffix)
         self.image_classification_widget.classification_widget.set_arrow_icons(icons_dir, theme_suffix)
-
-    def _set_window_icon(self, icons_dir):
-        window_icon_path = os.path.join(icons_dir, "app-icon.png")        
-        self.setWindowIcon(QIcon(window_icon_path))
 
     def _set_sidebar_icons(self, icons_dir, theme_suffix):
         for i in range(self.sidebar.layout().count()):
@@ -238,6 +233,10 @@ class MainWindow(QMainWindow):
     def _create_ui(self):
         self.setWindowTitle("FruitVegNet")
         self.setGeometry(50, 50, 1280, 960)
+        project_root = self.get_project_root()
+        icons_dir = os.path.join(project_root, "assets", "icons")
+        window_icon_path = os.path.join(icons_dir, "app-icon.png")        
+        self.setWindowIcon(QIcon(window_icon_path))
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
