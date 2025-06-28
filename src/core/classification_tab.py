@@ -108,10 +108,11 @@ class ClassificationTab(QWidget):
         else:
             self.plot_widget.init_plot()
             self.results_widget.reset_results()
-            if class_name:
-                self.image_loaded.emit(f"Showing test image {self.current_test_index + 1}/{len(self.test_images)} - {class_name}", 3000)
-            else:
+            if not class_name:
                 self.image_loaded.emit("Image loaded, previous results cleared.", 8000)
+
+        if class_name:
+            self.image_loaded.emit(f"Showing test image {self.current_test_index + 1}/{len(self.test_images)} - {class_name}", 3000)
             
     def load_image(self):
         supported_formats = [f"*.{fmt.data().decode()}" for fmt in QImageReader.supportedImageFormats()]
@@ -187,7 +188,7 @@ class ClassificationTab(QWidget):
         self.classification_widget = ClassificationWidget()
         self.results_widget = ResultsWidget()
         
-        top_layout.addWidget(self.classification_widget, 3)
+        top_layout.addWidget(self.classification_widget, 2)
         top_layout.addWidget(self.results_widget, 2)
         return top_layout
         
