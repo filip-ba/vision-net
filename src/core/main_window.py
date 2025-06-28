@@ -85,7 +85,6 @@ class MainWindow(QMainWindow):
             self.vgg16_tab: {'type': 'vgg16', 'name': 'VGG16'}
         }
         
-        results = []
         for tab, model_info in model_map.items():
             if tab.model_loaded:
                 try:
@@ -95,9 +94,6 @@ class MainWindow(QMainWindow):
                     probabilities = result['probabilities']
                     self.image_classification_widget.update_result(model_info['type'], predicted_class)
                     self.image_classification_widget.update_plot(model_info['type'], tab.model.classes, probabilities)
-                    
-                    results.append(f"{model_info['name']}: {predicted_class}")
-
                     self.update_status_bar("Classification complete")
                 except Exception as e:
                     self.image_classification_widget.update_result(model_info['type'], "Error")

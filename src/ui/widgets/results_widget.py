@@ -14,6 +14,7 @@ class ResultsWidget(QWidget):
             'vgg16': 'VGG 16'
         }
         self.result_labels = {}
+        self.model_labels = {}
         self._create_ui()
 
     def _create_ui(self):
@@ -40,7 +41,7 @@ class ResultsWidget(QWidget):
         right_column.setSpacing(18)
         right_column.setContentsMargins(0, 0, 0, 0)
 
-        model_labels = {
+        self.model_labels = {
             'simple_cnn': QLabel("Simple CNN"),
             'resnet': QLabel("ResNet"),
             'efficientnet': QLabel("EfficientNet"),
@@ -48,7 +49,7 @@ class ResultsWidget(QWidget):
         }
         
         # Add model labels to the left column
-        for model_id, label in model_labels.items():
+        for model_id, label in self.model_labels.items():
             label.setObjectName(f"Model{model_id.title().replace('_', '')}")
             label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
             label.setMinimumWidth(70)
@@ -66,10 +67,11 @@ class ResultsWidget(QWidget):
             result_label.setObjectName("ModelResultLabel")
             result_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
             result_label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+            result_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
             result_label.setMinimumWidth(70)
             self.result_labels[model_id] = result_label
             right_column.addWidget(result_label, 1)
-            
+
             # Add separator after each except the last one
             if model_id != list(self.model_names.keys())[-1]:
                 right_column.addWidget(create_separator("horizontal"))
@@ -84,11 +86,20 @@ class ResultsWidget(QWidget):
         self.setLayout(layout)
         
     def update_result(self, model_type, result):
-        """Update the classification result for a specific model"""
         if model_type in self.result_labels:
-            self.result_labels[model_type].setText(result)
+            model_label = self.model_labels[model_type]
+            result_label = self.result_labels[model_type]
             
+            if result == "No model":
+                result_label.setText("")
+                model_label.setToolTip("No model of this architecture is loaded.")
+            else:
+                result_label.setText(result)
+                model_label.setToolTip("")
+    
     def reset_results(self):
-        """Reset all result labels to None"""
         for model_id in self.result_labels:
             self.result_labels[model_id].setText("None") 
+            self.result_labels[model_id].setStyleSheet("font-weight: 700;")
+            if model_id in self.model_labels:
+                self.model_labels[model_id].setToolTip("") 
