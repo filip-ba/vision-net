@@ -295,9 +295,9 @@ class MainWindow(QMainWindow):
         self.dataset_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         # Create settings page (fourth page)
-        self.settings_widget = SettingsTab(self.style_manager)
-        self.settings_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.settings_widget.style_changed.connect(self._set_icons_based_on_current_theme)
+        self.settings_tab = SettingsTab(self.style_manager)
+        self.settings_tab.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.settings_tab.style_changed.connect(self._set_icons_based_on_current_theme)
 
         # Create scroll areas for each page
         models_scroll = QScrollArea()
@@ -318,7 +318,7 @@ class MainWindow(QMainWindow):
         settings_scroll = QScrollArea()
         settings_scroll.setWidgetResizable(True)
         settings_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        settings_scroll.setWidget(self.settings_widget)
+        settings_scroll.setWidget(self.settings_tab)
 
         # Add scroll areas to the content stack
         self.content_stack.addWidget(models_scroll)
