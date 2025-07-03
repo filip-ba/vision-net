@@ -134,6 +134,11 @@ QGroupBox::title {
     margin-bottom: 5px;
 }
 
+#dataset-overview {
+    padding: 15px;
+    margin-bottom: 5px;
+}
+
 #model-metrics {
     margin-bottom: 0px;
     padding: 0px;
