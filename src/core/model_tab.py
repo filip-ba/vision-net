@@ -52,7 +52,7 @@ class ModelTab(QWidget):
         self.model_info_widget.set_model_status("No model loaded") 
 
         # Try to load the dataset and default model on startup
-        self._load_dataset()
+        self._load_dataset_on_start_legacy()
         self._load_model_on_start()
 
         # Connect signals
@@ -187,7 +187,7 @@ class ModelTab(QWidget):
         self.kfold_train_btn.setEnabled(False)
         self.model_loaded = False
 
-    def _load_dataset(self):
+    def _load_dataset_on_start_legacy(self):
         """Loads the dataset on startup. If shared_dataset_source is provided (for EfficientNet & VGG16),
         it will use the dataset from that source. Otherwise, it will load the dataset from the default location.
         Updates the UI to reflect the dataset loading status."""
@@ -471,7 +471,7 @@ class ModelTab(QWidget):
             self.reset_model()
             # Try to load dataset 
             print("trying to load the dataset")
-            self._load_dataset()
+            self._load_dataset_on_start_legacy()
             
     def handle_training_and_testing_complete(self, training_result, testing_result):
         """Handle training completion from the progress dialog"""
@@ -516,7 +516,7 @@ class ModelTab(QWidget):
         self.reset_model()
         # Try to load dataset 
         print("trying to load the dataset")
-        self._load_dataset()
+        self._load_dataset_on_start_legacy()
 
     def train_kfold(self):
         """Performs k-fold cross-validation training."""
@@ -574,7 +574,7 @@ class ModelTab(QWidget):
             self.kfold_train_btn.setEnabled(True)
             # Try to load dataset 
             print("trying to load the dataset")
-            self._load_dataset()
+            self._load_dataset_on_start_legacy()
 
     def _start_next_fold(self, k, epochs, learning_rate, momentum):
         """Starts the next fold of K-fold cross-validation"""
@@ -619,7 +619,7 @@ class ModelTab(QWidget):
             self.kfold_train_btn.setEnabled(True)
             # Try to load dataset 
             print("trying to load the dataset")
-            self._load_dataset()
+            self._load_dataset_on_start_legacy()
             
     def _handle_fold_complete(self, training_result, testing_result, k, epochs, learning_rate, momentum):
         """Handle completion of a single fold"""

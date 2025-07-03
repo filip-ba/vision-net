@@ -218,7 +218,7 @@ class MainWindow(QMainWindow):
         return super().eventFilter(obj, event)
     
     def _create_ui(self):
-        self.setWindowTitle("FruitVegNet")
+        self.setWindowTitle("VisionNet")
         self.setGeometry(50, 50, 1280, 960)
         project_root = self.get_project_root()
         icons_dir = os.path.join(project_root, "assets", "icons")
@@ -346,7 +346,7 @@ class MainWindow(QMainWindow):
         logo_widget.setMinimumHeight(80)
         logo_layout = QVBoxLayout(logo_widget)
         
-        title_label = QLabel("FruitVegNet")
+        title_label = QLabel("VisionNet")
         title_label.setObjectName("app-title")
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         logo_layout.addWidget(title_label)
