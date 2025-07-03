@@ -40,13 +40,6 @@ class MainWindow(QMainWindow):
         self.efficientnet_tab.status_message.connect(self.update_status_bar)
         self.vgg16_tab.status_message.connect(self.update_status_bar)
 
-    def _connect_dataset_refresh_signals(self):
-        """Connect dataset refresh buttons from all tabs to refresh all datasets at once"""
-        self.simple_cnn_tab.model_info_widget.refresh_button.clicked.connect(self.refresh_all_datasets)
-        self.resnet_tab.model_info_widget.refresh_button.clicked.connect(self.refresh_all_datasets)
-        self.efficientnet_tab.model_info_widget.refresh_button.clicked.connect(self.refresh_all_datasets)
-        self.vgg16_tab.model_info_widget.refresh_button.clicked.connect(self.refresh_all_datasets)
-
     def refresh_all_datasets(self):
         """Refreshes datasets for all model tabs"""
         self.simple_cnn_tab._load_dataset()
@@ -338,7 +331,6 @@ class MainWindow(QMainWindow):
         self.classification_tab.classify_clicked.connect(self._classify_all) 
         self.classification_tab.image_loaded.connect(self.update_status_bar) 
         self._connect_tab_status_signals()
-        self._connect_dataset_refresh_signals()
 
     def _create_sidebar(self):
         sidebar = QWidget()

@@ -28,25 +28,11 @@ class ModelInfoWidget(QWidget):
         self.dataset_status_label.setObjectName("ModelStatus")
         self.dataset_status_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
 
-        self.refresh_button = QPushButton()
-        self.refresh_button.setMaximumSize(35, 35)
-        self.refresh_button.setToolTip("Tries to load the dataset.")
-
-        dataset_label_layout = QHBoxLayout()
-        dataset_label_layout.setSpacing(3) 
-        dataset_label_layout.addWidget(self.dataset_status_label)
-
-        dataset_layout = QHBoxLayout()
-        dataset_layout.setContentsMargins(0, 0, 20, 0)
-        dataset_layout.addLayout(dataset_label_layout)  
-        dataset_layout.addStretch()  
-        dataset_layout.addWidget(self.refresh_button)
-
         layout.addWidget(self.model_file_label)
         layout.addWidget(create_separator("horizontal"))
         layout.addWidget(self.model_status_label)
         layout.addWidget(create_separator("horizontal"))
-        layout.addLayout(dataset_layout)
+        layout.addWidget(self.dataset_status_label)
 
     def set_model_file(self, file_name, color=None):
         if color is None:

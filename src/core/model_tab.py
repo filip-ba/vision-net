@@ -204,7 +204,6 @@ class ModelTab(QWidget):
                 dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
                 train_size, val_size, test_size = self.model.load_data(dataset_dir)
                 self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
-            self.model_info_widget.refresh_button.setVisible(False)
             self.train_model_btn.setEnabled(True)
             self.load_model_btn.setEnabled(True)
         except Exception as e:
@@ -213,7 +212,6 @@ class ModelTab(QWidget):
             error_msg = f"Error loading dataset: {str(e)}"
             self.status_message.emit(error_msg, 8000)
             self.model_info_widget.set_dataset_status("No dataset found", color="red") 
-            self.model_info_widget.refresh_button.setVisible(True)
 
     def _load_model_on_start(self):
         """Attempts to load the default model on startup. The model path is determined based on the model type
