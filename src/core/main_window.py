@@ -54,8 +54,6 @@ class MainWindow(QMainWindow):
         # Shared dataset from ResNet
         self.efficientnet_tab._load_dataset()
         self.vgg16_tab._load_dataset()
-        # Try to load random test image
-        self.image_classification_widget.load_random_test_image()
 
     def update_status_bar(self, message, timeout=8000):
         self.status_bar.showMessage(message, timeout)
@@ -74,7 +72,7 @@ class MainWindow(QMainWindow):
 
     def _classify_all(self):
         """Classify the loaded image"""
-        if not self.image_classification_widget.current_image_path:
+        if not self.classification_tab.current_image_path:
             self.update_status_bar("No image loaded for classification")
             return
             
@@ -89,19 +87,19 @@ class MainWindow(QMainWindow):
             if tab.model_loaded:
                 try:
                     # Get image prediction
-                    result = tab.model.predict_image(self.image_classification_widget.current_image_path)
+                    result = tab.model.predict_image(self.classification_tab.current_image_path)
                     predicted_class = result['class']
                     probabilities = result['probabilities']
-                    self.image_classification_widget.update_result(model_info['type'], predicted_class)
-                    self.image_classification_widget.update_plot(model_info['type'], tab.model.classes, probabilities)
+                    self.classification_tab.update_result(model_info['type'], predicted_class)
+                    self.classification_tab.update_plot(model_info['type'], tab.model.classes, probabilities)
                     self.update_status_bar("Classification complete")
                 except Exception as e:
-                    self.image_classification_widget.update_result(model_info['type'], "Error")
+                    self.classification_tab.update_result(model_info['type'], "Error")
                     print(f"Error in {model_info['name']} classification: {str(e)}")
                     self.update_status_bar("No models available for classification")
             else:
-                self.image_classification_widget.update_result(model_info['type'], "No model")
-                self.image_classification_widget.init_plot(model_info['type'])
+                self.classification_tab.update_result(model_info['type'], "No model")
+                self.classification_tab.init_plot(model_info['type'])
 
     def _switch_page(self, index, clicked_button):
         """Switch between sidebar pages"""
@@ -120,7 +118,7 @@ class MainWindow(QMainWindow):
 
         self._set_sidebar_icons(icons_dir, theme_suffix)
         self._set_menu_toggle_icon(icons_dir, theme_suffix)
-        self.image_classification_widget.classification_widget.set_arrow_icons(icons_dir, theme_suffix)
+        self.classification_tab.classification_widget.set_arrow_icons(icons_dir, theme_suffix)
 
     def _set_sidebar_icons(self, icons_dir, theme_suffix):
         for i in range(self.sidebar.layout().count()):
@@ -289,8 +287,8 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.vgg16_tab, "VGG16")
         
         # Create image classification (second page)
-        self.image_classification_widget = ClassificationTab()
-        self.image_classification_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.classification_tab = ClassificationTab()
+        self.classification_tab.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         # Create dataset tab (third page)
         self.dataset_widget = DatasetTab()
@@ -310,7 +308,7 @@ class MainWindow(QMainWindow):
         classification_scroll = QScrollArea()
         classification_scroll.setWidgetResizable(True)
         classification_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        classification_scroll.setWidget(self.image_classification_widget)
+        classification_scroll.setWidget(self.classification_tab)
 
         dataset_scroll = QScrollArea()
         dataset_scroll.setWidgetResizable(True)
@@ -337,8 +335,8 @@ class MainWindow(QMainWindow):
         self.main_layout.addWidget(self.sidebar_scroll, 1)
         self.main_layout.addWidget(content_container, 5)  
         
-        self.image_classification_widget.classify_clicked.connect(self._classify_all) 
-        self.image_classification_widget.image_loaded.connect(self.update_status_bar) 
+        self.classification_tab.classify_clicked.connect(self._classify_all) 
+        self.classification_tab.image_loaded.connect(self.update_status_bar) 
         self._connect_tab_status_signals()
         self._connect_dataset_refresh_signals()
 
