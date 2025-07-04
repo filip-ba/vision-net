@@ -81,7 +81,7 @@ class BaseModel(ABC):
         """Check if dataset is loaded"""
         return self.dataset_loaded
 
-    def load_data(self, data_dir, k=None, current_fold=None):
+    def load_dataset(self, data_dir, k=None, current_fold=None):
         """Loads and prepares dataset. If k and current_fold are provided, performs K-fold cross-validation split."""
         train_transform, test_transform = self.get_transforms()
 
