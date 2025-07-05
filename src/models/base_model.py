@@ -129,8 +129,6 @@ class BaseModel(ABC):
             self.classes = train_dataset.classes
         
         self.dataset_loaded = True
-        
-        return len(self.trainloader.dataset), len(self.valloader.dataset), len(self.testloader.dataset)
 
     def share_dataset(self, source_model):
         """Shares dataset from another model instance to avoid reloading"""
@@ -142,8 +140,6 @@ class BaseModel(ABC):
         self.testloader = source_model.testloader
         self.classes = source_model.classes
         self.dataset_loaded = True
-        
-        return len(self.trainloader.dataset), len(self.valloader.dataset), len(self.testloader.dataset)
 
     def train(self, epochs, learning_rate, momentum, progress_callback=None):
         """Trains the model and returns the loss history"""
