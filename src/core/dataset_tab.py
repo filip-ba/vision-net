@@ -1,19 +1,123 @@
-from PyQt6.QtWidgets import QPushButton, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QGroupBox, QFileDialog
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (QPushButton, QWidget, QHBoxLayout, QVBoxLayout, QLabel, 
+                             QGroupBox, QFileDialog, QMessageBox)
+from PyQt6.QtCore import pyqtSignal, Qt, QTimer
+import configparser
+import sys
+import os
 
 
 class DatasetTab(QWidget):
-    def __init__(self):
-        super().__init__()
+    status_message = pyqtSignal(str, int)
+
+    def __init__(self, model_tabs, parent=None):
+        super().__init__(parent)
+
+        self.model_tabs = model_tabs
 
         self._create_ui()
-        self.load_dataset_btn.clicked.connect(self._load_dataset_path)
 
-    def _load_dataset_path(self):
-        file_path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
-        
-        if file_path:
-            self.info_label.setText(file_path)
+        self.load_dataset_btn.clicked.connect(self._browse_dataset)
+
+        QTimer.singleShot(0, self._load_dataset_on_start)
+
+    def _browse_dataset(self):
+        dir_path = QFileDialog.getExistingDirectory(self, "Select Dataset Directory")
+        if dir_path:
+            required_folders = ["train", "test", "valid"]
+            subdirs = set(os.listdir(dir_path))
+            missing = [fld for fld in required_folders if fld not in subdirs]
+            if missing:
+                QMessageBox.critical(self, "Invalid Dataset Structure", 
+                    "The selected directory must contain 'train', 'test' and 'valid' subfolders.")
+                return
+            self.status_message.emit(f"Selected dataset: {dir_path}", 8000)
+            self.dataset_path_label.setText(dir_path)
+            self._load_dataset(dir_path)
+            self._save_dataset_path(dir_path)
+
+    def _load_dataset_on_start(self):
+        dataset_path = self._load_dataset_path_from_config()
+        if not dataset_path == None:
+            self._load_dataset(dataset_path)
+            
+    def _load_dataset(self, dataset_path):
+        status_report: list[str] = []
+
+        try:
+            simple_cnn_tab = self.model_tabs[0]
+            simple_cnn_tab.model.load_dataset(dataset_path)
+            status_report.append(f"{simple_cnn_tab.model_name}: OK")
+        except Exception as e:
+            status_report.append(f"{simple_cnn_tab.model_name}: {e}")
+
+        pretrained_tabs = self.model_tabs[1:]
+        source_tab = None  
+
+        for tab in pretrained_tabs:
+            if source_tab is None:
+                try:
+                    tab.model.load_dataset(dataset_path)
+                    status_report.append(f"{tab.model_name}: OK")
+                    source_tab = tab 
+                except Exception as e:
+                    status_report.append(f"{tab.model_name}: {e}")
+            else:
+                try:
+                    tab.model.share_dataset(source_tab.model)
+                    status_report.append(f"{tab.model_name}: OK")
+                except Exception as e:
+                    status_report.append(f"{tab.model_name}: {e}")
+
+        summary = "Dataset load status:\n" + "\n".join(status_report)
+        self.status_message.emit(summary, 12000)
+
+    def _load_dataset_path_from_config(self):
+        project_root = self.get_project_root()
+        config = configparser.ConfigParser()
+        config_path = os.path.join(project_root, "model_config.ini")
+
+        if not os.path.exists(config_path):
+            self.status_message.emit("Config not found: model_config.ini", 8000)
+            return None
+
+        config.read(config_path)
+        if config.has_option('DatasetPath', 'dataset_path'):
+            dataset_path = config.get('DatasetPath', 'dataset_path')
+            if os.path.exists(dataset_path):
+                return dataset_path
+            else:
+                self.status_message.emit(f"Saved dataset path not found: {dataset_path}", 8000)
+                return None
+        else:
+            self.status_message.emit("No path saved in the config file.", 8000)
+            return None
+
+    def _save_dataset_path(self, dataset_path):
+        project_root = self.get_project_root()
+        config_path = os.path.join(project_root, "model_config.ini")
+        config = configparser.ConfigParser()
+        config.read(config_path)
+
+        if not config.has_section('DatasetPath'):
+            config.add_section('DatasetPath')
+
+        config.set('DatasetPath', 'dataset_path', dataset_path)
+
+        with open(config_path, 'w') as configfile:
+            config.write(configfile)
+        self.status_message.emit(f"Dataset path saved: {dataset_path}", 4000)
+
+    def get_project_root(self):
+        if getattr(sys, 'frozen', False):
+            # Executable
+            return os.path.dirname(sys.executable)
+        else:
+            # IDE
+            current_file_path = os.path.abspath(__file__)
+            core_dir = os.path.dirname(current_file_path)
+            src_dir = os.path.dirname(core_dir)
+            project_root = os.path.dirname(src_dir)
+            return project_root
 
     def _create_ui(self):
         main_layout = QVBoxLayout(self)
@@ -28,12 +132,12 @@ class DatasetTab(QWidget):
         
         self.load_dataset_btn = QPushButton("Load Dataset")
 
-        self.info_label = QLabel("Dataset information and statistics will be displayed here.")
-        self.info_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
-        self.info_label.setStyleSheet("color: gray; font-style: italic;")
+        self.dataset_path_label = QLabel("Dataset path will be displayed here.")
+        self.dataset_path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
+        self.dataset_path_label.setStyleSheet("color: gray; font-style: italic;")
 
         dataset_layout.addWidget(self.load_dataset_btn, 1)
-        dataset_layout.addWidget(self.info_label, 4)
+        dataset_layout.addWidget(self.dataset_path_label, 4)
         dataset_group.setLayout(dataset_layout)
 
         main_layout.addWidget(dataset_group)
