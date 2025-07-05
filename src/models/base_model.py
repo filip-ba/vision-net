@@ -77,7 +77,7 @@ class BaseModel(ABC):
             'fold_accuracies': None
         }
 
-    def is_data_loaded(self):
+    def is_dataset_loaded(self):
         """Check if dataset is loaded"""
         return self.dataset_loaded
 
