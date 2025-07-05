@@ -24,10 +24,9 @@ class ModelTab(QWidget):
     # Signal to emit status messages to the main window
     status_message = pyqtSignal(str, int)
 
-    def __init__(self, model_class=SimpleCnnModel, shared_dataset_source=None):
+    def __init__(self, model_class=None):
         super().__init__()
         self.model_class = model_class
-        self.shared_dataset_source = shared_dataset_source
         
         # Set model name based on the model class
         if model_class == SimpleCnnModel:
@@ -51,8 +50,7 @@ class ModelTab(QWidget):
         # Update model status
         self.model_info_widget.set_model_status("No model loaded") 
 
-        # Try to load the dataset and default model on startup
-        self._load_dataset_on_start_legacy()
+        # Try to load the default model on startup
         self._load_model_on_start()
 
         # Connect signals
@@ -85,9 +83,6 @@ class ModelTab(QWidget):
         self.recall_label.setText(f"Recall: {metrics['recall']:.2%}")
 
     def _update_ui_from_model_data(self):
-        """Updates UI elements with model data after the application starts"""
-        
-        # Update metrics display if metrics exist
         if self.model.metrics['accuracy'] is not None:
             self.metrics_widget.update_metrics(self.model.metrics)
         else:
@@ -187,37 +182,9 @@ class ModelTab(QWidget):
         self.kfold_train_btn.setEnabled(False)
         self.model_loaded = False
 
-    def _load_dataset_on_start_legacy(self):
-        """Loads the dataset on startup. If shared_dataset_source is provided (for EfficientNet & VGG16),
-        it will use the dataset from that source. Otherwise, it will load the dataset from the default location.
-        Updates the UI to reflect the dataset loading status."""
-        try:
-            # Check if we should share the dataset from another tab (EfficientNet & VGG16)
-            if self.shared_dataset_source and self.shared_dataset_source.model.dataset_loaded:
-                train_size, val_size, test_size = self.model.share_dataset(self.shared_dataset_source.model)
-                self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
-            else:
-                # Load the dataset normally (Simple CNN & ResNet)
-                project_root = self.get_project_root()
-                dataset_root = os.path.join(project_root, "dataset")
-                os.makedirs(dataset_root, exist_ok=True)
-                dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
-                train_size, val_size, test_size = self.model.load_data(dataset_dir)
-                self.model_info_widget.set_dataset_status("Dataset loaded", color="green") 
-            self.train_model_btn.setEnabled(True)
-            self.load_model_btn.setEnabled(True)
-        except Exception as e:
-            self.train_model_btn.setEnabled(False)
-            self.load_model_btn.setEnabled(False)
-            error_msg = f"Error loading dataset: {str(e)}"
-            self.status_message.emit(error_msg, 8000)
-            self.model_info_widget.set_dataset_status("No dataset found", color="red") 
-
     def _load_model_on_start(self):
         """Attempts to load the default model on startup. The model path is determined based on the model type
         and can be overridden by a saved path in the configuration file. Updates the UI to reflect the model loading status."""
-        if self.model.dataset_loaded == False:
-            return
         project_root = self.get_project_root()
         # Determine the model type and default paths
         if self.model_class == SimpleCnnModel:
@@ -291,7 +258,7 @@ class ModelTab(QWidget):
                 self.model_info_widget.set_model_status("No model found")
         except Exception as e:
             self.model_info_widget.set_model_status("Error initializing model", "red")
-            
+
     def load_model(self):
         """Loads the trained neural network model"""
         file_path, _ = QFileDialog.getOpenFileName(
@@ -427,7 +394,7 @@ class ModelTab(QWidget):
         
         try:
             # Check if dataset is loaded
-            if not self.model.is_data_loaded():
+            if not self.model.is_dataset_loaded():
                 self.status_message.emit("Dataset not loaded. Please load the dataset first.", 8000)
                 return
                 
@@ -469,9 +436,6 @@ class ModelTab(QWidget):
             print(f"Training error: {error_message}")
             self.status_message.emit(error_message, 8000)  
             self.reset_model()
-            # Try to load dataset 
-            print("trying to load the dataset")
-            self._load_dataset_on_start_legacy()
             
     def handle_training_and_testing_complete(self, training_result, testing_result):
         """Handle training completion from the progress dialog"""
@@ -514,15 +478,12 @@ class ModelTab(QWidget):
         print(f"Training and testing error: {error_message}")
         self.status_message.emit(f"Error: {error_message}", 8000)  
         self.reset_model()
-        # Try to load dataset 
-        print("trying to load the dataset")
-        self._load_dataset_on_start_legacy()
-
+        
     def train_kfold(self):
         """Performs k-fold cross-validation training."""
         try:
             # Check if dataset is loaded
-            if not self.model.is_data_loaded():
+            if not self.model.is_dataset_loaded():
                 self.status_message.emit("Dataset not loaded. Please load the dataset first.", 8000)
                 return
 
@@ -572,10 +533,7 @@ class ModelTab(QWidget):
             self.status_message.emit(error_message, 8000)
             self.kfold_result_label.setText("Error during cross-validation")
             self.kfold_train_btn.setEnabled(True)
-            # Try to load dataset 
-            print("trying to load the dataset")
-            self._load_dataset_on_start_legacy()
-
+            
     def _start_next_fold(self, k, epochs, learning_rate, momentum):
         """Starts the next fold of K-fold cross-validation"""
         try:
@@ -588,7 +546,7 @@ class ModelTab(QWidget):
                 dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
                 
                 # Split the data into k folds
-                fold_model.load_data(dataset_dir, k=k, current_fold=self.current_fold)
+                fold_model.load_dataset(dataset_dir, k=k, current_fold=self.current_fold)
                 
                 # Create and show progress dialog for this fold
                 dialog = ProgressDialog(
@@ -617,9 +575,6 @@ class ModelTab(QWidget):
             self.status_message.emit(error_message, 8000)
             self.kfold_result_label.setText("Error during cross-validation")
             self.kfold_train_btn.setEnabled(True)
-            # Try to load dataset 
-            print("trying to load the dataset")
-            self._load_dataset_on_start_legacy()
             
     def _handle_fold_complete(self, training_result, testing_result, k, epochs, learning_rate, momentum):
         """Handle completion of a single fold"""

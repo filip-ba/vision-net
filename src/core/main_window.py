@@ -33,7 +33,10 @@ class MainWindow(QMainWindow):
         self._create_ui()
         self._set_icons_based_on_current_theme()
 
-    def _connect_tab_status_signals(self):
+        self._connect_model_tab_status_signals()
+
+
+    def _connect_model_tab_status_signals(self):
         """Connect status signals from tabs to the main window status bar"""
         self.simple_cnn_tab.status_message.connect(self.update_status_bar)
         self.resnet_tab.status_message.connect(self.update_status_bar)
@@ -219,7 +222,7 @@ class MainWindow(QMainWindow):
     
     def _create_ui(self):
         self.setWindowTitle("VisionNet")
-        self.setGeometry(50, 50, 1280, 960)
+        self.setGeometry(50, 50, 1000, 600)
         project_root = self.get_project_root()
         icons_dir = os.path.join(project_root, "assets", "icons")
         window_icon_path = os.path.join(icons_dir, "app-icon.png")        
@@ -264,15 +267,10 @@ class MainWindow(QMainWindow):
         self.tab_widget.setMovable(True)
         self.tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)  
 
-        # Initialize model tabs - load datasets efficiently
-        self.simple_cnn_tab = ModelTab(model_class=SimpleCnnModel, shared_dataset_source=None)
-        
-        # Initialize the ResNet tab first as it will be the source for shared datasets
-        self.resnet_tab = ModelTab(model_class=ResNetModel, shared_dataset_source=None)
-        
-        # Pass ResNet tab as the source for the other tabs with the same transformation
-        self.efficientnet_tab = ModelTab(model_class=EfficientNetModel, shared_dataset_source=self.resnet_tab)
-        self.vgg16_tab = ModelTab(model_class=VGG16Model, shared_dataset_source=self.resnet_tab)
+        self.simple_cnn_tab = ModelTab(model_class=SimpleCnnModel)
+        self.resnet_tab = ModelTab(model_class=ResNetModel)
+        self.efficientnet_tab = ModelTab(model_class=EfficientNetModel)
+        self.vgg16_tab = ModelTab(model_class=VGG16Model)
         
         self.tab_widget.addTab(self.simple_cnn_tab, "Simple CNN")
         self.tab_widget.addTab(self.resnet_tab, "ResNet18")
@@ -284,8 +282,10 @@ class MainWindow(QMainWindow):
         self.classification_tab.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         # Create dataset tab (third page)
-        self.dataset_widget = DatasetTab()
-        self.dataset_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        model_tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
+        self.dataset_tab = DatasetTab(model_tabs)
+        self.dataset_tab.status_message.connect(self.update_status_bar)
+        self.dataset_tab.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         # Create settings page (fourth page)
         self.settings_tab = SettingsTab(self.style_manager)
@@ -306,7 +306,7 @@ class MainWindow(QMainWindow):
         dataset_scroll = QScrollArea()
         dataset_scroll.setWidgetResizable(True)
         dataset_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        dataset_scroll.setWidget(self.dataset_widget)
+        dataset_scroll.setWidget(self.dataset_tab)
 
         settings_scroll = QScrollArea()
         settings_scroll.setWidgetResizable(True)
@@ -330,7 +330,6 @@ class MainWindow(QMainWindow):
         
         self.classification_tab.classify_clicked.connect(self._classify_all) 
         self.classification_tab.image_loaded.connect(self.update_status_bar) 
-        self._connect_tab_status_signals()
 
     def _create_sidebar(self):
         sidebar = QWidget()
