@@ -18,6 +18,7 @@ class BaseModel(ABC):
         self.net = None
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = None
+        self.batch_size = 4
         
         # Dataset attributes
         self.trainloader = None
@@ -107,12 +108,12 @@ class BaseModel(ABC):
             val_dataset = Subset(full_train_dataset, val_indices)
             
             # Create data loaders
-            self.trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-            self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=False)
+            self.trainloader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=0)
+            self.valloader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=0)
             
             # Load test data normally
             test_dataset = datasets.ImageFolder(root=os.path.join(data_dir, "test"), transform=test_transform)
-            self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+            self.testloader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=0)
             
             # Store classes from the full dataset
             self.classes = full_train_dataset.classes
@@ -122,9 +123,9 @@ class BaseModel(ABC):
             val_dataset = datasets.ImageFolder(root=os.path.join(data_dir, "valid"), transform=train_transform)
             test_dataset = datasets.ImageFolder(root=os.path.join(data_dir, "test"), transform=test_transform)
 
-            self.trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-            self.valloader = DataLoader(val_dataset, batch_size=4, shuffle=False)
-            self.testloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+            self.trainloader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=0)
+            self.valloader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=0)
+            self.testloader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=0)
             
             self.classes = train_dataset.classes
         
