@@ -210,7 +210,7 @@ class ModelTab(QWidget):
 
         # Create default configuration if it doesn't exist
         if not os.path.exists(config_path):
-            config['LastModels'] = {
+            config['ModelsPath'] = {
                 'simple_cnn': os.path.join(project_root, "saved_models", "simple_cnn.pth"),
                 'resnet': os.path.join(project_root, "saved_models", "resnet.pth"),
                 'efficientnet': os.path.join(project_root, "saved_models", "efficientnet.pth"),
@@ -223,8 +223,8 @@ class ModelTab(QWidget):
     
         # Get the last used model path from config, fall back to default if not found
         try:
-            if 'LastModels' in config and model_type in config['LastModels']:
-                last_model_path = config['LastModels'][model_type]
+            if 'ModelsPath' in config and model_type in config['ModelsPath']:
+                last_model_path = config['ModelsPath'][model_type]
                 if os.path.exists(last_model_path):
                     model_path = last_model_path
                 else:
@@ -335,12 +335,12 @@ class ModelTab(QWidget):
         if os.path.exists(config_path):
             config.read(config_path)
         
-        # Make sure the LastModels section exists
-        if 'LastModels' not in config:
-            config['LastModels'] = {}
+        # Make sure the ModelsPath section exists
+        if 'ModelsPath' not in config:
+            config['ModelsPath'] = {}
         
         # Update the model path
-        config['LastModels'][model_type] = model_path
+        config['ModelsPath'][model_type] = model_path
         
         # Save the config
         with open(config_path, 'w') as configfile:
