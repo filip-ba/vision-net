@@ -130,7 +130,7 @@ class DatasetTab(QWidget):
         
         self.load_dataset_btn = QPushButton("Load Dataset")
 
-        self.dataset_path_label = QLabel("Dataset path will be displayed here.")
+        self.dataset_path_label = QLabel("Dataset not loaded.")
         self.dataset_path_label.setObjectName("dataset-path-label")
         self.dataset_path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
         self.dataset_path_label.setWordWrap(True)
