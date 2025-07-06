@@ -75,8 +75,9 @@ class DatasetTab(QWidget):
         config_path = os.path.join(project_root, "config.ini")
 
         if not os.path.exists(config_path):
-            self.status_message.emit("Config not found: config.ini", 8000)
-            return None
+            os.makedirs(os.path.dirname(config_path), exist_ok=True)
+            with open(config_path, 'w') as f:
+                config.write(f)
 
         config.read(config_path)
         if config.has_option('DatasetPath', 'dataset_path'):
@@ -84,10 +85,10 @@ class DatasetTab(QWidget):
             if os.path.exists(dataset_path):
                 return dataset_path
             else:
-                self.status_message.emit(f"Saved dataset path not found: {dataset_path}", 8000)
+                self.status_message.emit(f"Saved dataset path not found: {dataset_path}", 12000)
                 return None
         else:
-            self.status_message.emit("No path saved in the config file.", 8000)
+            self.status_message.emit("Dataset not loaded.", 10000)
             return None
 
     def _save_dataset_path(self, dataset_path):
