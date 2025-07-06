@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (QPushButton, QWidget, QHBoxLayout, QVBoxLayout, QLabel, 
-                             QGroupBox, QFileDialog, QMessageBox)
+                             QGroupBox, QFileDialog, QMessageBox, QSizePolicy)
 from PyQt6.QtCore import pyqtSignal, Qt, QTimer
 import configparser
 import sys
@@ -40,6 +40,7 @@ class DatasetTab(QWidget):
     def _load_dataset_on_start(self):
         dataset_path = self._load_dataset_path_from_config()
         if not dataset_path == None:
+            self.dataset_path_label.setText(dataset_path)
             self._load_dataset(dataset_path)
             
     def _load_dataset(self, dataset_path):
@@ -71,10 +72,10 @@ class DatasetTab(QWidget):
     def _load_dataset_path_from_config(self):
         project_root = self.get_project_root()
         config = configparser.ConfigParser()
-        config_path = os.path.join(project_root, "model_config.ini")
+        config_path = os.path.join(project_root, "config.ini")
 
         if not os.path.exists(config_path):
-            self.status_message.emit("Config not found: model_config.ini", 8000)
+            self.status_message.emit("Config not found: config.ini", 8000)
             return None
 
         config.read(config_path)
@@ -91,7 +92,7 @@ class DatasetTab(QWidget):
 
     def _save_dataset_path(self, dataset_path):
         project_root = self.get_project_root()
-        config_path = os.path.join(project_root, "model_config.ini")
+        config_path = os.path.join(project_root, "config.ini")
         config = configparser.ConfigParser()
         config.read(config_path)
 
@@ -129,8 +130,10 @@ class DatasetTab(QWidget):
         self.load_dataset_btn = QPushButton("Load Dataset")
 
         self.dataset_path_label = QLabel("Dataset path will be displayed here.")
+        self.dataset_path_label.setObjectName("dataset-path-label")
         self.dataset_path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
-        self.dataset_path_label.setStyleSheet("color: gray; font-style: italic;")
+        self.dataset_path_label.setWordWrap(True)
+        self.dataset_path_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
         dataset_overview_group_layout.addWidget(self.load_dataset_btn, 1)
         dataset_overview_group_layout.addWidget(self.dataset_path_label, 4)

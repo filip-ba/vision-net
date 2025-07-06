@@ -1,7 +1,9 @@
 from PyQt6.QtWidgets import ( QWidget, QGroupBox, QVBoxLayout, 
-                            QHBoxLayout, QLabel, QFrame, QSizePolicy )
+                            QHBoxLayout, QLabel, QSizePolicy )
 from PyQt6.QtCore import Qt
-#from ...utils.custom_separator import create_separator
+
+from ...utils.custom_separator import create_separator
+
 
 class DatasetStatusWidget(QWidget):
 
@@ -31,11 +33,12 @@ class DatasetStatusWidget(QWidget):
         status_group.setObjectName("dataset-status")
         status_layout = QHBoxLayout()
         status_layout.setContentsMargins(18, 0, 18, 0)
-        status_layout.setSpacing(0)
+        status_layout.setSpacing(18)
 
         for idx, tab in enumerate(self.model_tabs):
             col_layout = QVBoxLayout()
             col_layout.setSpacing(4)
+            col_layout.setContentsMargins(0, 4, 0, 4)
 
             name_lbl = QLabel(tab.model_name)
             name_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -52,12 +55,9 @@ class DatasetStatusWidget(QWidget):
 
             self.status_labels[tab.model_name] = status_lbl
 
-            # vertical separator except after last column
             if idx != len(self.model_tabs) - 1:
-                vline = QFrame()
-                vline.setFrameShape(QFrame.Shape.VLine)
-                vline.setFrameShadow(QFrame.Shadow.Sunken)
-                status_layout.addWidget(vline)
+                separator = create_separator("vertical")
+                status_layout.addWidget(separator)
 
         status_group.setLayout(status_layout)
         main_layout.addWidget(status_group)

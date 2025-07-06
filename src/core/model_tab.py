@@ -183,10 +183,7 @@ class ModelTab(QWidget):
         self.model_loaded = False
 
     def _load_model_on_start(self):
-        """Attempts to load the default model on startup. The model path is determined based on the model type
-        and can be overridden by a saved path in the configuration file. Updates the UI to reflect the model loading status."""
         project_root = self.get_project_root()
-        # Determine the model type and default paths
         if self.model_class == SimpleCnnModel:
             default_model_path = os.path.join(project_root, "saved_models", "simple_cnn.pth")
             model_type = "simple_cnn"
@@ -204,11 +201,9 @@ class ModelTab(QWidget):
             self.model_info_widget.set_model_status("No model loaded", "red")
             return
 
-        # Try to get the last loaded model path from config
         config = configparser.ConfigParser()
-        config_path = os.path.join(project_root, "model_config.ini")
+        config_path = os.path.join(project_root, "config.ini")
 
-        # Create default configuration if it doesn't exist
         if not os.path.exists(config_path):
             config['ModelsPath'] = {
                 'simple_cnn': os.path.join(project_root, "saved_models", "simple_cnn.pth"),
@@ -329,7 +324,7 @@ class ModelTab(QWidget):
         """Save the model path to config file"""
         config = configparser.ConfigParser()
         project_root = self.get_project_root()
-        config_path = os.path.join(project_root, "model_config.ini")
+        config_path = os.path.join(project_root, "config.ini")
         
         # Create or read existing config
         if os.path.exists(config_path):
