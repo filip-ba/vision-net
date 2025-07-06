@@ -5,6 +5,8 @@ import configparser
 import sys
 import os
 
+from .dataset_tab_widgets.dataset_status_widget import DatasetStatusWidget
+
 
 class DatasetTab(QWidget):
     status_message = pyqtSignal(str, int)
@@ -41,14 +43,12 @@ class DatasetTab(QWidget):
             self._load_dataset(dataset_path)
             
     def _load_dataset(self, dataset_path):
-        status_report: list[str] = []
-
         try:
             simple_cnn_tab = self.model_tabs[0]
             simple_cnn_tab.model.load_dataset(dataset_path)
-            status_report.append(f"{simple_cnn_tab.model_name}: OK")
+            self.dataset_status_widget.set_status(simple_cnn_tab.model_name, "OK", "green")
         except Exception as e:
-            status_report.append(f"{simple_cnn_tab.model_name}: {e}")
+            self.dataset_status_widget.set_status(simple_cnn_tab.model_name, str(e), "red")
 
         pretrained_tabs = self.model_tabs[1:]
         source_tab = None  
@@ -57,19 +57,16 @@ class DatasetTab(QWidget):
             if source_tab is None:
                 try:
                     tab.model.load_dataset(dataset_path)
-                    status_report.append(f"{tab.model_name}: OK")
+                    self.dataset_status_widget.set_status(tab.model_name, "OK", "green")
                     source_tab = tab 
                 except Exception as e:
-                    status_report.append(f"{tab.model_name}: {e}")
+                    self.dataset_status_widget.set_status(tab.model_name, str(e), "red")
             else:
                 try:
                     tab.model.share_dataset(source_tab.model)
-                    status_report.append(f"{tab.model_name}: OK")
+                    self.dataset_status_widget.set_status(tab.model_name, "OK", "green")
                 except Exception as e:
-                    status_report.append(f"{tab.model_name}: {e}")
-
-        summary = "Dataset load status:\n" + "\n".join(status_report)
-        self.status_message.emit(summary, 12000)
+                    self.dataset_status_widget.set_status(tab.model_name, str(e), "red")  
 
     def _load_dataset_path_from_config(self):
         project_root = self.get_project_root()
@@ -109,10 +106,8 @@ class DatasetTab(QWidget):
 
     def get_project_root(self):
         if getattr(sys, 'frozen', False):
-            # Executable
             return os.path.dirname(sys.executable)
         else:
-            # IDE
             current_file_path = os.path.abspath(__file__)
             core_dir = os.path.dirname(current_file_path)
             src_dir = os.path.dirname(core_dir)
@@ -124,11 +119,12 @@ class DatasetTab(QWidget):
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(0)
 
-        dataset_group = QGroupBox("Dataset Overview")
-        dataset_group.setObjectName("dataset-overview")
-        dataset_layout = QHBoxLayout()
-        dataset_layout.setContentsMargins(0, 0, 0, 0)
-        dataset_layout.setSpacing(20)
+        dataset_overview_group = QGroupBox("Dataset Overview")
+        dataset_overview_group.setObjectName("dataset-overview")
+        
+        dataset_overview_group_layout = QHBoxLayout()
+        dataset_overview_group_layout.setContentsMargins(0, 0, 0, 0)
+        dataset_overview_group_layout.setSpacing(20)
         
         self.load_dataset_btn = QPushButton("Load Dataset")
 
@@ -136,9 +132,12 @@ class DatasetTab(QWidget):
         self.dataset_path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
         self.dataset_path_label.setStyleSheet("color: gray; font-style: italic;")
 
-        dataset_layout.addWidget(self.load_dataset_btn, 1)
-        dataset_layout.addWidget(self.dataset_path_label, 4)
-        dataset_group.setLayout(dataset_layout)
+        dataset_overview_group_layout.addWidget(self.load_dataset_btn, 1)
+        dataset_overview_group_layout.addWidget(self.dataset_path_label, 4)
+        dataset_overview_group.setLayout(dataset_overview_group_layout)
 
-        main_layout.addWidget(dataset_group)
+        self.dataset_status_widget = DatasetStatusWidget(self.model_tabs)
+
+        main_layout.addWidget(dataset_overview_group)
+        main_layout.addWidget(self.dataset_status_widget)
         main_layout.addStretch()
