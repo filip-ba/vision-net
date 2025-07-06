@@ -7,7 +7,7 @@ from ...utils.custom_separator import create_separator
 
 class DatasetStatusWidget(QWidget):
 
-    def __init__(self, model_tabs: list, parent=None):
+    def __init__(self, parent: QWidget | None, model_tabs: list):
         super().__init__(parent)
         self.model_tabs = model_tabs
         self.status_labels: dict[str, QLabel] = {}

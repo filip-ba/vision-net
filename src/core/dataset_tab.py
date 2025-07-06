@@ -1,10 +1,10 @@
-from PyQt6.QtWidgets import (QPushButton, QWidget, QHBoxLayout, QVBoxLayout, QLabel, 
-                             QGroupBox, QFileDialog, QMessageBox, QSizePolicy)
-from PyQt6.QtCore import pyqtSignal, Qt, QTimer
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QMessageBox
+from PyQt6.QtCore import pyqtSignal, QTimer
 import configparser
 import sys
 import os
 
+from .dataset_tab_widgets.dataset_overview_widget import DatasetOverviewWidget
 from .dataset_tab_widgets.dataset_status_widget import DatasetStatusWidget
 
 
@@ -121,27 +121,12 @@ class DatasetTab(QWidget):
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(0)
 
-        dataset_overview_group = QGroupBox("Dataset Overview")
-        dataset_overview_group.setObjectName("dataset-overview")
-        
-        dataset_overview_group_layout = QHBoxLayout()
-        dataset_overview_group_layout.setContentsMargins(0, 0, 0, 0)
-        dataset_overview_group_layout.setSpacing(20)
-        
-        self.load_dataset_btn = QPushButton("Load Dataset")
+        self.dataset_overview_widget = DatasetOverviewWidget(self)
+        self.load_dataset_btn = self.dataset_overview_widget.load_dataset_btn
+        self.dataset_path_label = self.dataset_overview_widget.dataset_path_label
 
-        self.dataset_path_label = QLabel("Dataset not loaded.")
-        self.dataset_path_label.setObjectName("dataset-path-label")
-        self.dataset_path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
-        self.dataset_path_label.setWordWrap(True)
-        self.dataset_path_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.dataset_status_widget = DatasetStatusWidget(self, self.model_tabs)
 
-        dataset_overview_group_layout.addWidget(self.load_dataset_btn, 1)
-        dataset_overview_group_layout.addWidget(self.dataset_path_label, 4)
-        dataset_overview_group.setLayout(dataset_overview_group_layout)
-
-        self.dataset_status_widget = DatasetStatusWidget(self.model_tabs)
-
-        main_layout.addWidget(dataset_overview_group)
+        main_layout.addWidget(self.dataset_overview_widget)
         main_layout.addWidget(self.dataset_status_widget)
         main_layout.addStretch()
