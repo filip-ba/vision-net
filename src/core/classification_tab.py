@@ -42,9 +42,7 @@ class ClassificationTab(QWidget):
 
         random.shuffle(self.test_images)
         self.current_test_index = 0
-        image_path, _ = self.test_images[self.current_test_index]
-        self.classification_widget.update_image(image_path)
-        self._update_navigation_buttons()
+        self._show_current_test_image(suppress_message=True)
 
     def _load_placeholder_image(self):
         project_root = self.get_project_root()
@@ -64,13 +62,15 @@ class ClassificationTab(QWidget):
             self._update_navigation_buttons()
             self._show_current_test_image()
 
-    def _show_current_test_image(self):
+    def _show_current_test_image(self, suppress_message=False):
         if 0 <= self.current_test_index < len(self.test_images):
             image_path, class_name = self.test_images[self.current_test_index]
             self.current_image_path = image_path
             self.classification_widget.update_image(image_path)
             self._load_results_from_cache(image_path, class_name)
             self._update_navigation_buttons()
+            if not suppress_message:
+                self.image_loaded.emit(f"Showing test image {self.current_test_index + 1}/{len(self.test_images)} - {class_name}", 3000)
 
     def _update_navigation_buttons(self):
         prev_enabled = self.current_test_index > 0
@@ -98,9 +98,6 @@ class ClassificationTab(QWidget):
             self.results_widget.reset_results()
             if not class_name:
                 self.image_loaded.emit("Image loaded, previous results cleared.", 8000)
-
-        if class_name:
-            self.image_loaded.emit(f"Showing test image {self.current_test_index + 1}/{len(self.test_images)} - {class_name}", 3000)
             
     def load_image(self):
         supported_formats = [f"*.{fmt.data().decode()}" for fmt in QImageReader.supportedImageFormats()]
