@@ -10,6 +10,7 @@ from .dataset_tab_widgets.dataset_status_widget import DatasetStatusWidget
 
 class DatasetTab(QWidget):
     status_message = pyqtSignal(str, int)
+    dataset_loaded = pyqtSignal(str)  
 
     def __init__(self, model_tabs, parent=None):
         super().__init__(parent)
@@ -44,10 +45,12 @@ class DatasetTab(QWidget):
             self._load_dataset(dataset_path)
             
     def _load_dataset(self, dataset_path):
+        success = False
         try:
             simple_cnn_tab = self.model_tabs[0]
             simple_cnn_tab.model.load_dataset(dataset_path)
             self.dataset_status_widget.set_status(simple_cnn_tab.model_name, "OK", "green")
+            success = True
         except Exception as e:
             self.dataset_status_widget.set_status(simple_cnn_tab.model_name, str(e), "red")
 
@@ -59,15 +62,20 @@ class DatasetTab(QWidget):
                 try:
                     tab.model.load_dataset(dataset_path)
                     self.dataset_status_widget.set_status(tab.model_name, "OK", "green")
-                    source_tab = tab 
+                    source_tab = tab
+                    success = True 
                 except Exception as e:
                     self.dataset_status_widget.set_status(tab.model_name, str(e), "red")
             else:
                 try:
                     tab.model.share_dataset(source_tab.model)
                     self.dataset_status_widget.set_status(tab.model_name, "OK", "green")
+                    success = True
                 except Exception as e:
                     self.dataset_status_widget.set_status(tab.model_name, str(e), "red")  
+
+        if success:
+            self.dataset_loaded.emit(dataset_path)
 
     def _load_dataset_path_from_config(self):
         project_root = self.get_project_root()
@@ -104,7 +112,7 @@ class DatasetTab(QWidget):
 
         with open(config_path, 'w') as configfile:
             config.write(configfile)
-        self.status_message.emit(f"Dataset path saved: {dataset_path}", 4000)
+        self.status_message.emit(f"Dataset path saved: {dataset_path}", 8000)
 
     def get_project_root(self):
         if getattr(sys, 'frozen', False):

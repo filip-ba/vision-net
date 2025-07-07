@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFileDialog)
 from PyQt6.QtGui import QPixmap, QImageReader
 from PyQt6.QtCore import pyqtSignal, QTimer
-import os, random
+import os, random, configparser
 import sys
 
 from ..ui.widgets.classification_widget import ClassificationWidget
@@ -22,27 +22,14 @@ class ClassificationTab(QWidget):
         self.classification_results_cache = {}
         self.test_images = []
         self.current_test_index = -1
-        self.load_test_dataset()
-        self.show_next_test_image()
+        self._load_placeholder_image()
 
-    def get_project_root(self):
-        if getattr(sys, 'frozen', False):
-            # Executable
-            return os.path.dirname(sys.executable)
-        else:
-            # IDE
-            current_file_path = os.path.abspath(__file__)
-            core_dir = os.path.dirname(current_file_path)
-            src_dir = os.path.dirname(core_dir)
-            project_root = os.path.dirname(src_dir)
-            return project_root
-
-    def load_test_dataset(self):
+    def load_test_dataset(self, dataset_path=None):
         self.test_images = []
-        project_root = self.get_project_root()
-        dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset", "test")
 
-        if os.path.exists(dataset_dir):
+        dataset_dir = os.path.join(dataset_path, "test") if dataset_path else None
+
+        if dataset_dir and os.path.exists(dataset_dir):
             for class_name in os.listdir(dataset_dir):
                 class_path = os.path.join(dataset_dir, class_name)
                 if os.path.isdir(class_path):
@@ -50,31 +37,30 @@ class ClassificationTab(QWidget):
                         if img_name.lower().endswith(('.png', '.jpg', '.jpeg')):
                             img_path = os.path.join(class_path, img_name)
                             self.test_images.append((img_path, class_name))
-        
-        if not self.test_images:
-            print("No test images found in the dataset")
+        else:
             return False
-            
+
         random.shuffle(self.test_images)
-        self.current_test_index = -1
-        return True
-        
-    def show_next_test_image(self):
-        if not self.test_images:
-            if not self.load_test_dataset():
-                return
-                
+        self.current_test_index = 0
+        self._show_current_test_image()
+
+    def _load_placeholder_image(self):
+        project_root = self.get_project_root()
+        placeholder_path = os.path.join(project_root, "assets", "themes", "classification-placeholder.jpg")
+        if os.path.exists(placeholder_path):
+            self.classification_widget.update_image(placeholder_path)
+            return False
+
+    def show_next_test_image(self):       
         if self.current_test_index < len(self.test_images) - 1:
             self.current_test_index += 1
             self._show_current_test_image()
             
     def show_previous_test_image(self):
-        if not self.test_images or self.current_test_index <= 0:
-            return
-            
-        self.current_test_index -= 1
-        self._update_navigation_buttons()
-        self._show_current_test_image()
+        if self.current_test_index >= 0:
+            self.current_test_index -= 1
+            self._update_navigation_buttons()
+            self._show_current_test_image()
 
     def _show_current_test_image(self):
         if 0 <= self.current_test_index < len(self.test_images):
@@ -164,6 +150,16 @@ class ClassificationTab(QWidget):
         """Scale the image in image display properly after the start of the application"""
         super().showEvent(event)
         QTimer.singleShot(50, self.classification_widget.scale_image)
+
+    def get_project_root(self):
+        if getattr(sys, 'frozen', False):
+            return os.path.dirname(sys.executable)
+        else:
+            current_file_path = os.path.abspath(__file__)
+            core_dir = os.path.dirname(current_file_path)
+            src_dir = os.path.dirname(core_dir)
+            project_root = os.path.dirname(src_dir)
+            return project_root
 
     def _create_ui(self):
         main_layout = QVBoxLayout()
