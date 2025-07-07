@@ -24,7 +24,7 @@ class ClassificationTab(QWidget):
         self.current_test_index = -1
         self._load_placeholder_image()
 
-    def load_test_dataset(self, dataset_path=None):
+    def load_test_images(self, dataset_path=None):
         self.test_images = []
 
         dataset_dir = os.path.join(dataset_path, "test") if dataset_path else None
@@ -42,7 +42,9 @@ class ClassificationTab(QWidget):
 
         random.shuffle(self.test_images)
         self.current_test_index = 0
-        self._show_current_test_image()
+        image_path, _ = self.test_images[self.current_test_index]
+        self.classification_widget.update_image(image_path)
+        self._update_navigation_buttons()
 
     def _load_placeholder_image(self):
         project_root = self.get_project_root()
