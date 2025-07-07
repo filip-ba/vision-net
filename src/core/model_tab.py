@@ -477,7 +477,6 @@ class ModelTab(QWidget):
     def train_kfold(self):
         """Performs k-fold cross-validation training."""
         try:
-            # Check if dataset is loaded
             if not self.model.is_dataset_loaded():
                 self.status_message.emit("Dataset not loaded. Please load the dataset first.", 8000)
                 return
@@ -529,21 +528,41 @@ class ModelTab(QWidget):
             self.kfold_result_label.setText("Error during cross-validation")
             self.kfold_train_btn.setEnabled(True)
             
+    def _load_dataset_path_from_config(self):
+        project_root = self.get_project_root()
+        config = configparser.ConfigParser()
+        config_path = os.path.join(project_root, "config.ini")
+
+        if not os.path.exists(config_path):
+            return False
+
+        config.read(config_path)
+        if config.has_option('DatasetPath', 'dataset_path'):
+            dataset_path = config.get('DatasetPath', 'dataset_path')
+            if os.path.exists(dataset_path):
+                return dataset_path
+            else:
+                self.status_message.emit(f"Saved dataset path not found: {dataset_path}", 12000)
+                return None
+        else:
+            self.status_message.emit("Dataset not loaded.", 10000)
+            return None
+
     def _start_next_fold(self, k, epochs, learning_rate, momentum):
         """Starts the next fold of K-fold cross-validation"""
         try:
             if self.current_fold < k:
                 # Create a new model instance for this fold
                 fold_model = self.model_class()
+                
+                dataset_path = self._load_dataset_path_from_config()
+                if dataset_path is None:
+                    return False
+
+                fold_model.load_dataset(dataset_path, k=k, current_fold=self.current_fold)
+
                 fold_model.initialize_model()
                 
-                project_root = self.get_project_root()
-                dataset_dir = os.path.join(project_root, "dataset", "fruitveg-dataset")
-                
-                # Split the data into k folds
-                fold_model.load_dataset(dataset_dir, k=k, current_fold=self.current_fold)
-                
-                # Create and show progress dialog for this fold
                 dialog = ProgressDialog(
                     self, 
                     epochs=epochs,
