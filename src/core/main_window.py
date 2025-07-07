@@ -286,7 +286,7 @@ class MainWindow(QMainWindow):
         self.dataset_tab = DatasetTab(model_tabs)
         self.dataset_tab.status_message.connect(self.update_status_bar)
         # Refresh classification test images when new dataset is loaded
-        self.dataset_tab.dataset_loaded.connect(self.classification_tab.load_test_dataset)
+        self.dataset_tab.dataset_loaded.connect(self.classification_tab.load_test_images)  
         self.dataset_tab.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         # Create settings page (fourth page)
