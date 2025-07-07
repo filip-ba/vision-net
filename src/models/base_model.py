@@ -320,17 +320,31 @@ class BaseModel(ABC):
 
     def load_model(self, path):
         """Loads model state along with training parameters, metrics and history"""
-        if self.net is None:
-            self.initialize_model()
-            
+        # First load the checkpoint so that we know how many classes the stored model has
         save_dict = torch.load(path, weights_only=False)
+
+        # Restore classes from the saved metrics (if present). This MUST happen before the
+        # network is (re)initialised so that the final classification layer has the correct
+        # output dimension.
+        if isinstance(save_dict, dict):
+            saved_metrics = save_dict.get("metrics", {})
+            saved_class_names = saved_metrics.get("class_names") if isinstance(saved_metrics, dict) else None
+            if saved_class_names:
+                self.classes = saved_class_names
         
-        self.net.load_state_dict(save_dict['model_state'])
+        # (Re)create the network so that the classification head matches the number of classes
+        # found above. We always recreate the network to avoid a potential shape mismatch that
+        # could have been introduced earlier in the session.
+        self.initialize_model()
+
+        # Now the shapes should line-up and we can safely load the checkpoint weights.
+        self.net.load_state_dict(save_dict["model_state"])
         self.net.eval()
-        
-        self.training_params = save_dict['training_params']
-        self.metrics = save_dict['metrics']
-        self.history = save_dict['history']
+
+        # Restore the remaining bookkeeping data
+        self.training_params = save_dict.get("training_params", self.training_params)
+        self.metrics = save_dict.get("metrics", self.metrics)
+        self.history = save_dict.get("history", self.history)
         
         # Load cross-validation metrics if they exist in the saved model
         if 'cv_metrics' in save_dict:
