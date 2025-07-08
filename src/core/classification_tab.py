@@ -1,12 +1,12 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFileDialog)
 from PyQt6.QtGui import QPixmap, QImageReader
 from PyQt6.QtCore import pyqtSignal, QTimer
-import os, random, configparser
-import sys
+import os, random
 
 from ..ui.widgets.classification_widget import ClassificationWidget
 from ..ui.widgets.results_widget import ResultsWidget
 from ..ui.widgets.plot_probability_widget import PlotProbabilityWidget
+from ..utils.get_project_root import get_project_root
 
 
 class ClassificationTab(QWidget):
@@ -45,7 +45,7 @@ class ClassificationTab(QWidget):
         self._show_current_test_image(suppress_message=True)
 
     def _load_placeholder_image(self):
-        project_root = self.get_project_root()
+        project_root = get_project_root()
         placeholder_path = os.path.join(project_root, "assets", "themes", "classification-placeholder.jpg")
         if os.path.exists(placeholder_path):
             self.classification_widget.update_image(placeholder_path)
@@ -149,16 +149,6 @@ class ClassificationTab(QWidget):
         """Scale the image in image display properly after the start of the application"""
         super().showEvent(event)
         QTimer.singleShot(50, self.classification_widget.scale_image)
-
-    def get_project_root(self):
-        if getattr(sys, 'frozen', False):
-            return os.path.dirname(sys.executable)
-        else:
-            current_file_path = os.path.abspath(__file__)
-            core_dir = os.path.dirname(current_file_path)
-            src_dir = os.path.dirname(core_dir)
-            project_root = os.path.dirname(src_dir)
-            return project_root
 
     def _create_ui(self):
         main_layout = QVBoxLayout()

@@ -6,7 +6,7 @@ import os
 
 from .dataset_tab_widgets.dataset_overview_widget import DatasetOverviewWidget
 from .dataset_tab_widgets.dataset_status_widget import DatasetStatusWidget
-from ..utils.return_project_root import get_project_root
+from ..utils.get_project_root import get_project_root
 
 
 class DatasetTab(QWidget):
