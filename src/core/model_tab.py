@@ -159,7 +159,7 @@ class ModelTab(QWidget):
         self.save_model_btn.setEnabled(state)
         self.clear_model_btn.setEnabled(state)
         self.kfold_train_btn.setEnabled(state)
-        self.k_spinbox(state)
+        self.k_spinbox.setEnabled(state)
 
     def enable_or_disable_controls_based_on_dataset_state(self):
         self._set_button_state(False)
