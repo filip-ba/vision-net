@@ -6,7 +6,7 @@ import os
 import platform
 import torch
 import configparser
-
+import traceback
 
 from .model_tab_widgets.progress_dialog import ProgressDialog
 from .model_tab_widgets.training_plot_widget import TrainingPlotWidget
@@ -36,28 +36,20 @@ class ModelTab(QWidget):
             self.model_name = "EfficientNet"
         elif model_class == VGG16Model:
             self.model_name = "VGG16"
-        else:
-            self.model_name = "Unknown Model"
             
         self._create_ui()
         self.current_image_path = None
-
-        # Model Initialization 
+ 
         self.model = model_class()
         self.model_loaded = False
 
-        # Update model status
-        self.model_info_widget.set_model_status("No model loaded") 
-
-        # Try to load the default model on startup
         self._load_model_on_start()
 
-        # Connect signals
         self._setup_connections()    
 
     def _setup_connections(self):
         self.load_model_btn.clicked.connect(self.load_model)
-        self.save_model_btn.clicked.connect(self.save_model)
+        self.save_model_btn.clicked.connect(self._save_model)
         self.train_model_btn.clicked.connect(self.train_model)
         self.clear_model_btn.clicked.connect(self.clear_model)
         self.kfold_train_btn.clicked.connect(self.train_kfold)
@@ -135,7 +127,6 @@ class ModelTab(QWidget):
             self.reset_model()
 
     def reset_model(self):
-        # Reset model and UI
         self.model.reset_metrics()
         self.model.training_params = {
             'epochs': None,
@@ -148,22 +139,26 @@ class ModelTab(QWidget):
             'val_loss': None
         }
         
-        # Reset UI elements
         self.metrics_widget.reset_metrics()
         self.parameters_widget.reset_parameters()
         self.plot_widget1.plot_loss_history(self.plot_widget1)
         self.plot_widget2.plot_confusion_matrix(self.plot_widget2)
         self.kfold_result_label.setText("No cross-validation performed yet")
 
-        # Update model status
         self.model_info_widget.set_model_status("No model loaded") 
-        self.model_info_widget.set_model_file("")
+        self.model_info_widget.set_model_file("None")
         
         # Disable buttons
         self.save_model_btn.setEnabled(False)
         self.clear_model_btn.setEnabled(False)
         self.kfold_train_btn.setEnabled(False)
         self.model_loaded = False
+
+    def _set_button_state(self):
+        pass
+
+    def _set_widgets_state(self):
+        pass
 
     def _load_model_path_from_config(self):
         project_root = get_project_root()
@@ -177,8 +172,8 @@ class ModelTab(QWidget):
     
         config.read(config_path)
    
-        if 'ModelsPath' in config and model_type in config['ModelsPath']:
-            last_model_path = config['ModelsPath'][model_type]
+        if 'ModelsPath' in config and self.model_name in config['ModelsPath']:
+            last_model_path = config['ModelsPath'][self.model_name]
             if os.path.exists(last_model_path):
                 return last_model_path
             else:
@@ -193,30 +188,25 @@ class ModelTab(QWidget):
         if model_path == None:
             return
 
-        # Attempt to load the model
         try:
             self.model.initialize_model()
-            if os.path.exists(model_path):
-                try:
-                    metadata = self.model.load_model(model_path)
-                    # Update UI with loaded data
-                    self._update_ui_from_model_data()
-                    filename = os.path.basename(model_path)
-                    self.model_info_widget.set_model_file(filename) 
-                    self.model_loaded = True
-                    self.model_info_widget.set_model_status("Model loaded", "green")
-                    self.save_model_btn.setEnabled(True)
-                    self.clear_model_btn.setEnabled(True)
-                    self.kfold_train_btn.setEnabled(True)
-                except Exception as e:
-                    self.model_info_widget.set_model_status("Error loading the model", "red")
-            else:
-                self.model_info_widget.set_model_status("No model found")
-        except Exception as e:
+            try:
+                metadata = self.model.load_model(model_path)
+                # Update UI with loaded data
+                self._update_ui_from_model_data()
+                filename = os.path.basename(model_path)
+                self.model_info_widget.set_model_file(filename) 
+                self.model_loaded = True
+                self.model_info_widget.set_model_status("Model loaded", "green")
+                self.save_model_btn.setEnabled(True)
+                self.clear_model_btn.setEnabled(True)
+                self.kfold_train_btn.setEnabled(True)
+            except:
+                self.model_info_widget.set_model_status("Error loading the model", "red")
+        except:
             self.model_info_widget.set_model_status("Error initializing model", "red")
 
     def load_model(self):
-        """Loads the trained neural network model"""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Load Model",
@@ -226,27 +216,21 @@ class ModelTab(QWidget):
 
         if file_path:
             try:
-                # Load model and Check if the it's architecture matches
-                checkpoint = torch.load(file_path, weights_only=False)  
+                network_type = torch.load(file_path, weights_only=False)  
 
                 if isinstance(self.model, SimpleCnnModel):
-                    if not all(key in checkpoint['model_state'] for key in ['conv1.weight', 'conv2.weight']):
+                    if not all(key in network_type['model_state'] for key in ['conv1.weight', 'conv2.weight']):
                         raise ValueError("This model file is not compatible with Simple CNN architecture")
-                    model_type = "simple_cnn"
                 elif isinstance(self.model, ResNetModel):
-                    if not all(key in checkpoint['model_state'] for key in ['layer1.0.conv1.weight', 'layer1.0.conv2.weight']):
+                    if not all(key in network_type['model_state'] for key in ['layer1.0.conv1.weight', 'layer1.0.conv2.weight']):
                         raise ValueError("This model file is not compatible with ResNet architecture")
-                    model_type = "resnet"
                 elif isinstance(self.model, EfficientNetModel):
-                    if not all(key in checkpoint['model_state'] for key in ['features.0.0.weight', 'features.1.0.block.0.0.weight', 'classifier.1.weight']):
+                    if not all(key in network_type['model_state'] for key in ['features.0.0.weight', 'features.1.0.block.0.0.weight', 'classifier.1.weight']):
                         raise ValueError("This model file is not compatible with EfficientNet architecture")
-                    model_type = "efficientnet"
                 elif isinstance(self.model, VGG16Model):
-                    if not all(key in checkpoint['model_state'] for key in ['features.0.weight', 'features.2.weight', 'classifier.6.weight']):
+                    if not all(key in network_type['model_state'] for key in ['features.0.weight', 'features.2.weight', 'classifier.6.weight']):
                         raise ValueError("This model file is not compatible with VGG16 architecture")
-                    model_type = "vgg16"
                     
-                # Reset metrics, parameters and plots first
                 self.metrics_widget.reset_metrics()
                 self.parameters_widget.reset_parameters()
                 self.plot_widget1.plot_loss_history(self.plot_widget1)
@@ -255,64 +239,42 @@ class ModelTab(QWidget):
 
                 metadata = self.model.load_model(file_path)
 
-                # Save the path to config
-                self._save_model_path(model_type, file_path)
+                self._save_model_path(file_path)
 
-                # Display filename
                 filename = os.path.basename(file_path)
                 self.model_info_widget.set_model_file(filename)
 
-                # Update UI with loaded data only if the data exists
                 if metadata['training_params']['epochs'] is not None:
                     self._update_ui_from_model_data()
 
                 self.model_loaded = True
+
+                self.model_info_widget.set_model_status("Model loaded", "green")
+                self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
+
                 self.save_model_btn.setEnabled(True)
                 self.clear_model_btn.setEnabled(True)
                 self.kfold_train_btn.setEnabled(True)
-                self.model_info_widget.set_model_status("Model loaded", "green")
-
-                self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
             except Exception as e:
                 self.model_info_widget.set_model_status("Error loading the model", "red")
-                self.status_message.emit(f"Error loading model: {str(e)}", 8000)
-                import traceback
+                self.status_message.emit(f"Error loading model: {str(e)}", 12000)
                 error_msg = f"Error loading model: {str(e)}\n{traceback.format_exc()}"
-                print(error_msg)  # Print to console for debugging
-                raise Exception(error_msg)
+                print(error_msg)  
 
-    def _save_model_path(self, model_type, model_path):
-        """Save the model path to config file"""
+    def _save_model_path(self, model_path):
         config = configparser.ConfigParser()
         project_root = get_project_root()
         config_path = os.path.join(project_root, "config.ini")
-        
-        # Create or read existing config
-        if os.path.exists(config_path):
-            config.read(config_path)
-        
-        # Make sure the ModelsPath section exists
+
+        config.read(config_path)
         if 'ModelsPath' not in config:
             config['ModelsPath'] = {}
         
-        # Update the model path
-        config['ModelsPath'][model_type] = model_path
-        
-        # Save the config
+        config['ModelsPath'][self.model_name] = model_path
         with open(config_path, 'w') as configfile:
             config.write(configfile)
 
-    def save_model(self):
-        """Saves the trained neural network model"""
-        if isinstance(self.model, SimpleCnnModel):
-            model_type = "simple_cnn"
-        elif isinstance(self.model, ResNetModel):
-            model_type = "resnet"
-        elif isinstance(self.model, EfficientNetModel):
-            model_type = "efficientnet"
-        elif isinstance(self.model, VGG16Model):
-            model_type = "vgg16"
-
+    def _save_model(self):
         file_path, _ = QFileDialog.getSaveFileName(
             self,
             "Save Model",
@@ -323,9 +285,8 @@ class ModelTab(QWidget):
         if file_path:
             try:
                 self.model.save_model(file_path)
-                # Save path to config
-                self._save_model_path(model_type, file_path)
-                # Display filename
+                self._save_model_path(file_path)
+
                 filename = os.path.basename(file_path)
                 self.model_info_widget.set_model_file(filename)
                 self.status_message.emit("Model saved successfully", 8000)

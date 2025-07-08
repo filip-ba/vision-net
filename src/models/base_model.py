@@ -305,7 +305,6 @@ class BaseModel(ABC):
         }
 
     def save_model(self, path):
-        """Saves model state along with training parameters, metrics and history"""
         if self.net is None:
             raise ValueError("Model is not initialized")
             
