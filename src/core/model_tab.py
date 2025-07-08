@@ -7,12 +7,13 @@ import platform
 import torch
 import configparser
 
-from ..ui.dialogs.progress_dialog import ProgressDialog
-from ..ui.widgets.training_plot_widget import TrainingPlotWidget
-from ..ui.dialogs.parameters_dialog import ParametersDialog
-from ..ui.widgets.parameters_widget import ParametersWidget
-from ..ui.widgets.metrics_widget import MetricsWidget
-from ..ui.widgets.model_info_widget import ModelInfoWidget
+
+from .model_tab_widgets.progress_dialog import ProgressDialog
+from .model_tab_widgets.training_plot_widget import TrainingPlotWidget
+from .model_tab_widgets.parameters_dialog import ParametersDialog
+from .model_tab_widgets.parameters_widget import ParametersWidget
+from .model_tab_widgets.metrics_widget import MetricsWidget
+from .model_tab_widgets.model_info_widget import ModelInfoWidget
 from ..models.simple_cnn_model import SimpleCnnModel
 from ..models.resnet_model import ResNetModel
 from ..models.efficientnet_model import EfficientNetModel

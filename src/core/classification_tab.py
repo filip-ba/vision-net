@@ -3,9 +3,9 @@ from PyQt6.QtGui import QPixmap, QImageReader
 from PyQt6.QtCore import pyqtSignal, QTimer
 import os, random
 
-from ..ui.widgets.classification_widget import ClassificationWidget
-from ..ui.widgets.results_widget import ResultsWidget
-from ..ui.widgets.plot_probability_widget import PlotProbabilityWidget
+from .classification_tab_widgets.classification_widget import ClassificationWidget
+from .classification_tab_widgets.results_widget import ResultsWidget
+from .classification_tab_widgets.plot_probability_widget import PlotProbabilityWidget
 from ..utils.get_project_root import get_project_root
 
 

@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QApplication
 import sys
 
-from src.ui.styles.style_manager import StyleManager
+from src.styles.style_manager import StyleManager
 from src.core.main_window import MainWindow
 
 def main():
