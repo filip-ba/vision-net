@@ -40,4 +40,3 @@ class DatasetOverviewWidget(QWidget):
         overview_group.setLayout(overview_layout)
 
         main_layout.addWidget(overview_group)
-        main_layout.addStretch()

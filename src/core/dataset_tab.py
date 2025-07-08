@@ -126,7 +126,7 @@ class DatasetTab(QWidget):
 
     def _create_ui(self):
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(10, 10, 10, 10)
+        main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
         self.dataset_overview_widget = DatasetOverviewWidget(self)
