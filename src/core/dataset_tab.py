@@ -6,6 +6,7 @@ import os
 
 from .dataset_tab_widgets.dataset_overview_widget import DatasetOverviewWidget
 from .dataset_tab_widgets.dataset_status_widget import DatasetStatusWidget
+from ..utils.return_project_root import get_project_root
 
 
 class DatasetTab(QWidget):
@@ -20,7 +21,6 @@ class DatasetTab(QWidget):
         self._create_ui()
 
         self.load_dataset_btn.clicked.connect(self._browse_dataset)
-
         QTimer.singleShot(0, self._load_dataset_on_start)
 
     def _browse_dataset(self):
@@ -78,7 +78,7 @@ class DatasetTab(QWidget):
             self.dataset_loaded.emit(dataset_path)
 
     def _load_dataset_path_from_config(self):
-        project_root = self.get_project_root()
+        project_root = get_project_root()
         config = configparser.ConfigParser()
         config_path = os.path.join(project_root, "config.ini")
 
@@ -100,7 +100,7 @@ class DatasetTab(QWidget):
             return None
 
     def _save_dataset_path(self, dataset_path):
-        project_root = self.get_project_root()
+        project_root = get_project_root()
         config_path = os.path.join(project_root, "config.ini")
         config = configparser.ConfigParser()
         config.read(config_path)
@@ -113,16 +113,6 @@ class DatasetTab(QWidget):
         with open(config_path, 'w') as configfile:
             config.write(configfile)
         self.status_message.emit(f"Dataset path saved: {dataset_path}", 8000)
-
-    def get_project_root(self):
-        if getattr(sys, 'frozen', False):
-            return os.path.dirname(sys.executable)
-        else:
-            current_file_path = os.path.abspath(__file__)
-            core_dir = os.path.dirname(current_file_path)
-            src_dir = os.path.dirname(core_dir)
-            project_root = os.path.dirname(src_dir)
-            return project_root
 
     def _create_ui(self):
         main_layout = QVBoxLayout(self)
