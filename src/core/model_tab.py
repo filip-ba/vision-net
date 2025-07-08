@@ -41,6 +41,7 @@ class ModelTab(QWidget):
         self.current_image_path = None
  
         self.model = model_class()
+        self.model.initialize_model()
         self.model_loaded = False
 
         self._load_model_on_start()
@@ -48,7 +49,7 @@ class ModelTab(QWidget):
         self._setup_connections()    
 
     def _setup_connections(self):
-        self.load_model_btn.clicked.connect(self.load_model)
+        self.load_model_btn.clicked.connect(self._browse_models)
         self.save_model_btn.clicked.connect(self._save_model)
         self.train_model_btn.clicked.connect(self.train_model)
         self.clear_model_btn.clicked.connect(self.clear_model)
@@ -187,33 +188,20 @@ class ModelTab(QWidget):
         model_path = self._load_model_path_from_config()
         if model_path == None:
             return
+        self._load_model(model_path)
 
-        try:
-            self.model.initialize_model()
-            try:
-                metadata = self.model.load_model(model_path)
-                # Update UI with loaded data
-                self._update_ui_from_model_data()
-                filename = os.path.basename(model_path)
-                self.model_info_widget.set_model_file(filename) 
-                self.model_loaded = True
-                self.model_info_widget.set_model_status("Model loaded", "green")
-                self.save_model_btn.setEnabled(True)
-                self.clear_model_btn.setEnabled(True)
-                self.kfold_train_btn.setEnabled(True)
-            except:
-                self.model_info_widget.set_model_status("Error loading the model", "red")
-        except:
-            self.model_info_widget.set_model_status("Error initializing model", "red")
-
-    def load_model(self):
+    def _browse_models(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Load Model",
             "",
             "PyTorch Model (*.pth)"
         )
+        
+        self._load_model(file_path)
 
+    def _load_model(self, file_path):
+        filename = os.path.basename(file_path)
         if file_path:
             try:
                 network_type = torch.load(file_path, weights_only=False)  
@@ -241,7 +229,6 @@ class ModelTab(QWidget):
 
                 self._save_model_path(file_path)
 
-                filename = os.path.basename(file_path)
                 self.model_info_widget.set_model_file(filename)
 
                 if metadata['training_params']['epochs'] is not None:
@@ -256,7 +243,8 @@ class ModelTab(QWidget):
                 self.clear_model_btn.setEnabled(True)
                 self.kfold_train_btn.setEnabled(True)
             except Exception as e:
-                self.model_info_widget.set_model_status("Error loading the model", "red")
+                self.model_info_widget.set_model_file(filename)
+                self.model_info_widget.set_model_status(f"Error loading the model: {str(e)}", "red")
                 self.status_message.emit(f"Error loading model: {str(e)}", 12000)
                 error_msg = f"Error loading model: {str(e)}\n{traceback.format_exc()}"
                 print(error_msg)  
