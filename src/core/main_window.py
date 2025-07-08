@@ -44,14 +44,6 @@ class MainWindow(QMainWindow):
         self.efficientnet_tab.status_message.connect(self.update_status_bar)
         self.vgg16_tab.status_message.connect(self.update_status_bar)
 
-    def refresh_all_datasets(self):
-        """Refreshes datasets for all model tabs"""
-        self.simple_cnn_tab._load_dataset()
-        self.resnet_tab._load_dataset()
-        # Shared dataset from ResNet
-        self.efficientnet_tab._load_dataset()
-        self.vgg16_tab._load_dataset()
-
     def update_status_bar(self, message, timeout=8000):
         self.status_bar.showMessage(message, timeout)
 

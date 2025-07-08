@@ -159,9 +159,12 @@ class ModelTab(QWidget):
         self.save_model_btn.setEnabled(state)
         self.clear_model_btn.setEnabled(state)
         self.kfold_train_btn.setEnabled(state)
+        self.k_spinbox(state)
 
-    def _set_widgets_state(self):
-        pass
+    def enable_or_disable_controls_based_on_dataset_state(self):
+        self._set_button_state(False)
+        self.load_model_btn.setEnabled(False)
+        self.train_model_btn.setEnabled(False)
 
     def _load_model_path_from_config(self):
         project_root = get_project_root()
