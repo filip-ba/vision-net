@@ -165,55 +165,33 @@ class ModelTab(QWidget):
         self.kfold_train_btn.setEnabled(False)
         self.model_loaded = False
 
-    def _load_model_on_start(self):
+    def _load_model_path_from_config(self):
         project_root = get_project_root()
-        if self.model_class == SimpleCnnModel:
-            default_model_path = os.path.join(project_root, "saved_models", "simple_cnn.pth")
-            model_type = "simple_cnn"
-        elif self.model_class == ResNetModel:
-            default_model_path = os.path.join(project_root, "saved_models", "resnet.pth")
-            model_type = "resnet"
-        elif self.model_class == EfficientNetModel:
-            default_model_path = os.path.join(project_root, "saved_models", "efficientnet.pth")
-            model_type = "efficientnet"
-        elif self.model_class == VGG16Model:
-            default_model_path = os.path.join(project_root, "saved_models", "vgg16.pth")
-            model_type = "vgg16"
-        else:
-            default_model_path = None
-            self.model_info_widget.set_model_status("No model loaded", "red")
-            return
-
         config = configparser.ConfigParser()
         config_path = os.path.join(project_root, "config.ini")
 
         if not os.path.exists(config_path):
-            config['ModelsPath'] = {
-                'simple_cnn': os.path.join(project_root, "saved_models", "simple_cnn.pth"),
-                'resnet': os.path.join(project_root, "saved_models", "resnet.pth"),
-                'efficientnet': os.path.join(project_root, "saved_models", "efficientnet.pth"),
-                'vgg16': os.path.join(project_root, "saved_models", "vgg16.pth")
-            }
-            with open(config_path, 'w') as configfile:
-                config.write(configfile)
-        else:
-            config.read(config_path)            
+            os.makedirs(os.path.dirname(config_path), exist_ok=True)
+            with open(config_path, 'w') as f:
+                config.write(f)       
     
-        # Get the last used model path from config, fall back to default if not found
-        try:
-            if 'ModelsPath' in config and model_type in config['ModelsPath']:
-                last_model_path = config['ModelsPath'][model_type]
-                if os.path.exists(last_model_path):
-                    model_path = last_model_path
-                else:
-                    model_path = default_model_path
+        config.read(config_path)
+   
+        if 'ModelsPath' in config and model_type in config['ModelsPath']:
+            last_model_path = config['ModelsPath'][model_type]
+            if os.path.exists(last_model_path):
+                return last_model_path
             else:
-                model_path = default_model_path
-        except Exception as e:
-            self.status_message.emit(f"Error reading config: {str(e)}, using default model path", 8000)
-            model_path = default_model_path
+                self.status_message.emit(f"Saved model path not found: {last_model_path}", 12000)
+                return None
+        else:
+            self.status_message.emit("The path of the last model used was not found in the config file.", 10000)
+            return None
 
-        self.metrics_group.setTitle(f"{self.model_name} Stats")
+    def _load_model_on_start(self):
+        model_path = self._load_model_path_from_config()
+        if model_path == None:
+            return
 
         # Attempt to load the model
         try:

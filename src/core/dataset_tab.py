@@ -89,6 +89,7 @@ class DatasetTab(QWidget):
                 config.write(f)
 
         config.read(config_path)
+        
         if config.has_option('DatasetPath', 'dataset_path'):
             dataset_path = config.get('DatasetPath', 'dataset_path')
             if os.path.exists(dataset_path):
