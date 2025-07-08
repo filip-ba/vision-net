@@ -3,7 +3,6 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QTabWidget, QSiz
                              QPushButton, QLabel, QScrollArea)
 from PyQt6.QtGui import QIcon, QPixmap, QPainter
 from PyQt6.QtCore import Qt, QSize, QTimer, QEvent
-import sys
 import os
 
 from src.core.model_tab import ModelTab
@@ -14,6 +13,8 @@ from ..models.simple_cnn_model import SimpleCnnModel
 from ..models.resnet_model import ResNetModel 
 from ..models.efficientnet_model import EfficientNetModel  
 from ..models.vgg16_model import VGG16Model
+from ..utils.get_project_root import get_project_root
+
 
 class MainWindow(QMainWindow):
     
@@ -53,18 +54,6 @@ class MainWindow(QMainWindow):
 
     def update_status_bar(self, message, timeout=8000):
         self.status_bar.showMessage(message, timeout)
-             
-    def get_project_root(self):
-        if getattr(sys, 'frozen', False):
-            # Executable
-            return sys._MEIPASS
-        else:
-            # IDE
-            current_file_path = os.path.abspath(__file__)
-            core_dir = os.path.dirname(current_file_path)
-            src_dir = os.path.dirname(core_dir)
-            project_root = os.path.dirname(src_dir)
-            return project_root
 
     def _classify_all(self):
         """Classify the loaded image"""
@@ -108,7 +97,7 @@ class MainWindow(QMainWindow):
                 item.widget().setChecked(item.widget() == clicked_button)
     
     def _set_icons_based_on_current_theme(self):
-        project_root = self.get_project_root()
+        project_root = get_project_root()
         icons_dir = os.path.join(project_root, "assets", "icons")
         theme_suffix = "light" if self.style_manager.get_current_style() == self.style_manager.STYLE_DARK else "dark"
 
@@ -223,7 +212,7 @@ class MainWindow(QMainWindow):
     def _create_ui(self):
         self.setWindowTitle("VisionNet")
         self.setGeometry(50, 50, 1000, 600)
-        project_root = self.get_project_root()
+        project_root = get_project_root()
         icons_dir = os.path.join(project_root, "assets", "icons")
         window_icon_path = os.path.join(icons_dir, "app-icon.png")        
         self.setWindowIcon(QIcon(window_icon_path))

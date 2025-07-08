@@ -40,14 +40,3 @@ class ModelInfoWidget(QWidget):
             self.model_status_label.setStyleSheet("") 
         else:
             self.model_status_label.setStyleSheet(f"color: {color};")
-      
-    def get_project_root(self):
-        if getattr(sys, 'frozen', False):
-            return sys._MEIPASS
-        else:
-            current_file_path = os.path.abspath(__file__)
-            widgets_dir = os.path.dirname(current_file_path)
-            ui_dir = os.path.dirname(widgets_dir)
-            src_dir = os.path.dirname(ui_dir)
-            project_root = os.path.dirname(src_dir)
-            return project_root

@@ -6,7 +6,9 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT
 import numpy as np
-import os, sys
+import os
+
+from ...utils.get_project_root import get_project_root
 
 
 class CustomToolbar(QToolBar):
@@ -19,7 +21,7 @@ class CustomToolbar(QToolBar):
 
         self.tool_buttons = {}
 
-        project_root = self.get_project_root()
+        project_root = get_project_root()
         icon_dir = os.path.join(project_root, "assets", "icons", "mpl_toolbar_icons")
 
         buttons = [
@@ -53,20 +55,6 @@ class CustomToolbar(QToolBar):
             if b.isCheckable() and b != clicked_button:
                 b.setChecked(False)
         callback()
-
-    def get_project_root(self):
-        """Returns the path to the root directory of the project, works both in development and in the executable"""
-        if getattr(sys, 'frozen', False):
-            # Executable
-            return sys._MEIPASS
-        else:
-            # IDE
-            current_file_path = os.path.abspath(__file__)
-            widgets_dir = os.path.dirname(current_file_path)
-            ui_dir = os.path.dirname(widgets_dir)
-            src_dir = os.path.dirname(ui_dir)
-            project_root = os.path.dirname(src_dir)
-            return project_root
 
 
 class TrainingPlotWidget(QWidget):

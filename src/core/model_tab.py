@@ -1,8 +1,7 @@
 from PyQt6.QtWidgets import ( 
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QSplitter,
-    QFileDialog, QStackedWidget, QFrame, QDialog, QSpinBox, QLabel, QMessageBox, QSizePolicy )
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QSplitter, QFileDialog,
+    QStackedWidget, QFrame, QDialog, QSpinBox, QLabel, QMessageBox, QSizePolicy )
 from PyQt6.QtCore import pyqtSignal, Qt
-import sys
 import os
 import platform
 import torch
@@ -18,6 +17,7 @@ from ..models.simple_cnn_model import SimpleCnnModel
 from ..models.resnet_model import ResNetModel
 from ..models.efficientnet_model import EfficientNetModel
 from ..models.vgg16_model import VGG16Model
+from ..utils.get_project_root import get_project_root
 
 
 class ModelTab(QWidget):
@@ -62,19 +62,6 @@ class ModelTab(QWidget):
         self.train_model_btn.clicked.connect(self.train_model)
         self.clear_model_btn.clicked.connect(self.clear_model)
         self.kfold_train_btn.clicked.connect(self.train_kfold)
-
-    def get_project_root(self):
-        """Returns the path to the root directory of the project, works both in development and in the executable"""
-        if getattr(sys, 'frozen', False):
-            # Executable
-            return os.path.dirname(sys.executable)
-        else:
-            # IDE
-            current_file_path = os.path.abspath(__file__)
-            core_dir = os.path.dirname(current_file_path)
-            src_dir = os.path.dirname(core_dir)
-            project_root = os.path.dirname(src_dir)
-            return project_root
 
     def update_metrics_display(self, metrics):
         """Method to update the metrics"""
@@ -183,7 +170,7 @@ class ModelTab(QWidget):
         self.model_loaded = False
 
     def _load_model_on_start(self):
-        project_root = self.get_project_root()
+        project_root = get_project_root()
         if self.model_class == SimpleCnnModel:
             default_model_path = os.path.join(project_root, "saved_models", "simple_cnn.pth")
             model_type = "simple_cnn"
@@ -323,7 +310,7 @@ class ModelTab(QWidget):
     def _save_model_path(self, model_type, model_path):
         """Save the model path to config file"""
         config = configparser.ConfigParser()
-        project_root = self.get_project_root()
+        project_root = get_project_root()
         config_path = os.path.join(project_root, "config.ini")
         
         # Create or read existing config
@@ -529,7 +516,7 @@ class ModelTab(QWidget):
             self.kfold_train_btn.setEnabled(True)
             
     def _load_dataset_path_from_config(self):
-        project_root = self.get_project_root()
+        project_root = get_project_root()
         config = configparser.ConfigParser()
         config_path = os.path.join(project_root, "config.ini")
 
