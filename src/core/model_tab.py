@@ -155,8 +155,10 @@ class ModelTab(QWidget):
         self.kfold_train_btn.setEnabled(False)
         self.model_loaded = False
 
-    def _set_button_state(self):
-        pass
+    def _set_button_state(self, state):
+        self.save_model_btn.setEnabled(state)
+        self.clear_model_btn.setEnabled(state)
+        self.kfold_train_btn.setEnabled(state)
 
     def _set_widgets_state(self):
         pass
@@ -239,10 +241,9 @@ class ModelTab(QWidget):
                 self.model_info_widget.set_model_status("Model loaded", "green")
                 self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
 
-                self.save_model_btn.setEnabled(True)
-                self.clear_model_btn.setEnabled(True)
-                self.kfold_train_btn.setEnabled(True)
+                self._set_button_state(True)
             except Exception as e:
+                self._set_button_state(False)
                 self.model_info_widget.set_model_file(filename)
                 self.model_info_widget.set_model_status(f"Error loading the model: {str(e)}", "red")
                 self.status_message.emit(f"Error loading model: {str(e)}", 12000)
@@ -356,9 +357,7 @@ class ModelTab(QWidget):
             )
 
             self.model_loaded = True
-            self.save_model_btn.setEnabled(True)
-            self.clear_model_btn.setEnabled(True)
-            self.kfold_train_btn.setEnabled(True)
+            self._set_button_state(True)
             self.model_info_widget.set_model_status("Model trained successfully", "green")
             self.parameters_widget.update_parameters(self.model.training_params)
             self.model_info_widget.set_model_file("Not saved", "red")
