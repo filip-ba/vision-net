@@ -74,6 +74,7 @@ class DatasetTab(QWidget):
                 except Exception as e:
                     self.dataset_status_widget.set_status(tab.model_name, str(e), "red")  
 
+        # Signal that connects to self.classification_tab.load_test_images in main_window
         if success:
             self.dataset_loaded.emit(dataset_path)
 

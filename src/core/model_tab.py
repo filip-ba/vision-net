@@ -22,14 +22,12 @@ from ..utils.get_project_root import get_project_root
 
 
 class ModelTab(QWidget):
-    # Signal to emit status messages to the main window
-    status_message = pyqtSignal(str, int)
+    status_message = pyqtSignal(str, int)   # Signal that updates the status bar in the main_window
 
     def __init__(self, model_class=None):
         super().__init__()
         self.model_class = model_class
         
-        # Set model name based on the model class
         if model_class == SimpleCnnModel:
             self.model_name = "Simple CNN"
         elif model_class == ResNetModel:
@@ -65,7 +63,6 @@ class ModelTab(QWidget):
         self.kfold_train_btn.clicked.connect(self.train_kfold)
 
     def update_metrics_display(self, metrics):
-        """Method to update the metrics"""
         self.accuracy_label.setText(f"Accuracy: {metrics['accuracy']:.2%}")
         self.precision_label.setText(f"Precision: {metrics['precision']:.2%}")
         self.recall_label.setText(f"Recall: {metrics['recall']:.2%}")
@@ -120,7 +117,6 @@ class ModelTab(QWidget):
             self.kfold_result_label.setText("No cross-validation performed yet")
 
     def clear_model(self):
-        """Clears the current model"""
         if not self.model_loaded:
             self.status_message.emit("No model loaded", 8000)
             return
@@ -139,7 +135,6 @@ class ModelTab(QWidget):
             self.reset_model()
 
     def reset_model(self):
-        """Resets model and UI elements"""
         # Reset model and UI
         self.model.reset_metrics()
         self.model.training_params = {
