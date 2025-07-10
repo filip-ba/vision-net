@@ -24,9 +24,9 @@ class MainWindow(QMainWindow):
         self.style_manager = style_manager
         
         # Sidebar width settings
-        self.MIN_SIDEBAR_WIDTH = 190
+        self.MIN_SIDEBAR_WIDTH = 140
         self.MAX_SIDEBAR_WIDTH = 260
-        self.SIDEBAR_HIDE_THRESHOLD = 1000
+        self.SIDEBAR_HIDE_THRESHOLD = 900
         
         # Event filter for window resize
         self.installEventFilter(self)
@@ -34,15 +34,20 @@ class MainWindow(QMainWindow):
         self._create_ui()
         self._set_icons_based_on_current_theme()
 
-        self._connect_model_tab_status_signals()
+        self._connect_signals()
 
+    def _connect_signals(self):
+        tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
+        for tab in tabs:
+            tab.update_dataset_status.connect(self.dataset_tab.dataset_status_widget.set_status)
+            tab.status_message.connect(self.update_status_bar)
 
-    def _connect_model_tab_status_signals(self):
-        """Connect status signals from tabs to the main window status bar"""
-        self.simple_cnn_tab.status_message.connect(self.update_status_bar)
-        self.resnet_tab.status_message.connect(self.update_status_bar)
-        self.efficientnet_tab.status_message.connect(self.update_status_bar)
-        self.vgg16_tab.status_message.connect(self.update_status_bar)
+        self.classification_tab.classify_clicked.connect(self._classify_all) 
+        self.classification_tab.image_loaded.connect(self.update_status_bar) 
+        self.dataset_tab.status_message.connect(self.update_status_bar)
+        self.dataset_tab.dataset_loaded.connect(self.classification_tab.load_test_images)  
+        self.settings_tab.style_changed.connect(self._set_icons_based_on_current_theme)
+        self.sidebar_toggle_button.clicked.connect(self._toggle_sidebar)
 
     def update_status_bar(self, message, timeout=8000):
         self.status_bar.showMessage(message, timeout)
@@ -227,7 +232,6 @@ class MainWindow(QMainWindow):
         self.sidebar_toggle_button.setObjectName("sidebar-toggle-button")
         self.sidebar_toggle_button.setFixedSize(30, 30)
         self.sidebar_toggle_button.setVisible(False)
-        self.sidebar_toggle_button.clicked.connect(self._toggle_sidebar)
         
         content_container = QWidget()
         content_layout = QVBoxLayout(content_container)
@@ -265,15 +269,11 @@ class MainWindow(QMainWindow):
         # Create dataset tab (third page)
         model_tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
         self.dataset_tab = DatasetTab(model_tabs)
-        self.dataset_tab.status_message.connect(self.update_status_bar)
-        # Refresh classification test images when new dataset is loaded
-        self.dataset_tab.dataset_loaded.connect(self.classification_tab.load_test_images)  
         self.dataset_tab.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         # Create settings page (fourth page)
         self.settings_tab = SettingsTab(self.style_manager)
         self.settings_tab.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.settings_tab.style_changed.connect(self._set_icons_based_on_current_theme)
 
         # Create scroll areas for each page
         models_scroll = QScrollArea()
@@ -310,9 +310,6 @@ class MainWindow(QMainWindow):
         
         self.main_layout.addWidget(self.sidebar_scroll, 1)
         self.main_layout.addWidget(content_container, 5)  
-        
-        self.classification_tab.classify_clicked.connect(self._classify_all) 
-        self.classification_tab.image_loaded.connect(self.update_status_bar) 
 
     def _create_sidebar(self):
         sidebar = QWidget()
@@ -382,8 +379,6 @@ class MainWindow(QMainWindow):
         button.setCheckable(True)
 
         if page_index == 0:
-            button.setChecked(True)
-        
-        button.clicked.connect(lambda: self._switch_page(page_index, button))
-        
+            button.setChecked(True) 
+        button.clicked.connect(lambda: self._switch_page(page_index, button)) 
         return button
