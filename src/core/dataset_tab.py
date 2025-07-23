@@ -15,9 +15,8 @@ class DatasetTab(QWidget):
 
     def __init__(self, model_tabs, parent=None):
         super().__init__(parent)
-
         self.model_tabs = model_tabs
-
+        self.dataset_path = None
         self._create_ui()
 
         self.load_dataset_btn.clicked.connect(self._browse_dataset)
@@ -34,17 +33,17 @@ class DatasetTab(QWidget):
                     "The selected directory must contain 'train', 'test' and 'valid' subfolders.")
                 return
             self.status_message.emit(f"Selected dataset: {dir_path}", 8000)
-            self.dataset_path_label.setText(dir_path)
+            self._save_dataset_path_to_config(dir_path)
             self._load_dataset(dir_path)
-            self._save_dataset_path(dir_path)
 
     def _load_dataset_on_start(self):
         dataset_path = self._load_dataset_path_from_config()
         if not dataset_path == None:
-            self.dataset_path_label.setText(dataset_path)
             self._load_dataset(dataset_path)
             
     def _load_dataset(self, dataset_path):
+        self.dataset_path_label.setText(dataset_path)
+        self.dataset_path = dataset_path
         success = False
         try:
             simple_cnn_tab = self.model_tabs[0]
@@ -78,6 +77,9 @@ class DatasetTab(QWidget):
         if success:
             self.dataset_loaded.emit(dataset_path)
 
+        #for tab in self.model_tabs:
+            #tab.enable_or_disable_controls_based_on_dataset_state(tab.model.is_dataset_loaded())
+
     def _load_dataset_path_from_config(self):
         project_root = get_project_root()
         config = configparser.ConfigParser()
@@ -89,7 +91,7 @@ class DatasetTab(QWidget):
                 config.write(f)
 
         config.read(config_path)
-        
+
         if config.has_option('DatasetPath', 'dataset_path'):
             dataset_path = config.get('DatasetPath', 'dataset_path')
             if os.path.exists(dataset_path):
@@ -101,7 +103,7 @@ class DatasetTab(QWidget):
             self.status_message.emit("Dataset not loaded.", 10000)
             return None
 
-    def _save_dataset_path(self, dataset_path):
+    def _save_dataset_path_to_config(self, dataset_path):
         project_root = get_project_root()
         config_path = os.path.join(project_root, "config.ini")
         config = configparser.ConfigParser()
