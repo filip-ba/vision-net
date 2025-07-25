@@ -79,7 +79,6 @@ class BaseModel(ABC):
         }
 
     def is_dataset_loaded(self):
-        """Check if dataset is loaded"""
         return self.dataset_loaded
 
     def load_dataset(self, data_dir, k=None, current_fold=None):
@@ -143,7 +142,6 @@ class BaseModel(ABC):
         self.dataset_loaded = True
 
     def train(self, epochs, learning_rate, momentum, progress_callback=None):
-        """Trains the model and returns the loss history"""
         if self.net is None:
             raise ValueError("Model is not initialized")
         if not self.dataset_loaded:
@@ -232,7 +230,6 @@ class BaseModel(ABC):
         return train_loss_history, val_loss_history
 
     def test(self):
-        """Tests the model on the test set and returns metrics"""
         if self.net is None:
             raise ValueError("Model is not initialized")
         if not self.dataset_loaded:
@@ -280,7 +277,6 @@ class BaseModel(ABC):
         return self.metrics
 
     def predict_image(self, image_path):
-        """Predicts class for one image"""
         if self.net is None:
             raise ValueError("Model is not initialized")
             
