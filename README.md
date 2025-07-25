@@ -1,37 +1,74 @@
-# FruitVegNet
-This program is an application created using Python and PyQt6 as part of my Master's thesis. It is a software that performs the recognition of selected fruits and vegetables wrapped in a mesh bag. 
+# FruitVegNet 🍎🥦
 
-## Description
-The program can recognize selected pieces of fruit and vegetables wrapped in a mesh bag using neural networks from the PyTorch library. There are 3 pre-trained models implemented in the program: ResNet18, EfficientNet-B0 and VGG16. In addition, a simpler model called Simple CNN is implemented. However, the program can easily be extended with other neural networks from the PyTorch library.
+**Desktopová aplikace pro rozpoznávání ovoce a zeleniny v síťovaných sáčcích pomocí deep learningu.**
 
-A custom simple dataset was created for this purpose. But the program will work with any other dataset, it just needs to be put in the ```dataset``` folder and called ```fruitveg-dataset```It also needs to support the following structure:  
-- ```dataset/fruitveg-dataset```
-   - ```/train```
-   - ```/test```
-   - ```/valid```
+Tato aplikace, vyvinutá v rámci diplomové práce, využívá knihovnu PyTorch pro klasifikaci produktů. Nabízí uživatelsky přívětivé rozhraní vytvořené pomocí PyQt6, které uživatelům umožňuje načítat datasety, trénovat různé modely neuronových sítí a vyhodnocovat jejich výkon.
 
-## Dependencies
-- OS: Windows/Linux 
-- Python 3.13.2 (recommended)
-- PyQt6
-- torch
-- torchvision
-- scikit-learn
-- Pillow
-- matplotlib
-- numpy
+## ✨ Klíčové funkce
 
-## How to run
-1. Open CMD in the root folder of the project (main folder with the main.py, requirements.txt, ...)
+*   **Intuitivní grafické rozhraní:** Čisté a jednoduché rozhraní vytvořené pomocí PyQt6.
+*   **Správa datasetu:** Načítání a vizualizace datasetu.
+*   **Podpora více modelů:** Předpřipravené modely `ResNet18`, `EfficientNet-B0`, `VGG16` a vlastní `SimpleCNN`.
+*   **Trénování vlastních modelů:** Možnost trénovat modely na vlastních datasetech s nastavitelnými hyperparametry.
+*   **Vizualizace výkonu:** Sledování průběhu trénování pomocí grafů ztráty v reálném čase a zobrazení výsledků pomocí matice záměn.
+*   **Klasifikace v reálném čase:** Možnost klasifikovat jednotlivé obrázky.
+*   **Správa modelů:** Ukládání a načítání natrénovaných modelů pro pozdější použití.
+*   **Světlý/Tmavý režim:** Přepínání mezi tématy pro vaše pohodlí.
 
-2. Install the required packages (you need to have pip installed):
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. In the root directory create ```dataset/fruitveg-dataset``` (the names must be the same!).
-   Put your ```/train```, ```/test``` and ```/valid``` in the ```fruitveg-dataset``` folder.
+## 📸 Screenshoty
 
-4. To start the application, use the following command:
+![Záložka Dataset](./assets/images/dataset-tab.png)
+*Správa a vizualizace datasetu.*
+
+![Záložka Model](./assets/images/models-tab-vgg16.png)
+*Trénování modelu VGG16 a zobrazení metrik.*
+
+![Záložka Klasifikace](./assets/images/classification-tab.png)
+*Klasifikace obrázku pomocí natrénovaného modelu.*
+
+## ⚙️ Instalace
+
+Postupujte podle těchto kroků pro spuštění aplikace na vašem lokálním počítači.
+
+1.  **Naklonujte repozitář:**
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/fruit-veg-net.git
+    cd fruit-veg-net
+    ```
+    *(Nezapomeňte nahradit `YOUR_USERNAME` vaším GitHub jménem)*
+
+2.  **Nainstalujte závislosti:**
+    Ujistěte se, že máte nainstalovaný Python (doporučená verze 3.10+) a pip.
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## 🚀 Použití
+
+1.  **Připravte dataset:**
+    Vytvořte složku `dataset/fruitveg-dataset` v kořenovém adresáři projektu. Váš dataset musí mít následující strukturu:
+    ```
+    dataset/fruitveg-dataset
+    ├── /train
+    ├── /test
+    └── /valid
+    ```
+
+2.  **Spusťte aplikaci:**
     ```bash
     python main.py
     ```
+
+## 🧠 Modely
+
+Aplikace podporuje několik předtrénovaných architektur z knihovny `torchvision` a také jeden vlastní model:
+*   ResNet18
+*   EfficientNet-B0
+*   VGG16
+*   SimpleCNN (jednoduchá konvoluční síť)
+
+Program lze snadno rozšířit o další modely z `torchvision`.
+
+## 📝 Licence
+
+Tento projekt není pod žádnou licencí.
