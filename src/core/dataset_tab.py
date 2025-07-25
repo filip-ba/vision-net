@@ -20,6 +20,7 @@ class DatasetTab(QWidget):
         self._create_ui()
 
         self.load_dataset_btn.clicked.connect(self._browse_dataset)
+        self.dataset_status_widget.check_status_btn.clicked.connect(self.check_dataset_status)
         QTimer.singleShot(0, self._load_dataset_on_start)
 
     def _browse_dataset(self):
@@ -94,11 +95,9 @@ class DatasetTab(QWidget):
 
         if config.has_option('DatasetPath', 'dataset_path'):
             dataset_path = config.get('DatasetPath', 'dataset_path')
-            if os.path.exists(dataset_path):
-                return dataset_path
-            else:
+            if not os.path.exists(dataset_path):
                 self.status_message.emit(f"Saved dataset path not found: {dataset_path}", 12000)
-                return None
+            return dataset_path
         else:
             self.status_message.emit("Dataset not loaded.", 10000)
             return None
@@ -117,6 +116,16 @@ class DatasetTab(QWidget):
         with open(config_path, 'w') as configfile:
             config.write(configfile)
         self.status_message.emit(f"Dataset path saved: {dataset_path}", 8000)
+    
+    def check_dataset_status(self):
+        if not self.dataset_path or not os.path.exists(self.dataset_path):
+            self.status_message.emit("Dataset path is not set or not found.", 8000)
+            for tab in self.model_tabs:
+                self.dataset_status_widget.set_status(tab.model_name, "Not Found", "red")
+
+        self.status_message.emit("Checking dataset status...", 3000)
+        print(self.dataset_path)
+        self._load_dataset(self.dataset_path)
 
     def _create_ui(self):
         main_layout = QVBoxLayout(self)
