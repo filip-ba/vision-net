@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
         self.style_manager = style_manager
         
         # Sidebar width settings
-        self.MIN_SIDEBAR_WIDTH = 140
+        self.MIN_SIDEBAR_WIDTH = 160
         self.MAX_SIDEBAR_WIDTH = 260
         self.SIDEBAR_HIDE_THRESHOLD = 900
         
@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
     def _connect_signals(self):
         tabs = [self.simple_cnn_tab, self.resnet_tab, self.efficientnet_tab, self.vgg16_tab]
         for tab in tabs:
-            tab.update_dataset_status.connect(self.dataset_tab.dataset_status_widget.set_status)
+            #tab.update_dataset_status.connect(self.dataset_tab.dataset_status_widget.set_status)
             tab.status_message.connect(self.update_status_bar)
 
         self.classification_tab.classify_clicked.connect(self._classify_all) 

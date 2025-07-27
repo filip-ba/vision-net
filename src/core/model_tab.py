@@ -161,10 +161,10 @@ class ModelTab(QWidget):
         self.kfold_train_btn.setEnabled(state)
         self.k_spinbox.setEnabled(state)
 
-    def enable_or_disable_controls_based_on_dataset_state(self):
-        self._set_button_state(False)
-        self.load_model_btn.setEnabled(False)
-        self.train_model_btn.setEnabled(False)
+    def enable_or_disable_controls_based_on_dataset_state(self, dataset_loaded: bool):
+        self._set_button_state(dataset_loaded)
+        self.load_model_btn.setEnabled(dataset_loaded)
+        self.train_model_btn.setEnabled(dataset_loaded)
 
     def _load_model_path_from_config(self):
         project_root = get_project_root()
@@ -306,7 +306,7 @@ class ModelTab(QWidget):
             if not self.model.is_dataset_loaded():
                 self.status_message.emit("Dataset not loaded. Please load the dataset first.", 8000)
                 return
-                
+
             # Model Initialization
             self.model.initialize_model()
 
