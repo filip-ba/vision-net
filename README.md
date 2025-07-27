@@ -10,8 +10,8 @@ Originally designed to classify fruits and vegetables as part of my master's the
 *In the **Model tab**, you can select a neural network, configure its hyperparameters, and start the training process. Afterwards, the tab displays key metrics, including loss history and a confusion matrix plot.*
 ![Model Tab - Simple CNN](./assets/images/models-tab-simple-cnn.png)
 
-*This screenshot shows the VGG16 model, the largest available. It also demonstrates the responsive UI, where the sidebar automatically hides when the window is resized.*
-![Model Tab - VGG16](./assets/images/models-tab-vgg16.png)
+*This screenshot demonstrates the responsive UI, where the sidebar automatically hides when the window is resized. It also shows the k-fold cross-validation metrics*
+![Model Tab - VGG16](./assets/images/models-tab-2.png)
 
 *In the **Classification tab**, you can classify images from the test set (navigating with arrow keys) or upload your own. The predicted class and a probability distribution chart are displayed for each image.*
 ![Classification Tab](./assets/images/classification-tab.png)
