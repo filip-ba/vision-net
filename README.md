@@ -2,10 +2,10 @@
 
 A user-friendly desktop application for training and evaluating image classification models, built with PyTorch and PyQt6.
 
-Originally designed to classify fruits and vegetables, VisionNet has been generalized to support any image classification dataset. It provides an intuitive graphical interface that simplifies the process of loading datasets, training various neural network models, and assessing their performance.
+Originally designed to classify fruits and vegetables as part of my master's thesis, VisionNet has been generalized to support any image classification dataset. It provides an intuitive graphical interface that simplifies the process of loading datasets, training various neural network models, and assessing their performance.
 
 
-## 📸 Screenshots
+## Screenshots 📸 
 
 *In the **Model tab**, you can select a neural network, configure its hyperparameters, and start the training process. Afterwards, the tab displays key metrics, including loss history and a confusion matrix plot.*
 ![Model Tab - Simple CNN](./assets/images/models-tab-simple-cnn.png)
@@ -23,24 +23,24 @@ Originally designed to classify fruits and vegetables, VisionNet has been genera
 ![Settings Tab](./assets/images/settings-tab.png)
 
 
-## ✨ Key Features
+## Key Features ✨
 
 VisionNet is designed with a strong focus on user experience, providing a seamless workflow for deep learning practitioners and enthusiasts.
 
-*   **Intuitive Graphical Interface:** A clean, modern, and easy-to-navigate UI built with PyQt6 that streamlines the machine learning workflow.
-*   **Effortless Dataset Management:** Easily load, visualize, and manage your image datasets. The application expects a standard `train/test/valid` directory structure.
-*   **Multiple Model Support:** Comes with several pre-configured models ready for training:
+*   **Intuitive Graphical Interface:** A clean, modern, and easy-to-navigate UI built with PyQt6.
+*   **Effortless Dataset Management:** Easily load any dataset thats intended for image classification. The application expects a standard `train/test/valid` directory structure.
+*   **Multiple Model Support:** Comes with several models ready for training:
     *   `ResNet18`
     *   `EfficientNet-B0`
     *   `VGG16`
     *   `SimpleCNN` (a custom baseline model)
-*   **Interactive Model Training:** Train models on your own datasets with customizable hyperparameters (e.g., learning rate, epochs, batch size).
-*   **Real-time Performance Visualization:** Monitor the training process with live-updating loss and accuracy graphs. After training, evaluate model performance with a clear and insightful confusion matrix.
-*   **Instant Classification:** Use your trained models to classify individual images with a simple drag-and-drop interface.
-*   **Model Persistence:** Save your trained model weights and load them later for further evaluation or inference.
-*   **Customizable Theming:** Switch between a light and dark mode to suit your visual preference and reduce eye strain during late-night sessions.
+*   **Interactive Model Training:** Train models on your own datasets with customizable hyperparameters (learning rate, epochs, momentum).
+*   **Save and Load:** Save your trained model weights, calculated metrics, plots and training parameters and load them later for further analyzation.
+*   **Metrics and Visualization:** Analyze the model using metrics and plots.
+*   **Classification:** Use the trained models to classify images.
 
-## ⚙️ Installation
+
+## Installation ⚙️
 
 Follow these steps to run the application on your local machine.
 
@@ -56,7 +56,7 @@ Follow these steps to run the application on your local machine.
     pip install -r requirements.txt
     ```
 
-## 🔮 Future Roadmap
+## Future Roadmap 🔮
 
 Here are some features planned for future releases:
 
