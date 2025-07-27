@@ -35,7 +35,7 @@ VisionNet is designed with a strong focus on user experience, providing a seamle
     *   `VGG16`
     *   `SimpleCNN` (a custom baseline model)
 *   **Interactive Model Training:** Train models on your own datasets with customizable hyperparameters (learning rate, epochs, momentum).
-*   **Save and Load:** Save your trained model weights, calculated metrics, plots and training parameters and load them later for further analyzation.
+*   **Save and Load:** Save your trained model weights, calculated metrics, plots and training parameters and load them later for further analysis.
 *   **Metrics and Visualization:** Analyze the model using metrics and plots.
 *   **Classification:** Use the trained models to classify images.
 
@@ -56,6 +56,12 @@ Follow these steps to run the application on your local machine.
     pip install -r requirements.txt
     ```
 
+3. **To start the application, use the following command:**
+    ```bash
+    python main.py
+    ```
+
+
 ## Future Roadmap 🔮
 
 Here are some features planned for future releases:
@@ -67,6 +73,7 @@ Here are some features planned for future releases:
     *   Dropout rates
 *   **Expanded Model Library:** Another useful thing would be to integrate more CNN models from the pytorch library. Users would then be able to select which models they want to work with via a settings panel, keeping the interface clean and tailored to their needs.
 *   **Code Refactoring:** Ongoing efforts to refactor the codebase for better performance, scalability, and maintainability.
+
 
 ## 📝 License
 
