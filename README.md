@@ -75,6 +75,6 @@ Here are some features planned for future releases:
 *   **Code Refactoring:** Ongoing efforts to refactor the codebase for better performance, scalability, and maintainability.
 
 
-## 📝 License
+## License 📝
 
 This project is not under any license.
