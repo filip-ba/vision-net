@@ -23,6 +23,16 @@ class DatasetTab(QWidget):
         QTimer.singleShot(0, self._load_dataset_on_start)
 
     def _browse_dataset(self):
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Load dataset")
+        msg_box.setText("This will clear all loaded models. Are you sure you want to load a different dataset?")
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        msg_box.setDefaultButton(QMessageBox.StandardButton.No)
+        msg_box.setObjectName("clear-model-message")
+        reply = msg_box.exec()
+        if reply == QMessageBox.StandardButton.No:
+            return
+
         dir_path = QFileDialog.getExistingDirectory(self, "Select Dataset Directory")
         if dir_path:
             required_folders = ["train", "test", "valid"]
@@ -40,6 +50,8 @@ class DatasetTab(QWidget):
         dataset_path = self._load_dataset_path_from_config()
         if not dataset_path == None:
             self._load_dataset(dataset_path)
+            for tab in self.model_tabs:
+                tab._load_model_on_start()
             
     def _load_dataset(self, dataset_path):
         self.dataset_path_label.setText(dataset_path)
@@ -50,6 +62,7 @@ class DatasetTab(QWidget):
             simple_cnn_tab.model.load_dataset(dataset_path)
             self.dataset_status_widget.set_status(simple_cnn_tab.model_name, "OK", "green")
             simple_cnn_tab.enable_or_disable_controls_based_on_dataset_state(True)
+            simple_cnn_tab.reset_model()
             success = True
         except Exception as e:
             self.dataset_status_widget.set_status(simple_cnn_tab.model_name, str(e), "red")
@@ -58,6 +71,7 @@ class DatasetTab(QWidget):
         source_tab = None  
 
         for tab in pretrained_tabs:
+            tab.reset_model()
             if source_tab is None:
                 try:
                     tab.model.load_dataset(dataset_path)

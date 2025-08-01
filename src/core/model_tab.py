@@ -44,7 +44,7 @@ class ModelTab(QWidget):
         self.model.initialize_model()
         self.model_loaded = False
 
-        self._load_model_on_start()
+        #self._load_model_on_start()
 
         self._setup_connections()    
 
@@ -613,16 +613,13 @@ class ModelTab(QWidget):
         left_layout = QVBoxLayout(left_panel)
         left_layout.setSpacing(20)
         left_layout.setContentsMargins(0, 0, 0, 0)
-        
-        # Dataset, model and training
+
+        # Model controls 
         model_group = QGroupBox("Model Controls")
-        model_group.setObjectName("model-controls")
-        
+        model_group.setObjectName("model-controls")        
         model_layout = QVBoxLayout()
         model_layout.setContentsMargins(0, 0, 0, 0)
         model_group.setLayout(model_layout)
-
-        # Model buttons
         buttons_layout = QHBoxLayout()
         self.train_model_btn = QPushButton("Train")
         self.train_model_btn.setToolTip("Select parameters and start training the selected model.")
@@ -632,13 +629,11 @@ class ModelTab(QWidget):
         self.load_model_btn.setToolTip("Load a trained model from a saved file.")
         self.clear_model_btn = QPushButton("Clear")
         self.clear_model_btn.setToolTip("Reset the model and clear training progress.")
-        self.save_model_btn.setEnabled(False)
-        self.clear_model_btn.setEnabled(False)
         for btn in [self.train_model_btn, self.load_model_btn, self.save_model_btn, self.clear_model_btn]:
             buttons_layout.addWidget(btn)
         model_layout.addLayout(buttons_layout)
 
-        # Metrics group box
+        # Metrics 
         self.metrics_group = QGroupBox(f"{self.model_name} Stats")
         self.metrics_group.setObjectName("model-metrics")
         metrics_layout = QVBoxLayout()
@@ -647,7 +642,7 @@ class ModelTab(QWidget):
         metrics_layout.addWidget(self.metrics_widget)
         self.metrics_group.setLayout(metrics_layout)
 
-        # Parameters group box
+        # Parameters 
         self.parameters_group = QGroupBox("")
         self.parameters_group.setObjectName("model-parameters")
         parameters_layout = QVBoxLayout()
@@ -657,20 +652,15 @@ class ModelTab(QWidget):
         self.parameters_group.setLayout(parameters_layout)
         self.parameters_group.setContentsMargins(0, 0, 0, 0)
 
-        # K-fold Cross-validation
+        # K-fold Cross-validation 
         kfold_group = QGroupBox("k-Fold Cross-Validation")
         kfold_group.setObjectName("model-controls")
         kfold_layout = QVBoxLayout()
         kfold_layout.setContentsMargins(0, 0, 0, 0)
         kfold_group.setLayout(kfold_layout)
-
-        # Train button
         self.kfold_train_btn = QPushButton("Train")
         self.kfold_train_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.kfold_train_btn.setToolTip("Start k-fold cross-validation with the same parameters as the current model.")
-        self.kfold_train_btn.setEnabled(False)
-
-        # k label and spinbox layout
         k_settings_layout = QHBoxLayout()
         k_label = QLabel("k:")
         k_label.setFixedWidth(15)
@@ -683,28 +673,25 @@ class ModelTab(QWidget):
         k_settings_layout.addWidget(k_label)
         k_settings_layout.addWidget(self.k_spinbox)
         k_settings_layout.addStretch()
-
-        # Upper layout
         kfold_controls_layout = QHBoxLayout()
         kfold_controls_layout.addWidget(self.kfold_train_btn, 1)        
         kfold_controls_layout.addSpacing(20)  
         kfold_controls_layout.addLayout(k_settings_layout, 3)    
-        
-        # K-fold results
         self.kfold_result_label = QLabel("No cross-validation performed yet")
         self.kfold_result_label.setWordWrap(True)
         self.kfold_result_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.TextSelectableByKeyboard)
-        
         kfold_layout.addLayout(kfold_controls_layout)
         kfold_layout.addSpacing(10)
         kfold_layout.addWidget(self.kfold_result_label)
 
+        self.enable_or_disable_controls_based_on_dataset_state(False)
+
         # Create widget containers for the left panel
         for widget in [model_group, self.metrics_group, self.parameters_group, kfold_group]:
             left_layout.addWidget(widget)
-            
-        left_layout.addStretch()
         
+        left_layout.addStretch()
+
         return left_panel
 
     def _create_right_panel(self):
