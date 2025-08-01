@@ -1,7 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QMessageBox
 from PyQt6.QtCore import pyqtSignal, QTimer
 import configparser
-import sys
 import os
 
 from .dataset_tab_widgets.dataset_overview_widget import DatasetOverviewWidget
@@ -50,6 +49,7 @@ class DatasetTab(QWidget):
             simple_cnn_tab = self.model_tabs[0]
             simple_cnn_tab.model.load_dataset(dataset_path)
             self.dataset_status_widget.set_status(simple_cnn_tab.model_name, "OK", "green")
+            simple_cnn_tab.enable_or_disable_controls_based_on_dataset_state(True)
             success = True
         except Exception as e:
             self.dataset_status_widget.set_status(simple_cnn_tab.model_name, str(e), "red")
@@ -63,6 +63,7 @@ class DatasetTab(QWidget):
                     tab.model.load_dataset(dataset_path)
                     self.dataset_status_widget.set_status(tab.model_name, "OK", "green")
                     source_tab = tab
+                    tab.enable_or_disable_controls_based_on_dataset_state(True)
                     success = True 
                 except Exception as e:
                     self.dataset_status_widget.set_status(tab.model_name, str(e), "red")
@@ -70,16 +71,14 @@ class DatasetTab(QWidget):
                 try:
                     tab.model.share_dataset(source_tab.model)
                     self.dataset_status_widget.set_status(tab.model_name, "OK", "green")
+                    tab.enable_or_disable_controls_based_on_dataset_state(True)
                     success = True
                 except Exception as e:
                     self.dataset_status_widget.set_status(tab.model_name, str(e), "red")  
 
-        # Signal that connects to self.classification_tab.load_test_images in main_window
         if success:
-            self.dataset_loaded.emit(dataset_path)
-
-        #for tab in self.model_tabs:
-            #tab.enable_or_disable_controls_based_on_dataset_state(tab.model.is_dataset_loaded())
+            self.status_message.emit(f"Dataset loaded: {os.path.basename(dataset_path)}", 8000)
+            self.dataset_loaded.emit(dataset_path)  # Signal that connects to self.classification_tab.load_test_images in main_window
 
     def _load_dataset_path_from_config(self):
         project_root = get_project_root()
@@ -115,17 +114,15 @@ class DatasetTab(QWidget):
 
         with open(config_path, 'w') as configfile:
             config.write(configfile)
-        self.status_message.emit(f"Dataset path saved: {dataset_path}", 8000)
     
     def check_dataset_status(self):
         if not self.dataset_path or not os.path.exists(self.dataset_path):
             self.status_message.emit("Dataset path is not set or not found.", 8000)
             for tab in self.model_tabs:
                 self.dataset_status_widget.set_status(tab.model_name, "Not Found", "red")
+                tab.enable_or_disable_controls_based_on_dataset_state(False)
 
-        self.status_message.emit("Checking dataset status...", 3000)
-        print(self.dataset_path)
-        self._load_dataset(self.dataset_path)
+        self.status_message.emit("Checking dataset status...", 2000)
 
     def _create_ui(self):
         main_layout = QVBoxLayout(self)
