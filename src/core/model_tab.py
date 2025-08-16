@@ -44,7 +44,7 @@ class ModelTab(QWidget):
         self.model.initialize_model()
         self.model_loaded = False
 
-        #self._load_model_on_start()
+        #self.load_model_on_start()
 
         self._setup_connections()    
 
@@ -163,7 +163,7 @@ class ModelTab(QWidget):
         self.load_model_btn.setEnabled(state)
         self.train_model_btn.setEnabled(state)
 
-    def _load_model_path_from_config(self):
+    def load_model_path_from_config(self):
         project_root = get_project_root()
         config = configparser.ConfigParser()
         config_path = os.path.join(project_root, "config.ini")
@@ -186,11 +186,11 @@ class ModelTab(QWidget):
             self.status_message.emit("The path of the last model used was not found in the config file.", 10000)
             return None
 
-    def _load_model_on_start(self):
-        model_path = self._load_model_path_from_config()
+    def load_model_on_start(self):
+        model_path = self.load_model_path_from_config()
         if model_path == None:
             return
-        self._load_model(model_path)
+        self.load_model(model_path)
 
     def _browse_models(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -200,9 +200,9 @@ class ModelTab(QWidget):
             "PyTorch Model (*.pth)"
         )
         
-        self._load_model(file_path)
+        self.load_model(file_path)
 
-    def _load_model(self, file_path):
+    def load_model(self, file_path):
         filename = os.path.basename(file_path)
         if file_path:
             try:

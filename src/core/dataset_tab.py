@@ -51,7 +51,7 @@ class DatasetTab(QWidget):
         if not dataset_path == None:
             self._load_dataset(dataset_path)
             for tab in self.model_tabs:
-                tab._load_model_on_start()
+                tab.load_model_on_start()
             
     def _load_dataset(self, dataset_path):
         self.dataset_path_label.setText(dataset_path)
@@ -63,6 +63,12 @@ class DatasetTab(QWidget):
             self.dataset_status_widget.set_status(simple_cnn_tab.model_name, "OK", "green")
             simple_cnn_tab.set_controls_state_based_on_dataset_state(True)
             success = True
+            try:
+                simple_cnn_tab.model.load_model()
+                simple_cnn_tab._set_button_state(True)
+            except Exception as e:
+                print(e)
+                imple_cnn_tab._set_button_state(False)
         except Exception as e:
             self.dataset_status_widget.set_status(simple_cnn_tab.model_name, str(e), "red")
 
