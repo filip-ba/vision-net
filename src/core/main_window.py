@@ -208,7 +208,7 @@ class MainWindow(QMainWindow):
     
     def _create_ui(self):
         self.setWindowTitle("VisionNet")
-        self.setGeometry(50, 50, 1000, 600)
+        self.setGeometry(50, 50, 1200, 800)
         project_root = get_project_root()
         icons_dir = os.path.join(project_root, "assets", "icons")
         window_icon_path = os.path.join(icons_dir, "app-icon.png")        

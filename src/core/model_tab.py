@@ -158,8 +158,8 @@ class ModelTab(QWidget):
         self.kfold_train_btn.setEnabled(state)
         self.k_spinbox.setEnabled(state)
 
-    def enable_or_disable_controls_based_on_dataset_state(self, state):
-        self._set_button_state(state)
+    def set_controls_state_based_on_dataset_state(self, state):
+        #self._set_button_state(state)
         self.load_model_btn.setEnabled(state)
         self.train_model_btn.setEnabled(state)
 
@@ -631,6 +631,7 @@ class ModelTab(QWidget):
         self.clear_model_btn.setToolTip("Reset the model and clear training progress.")
         for btn in [self.train_model_btn, self.load_model_btn, self.save_model_btn, self.clear_model_btn]:
             buttons_layout.addWidget(btn)
+            btn.setEnabled(False)
         model_layout.addLayout(buttons_layout)
 
         # Metrics 
@@ -661,6 +662,7 @@ class ModelTab(QWidget):
         self.kfold_train_btn = QPushButton("Train")
         self.kfold_train_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.kfold_train_btn.setToolTip("Start k-fold cross-validation with the same parameters as the current model.")
+        self.kfold_train_btn.setEnabled(False)
         k_settings_layout = QHBoxLayout()
         k_label = QLabel("k:")
         k_label.setFixedWidth(15)
@@ -670,6 +672,7 @@ class ModelTab(QWidget):
         self.k_spinbox.setValue(5)
         self.k_spinbox.setFixedWidth(50)
         self.k_spinbox.setToolTip("Select the number of folds (k) for cross-validation.")
+        self.k_spinbox.setEnabled(False)
         k_settings_layout.addWidget(k_label)
         k_settings_layout.addWidget(self.k_spinbox)
         k_settings_layout.addStretch()
@@ -684,7 +687,7 @@ class ModelTab(QWidget):
         kfold_layout.addSpacing(10)
         kfold_layout.addWidget(self.kfold_result_label)
 
-        self.enable_or_disable_controls_based_on_dataset_state(False)
+        self.set_controls_state_based_on_dataset_state(False)
 
         # Create widget containers for the left panel
         for widget in [model_group, self.metrics_group, self.parameters_group, kfold_group]:
