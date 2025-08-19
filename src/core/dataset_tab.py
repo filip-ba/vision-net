@@ -44,6 +44,15 @@ class DatasetTab(QWidget):
                 return
             self.status_message.emit(f"Selected dataset: {dir_path}", 8000)
             self._save_dataset_path_to_config(dir_path)
+
+            project_root = get_project_root()
+            config_path = os.path.join(project_root, "config.ini")
+            config = configparser.ConfigParser()
+            config.read(config_path)
+            if config.has_section('ModelsPath'):
+                config.remove_section('ModelsPath')
+                with open(config_path, 'w') as configfile:
+                    config.write(configfile)
             self._load_dataset(dir_path)
 
     def _load_dataset_on_start(self):
