@@ -59,16 +59,10 @@ class DatasetTab(QWidget):
         success = False
         try:
             simple_cnn_tab = self.model_tabs[0]
+            simple_cnn_tab.reset_model()
             simple_cnn_tab.model.load_dataset(dataset_path)
             self.dataset_status_widget.set_status(simple_cnn_tab.model_name, "OK", "green")
-            simple_cnn_tab.set_controls_state_based_on_dataset_state(True)
             success = True
-            try:
-                simple_cnn_tab.model.load_model()
-                simple_cnn_tab._set_button_state(True)
-            except Exception as e:
-                print(e)
-                imple_cnn_tab._set_button_state(False)
         except Exception as e:
             self.dataset_status_widget.set_status(simple_cnn_tab.model_name, str(e), "red")
 
@@ -82,7 +76,6 @@ class DatasetTab(QWidget):
                     tab.model.load_dataset(dataset_path)
                     self.dataset_status_widget.set_status(tab.model_name, "OK", "green")
                     source_tab = tab
-                    tab.set_controls_state_based_on_dataset_state(True)
                     success = True 
                 except Exception as e:
                     self.dataset_status_widget.set_status(tab.model_name, str(e), "red")
@@ -90,7 +83,6 @@ class DatasetTab(QWidget):
                 try:
                     tab.model.share_dataset(source_tab.model)
                     self.dataset_status_widget.set_status(tab.model_name, "OK", "green")
-                    tab.set_controls_state_based_on_dataset_state(True)
                     success = True
                 except Exception as e:
                     self.dataset_status_widget.set_status(tab.model_name, str(e), "red")  
@@ -139,7 +131,7 @@ class DatasetTab(QWidget):
             self.status_message.emit("Dataset path is not set or not found.", 8000)
             for tab in self.model_tabs:
                 self.dataset_status_widget.set_status(tab.model_name, "Not Found", "red")
-                tab.set_controls_state_based_on_dataset_state(False)
+                tab.set_button_state(False, False)
 
         self.status_message.emit("Checking dataset status...", 2000)
 

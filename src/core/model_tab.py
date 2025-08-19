@@ -149,19 +149,16 @@ class ModelTab(QWidget):
         self.model_info_widget.set_model_status("No model loaded") 
         self.model_info_widget.set_model_file("None")
         
-        self._set_button_state(False)
+        self.set_button_state(False, True)
         self.model_loaded = False
 
-    def _set_button_state(self, state):
+    def set_button_state(self, state, state2):
         self.save_model_btn.setEnabled(state)
         self.clear_model_btn.setEnabled(state)
         self.kfold_train_btn.setEnabled(state)
         self.k_spinbox.setEnabled(state)
-
-    def set_controls_state_based_on_dataset_state(self, state):
-        #self._set_button_state(state)
-        self.load_model_btn.setEnabled(state)
-        self.train_model_btn.setEnabled(state)
+        self.load_model_btn.setEnabled(state2)
+        self.train_model_btn.setEnabled(state2)
 
     def load_model_path_from_config(self):
         project_root = get_project_root()
@@ -183,12 +180,13 @@ class ModelTab(QWidget):
                 self.status_message.emit(f"Saved model path not found: {last_model_path}", 12000)
                 return None
         else:
-            self.status_message.emit("The path of the last model used was not found in the config file.", 10000)
+            #self.status_message.emit("The path of the last model used was not found in the config file.", 10000)
             return None
 
     def load_model_on_start(self):
         model_path = self.load_model_path_from_config()
         if model_path == None:
+            self.set_button_state(False, True)
             return
         self.load_model(model_path)
 
@@ -241,9 +239,9 @@ class ModelTab(QWidget):
                 self.model_info_widget.set_model_status("Model loaded", "green")
                 self.status_message.emit(f"Model loaded successfully (Accuracy: {metadata['metrics']['accuracy']:.2%})", 8000)
 
-                self._set_button_state(True)
+                self.set_button_state(True, True)
             except Exception as e:
-                self._set_button_state(False)
+                self.set_button_state(False, True)
                 self.model_info_widget.set_model_file(filename)
                 self.model_info_widget.set_model_status(f"Error loading the model: {str(e)}", "red")
                 self.status_message.emit(f"Error loading model: {str(e)}", 12000)
@@ -357,7 +355,7 @@ class ModelTab(QWidget):
             )
 
             self.model_loaded = True
-            self._set_button_state(True)
+            self.set_button_state(True, True)
             self.model_info_widget.set_model_status("Model trained successfully", "green")
             self.parameters_widget.update_parameters(self.model.training_params)
             self.model_info_widget.set_model_file("Not saved", "red")
@@ -398,22 +396,6 @@ class ModelTab(QWidget):
             epochs = self.model.training_params['epochs']
             learning_rate = self.model.training_params['learning_rate']
             momentum = self.model.training_params['momentum']
-
-            # If parameters are not set, show the parameters dialog
-            if epochs is None or learning_rate is None or momentum is None:
-                param_dialog = ParametersDialog(self)
-                result = param_dialog.exec()
-                
-                if result != QDialog.DialogCode.Accepted:
-                    self.kfold_result_label.setText("No cross-validation performed yet")
-                    self.kfold_train_btn.setEnabled(True)
-                    return
-                    
-                # Get parameters from dialog
-                params = param_dialog.get_parameters()
-                epochs = params['epochs']
-                learning_rate = params['learning_rate']
-                momentum = params['momentum']
 
             # Reset cross-validation metrics in the model
             self.model.cv_metrics = {
@@ -686,8 +668,6 @@ class ModelTab(QWidget):
         kfold_layout.addLayout(kfold_controls_layout)
         kfold_layout.addSpacing(10)
         kfold_layout.addWidget(self.kfold_result_label)
-
-        self.set_controls_state_based_on_dataset_state(False)
 
         # Create widget containers for the left panel
         for widget in [model_group, self.metrics_group, self.parameters_group, kfold_group]:
